@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('m_rooms', function (Blueprint $table) {
-            $table->id();
+            // Custom string ID (generated in code, not auto-increment)
+            $table->string('id', 36)->primary()->comment('UUIDv7 generated in code');
 
             // Room Information
             $table->string('name', 100)->comment('Room name');
@@ -23,11 +24,11 @@ return new class extends Migration
 
             // Audit fields
             $table->timestamp('created_at')->nullable()->useCurrent();
-            $table->unsignedBigInteger('created_by')->nullable();
+            $table->string('created_by', 36)->nullable();
             $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate();
-            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->string('updated_by', 36)->nullable();
             $table->timestamp('deleted_at')->nullable();
-            $table->unsignedBigInteger('deleted_by')->nullable();
+            $table->string('deleted_by', 36)->nullable();
 
             // Foreign keys
             $table->foreign('created_by')->references('id')->on('s_users')->onDelete('set null');

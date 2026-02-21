@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('t_reservations', function (Blueprint $table) {
-            // Custom primary key (not auto-increment)
+            // Custom primary key (generated in code, not auto-increment)
             $table->string('id', 20)->primary()->comment('Format: RSV-YYYYMMDD-XX');
 
             // Reservation Information
-            $table->unsignedBigInteger('user_id')->comment('User who made the reservation');
-            $table->unsignedBigInteger('room_id')->comment('Room being reserved');
+            $table->string('user_id', 36)->comment('User who made the reservation');
+            $table->string('room_id', 36)->comment('Room being reserved');
             $table->timestamp('start_time')->comment('Reservation start time (UTC)');
             $table->timestamp('end_time')->comment('Reservation end time (UTC)');
             $table->text('purpose')->nullable()->comment('Purpose of reservation');
@@ -28,11 +28,11 @@ return new class extends Migration
 
             // Audit fields
             $table->timestamp('created_at')->nullable()->useCurrent();
-            $table->unsignedBigInteger('created_by')->nullable();
+            $table->string('created_by', 36)->nullable();
             $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate();
-            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->string('updated_by', 36)->nullable();
             $table->timestamp('deleted_at')->nullable();
-            $table->unsignedBigInteger('deleted_by')->nullable();
+            $table->string('deleted_by', 36)->nullable();
 
             // Foreign keys
             $table->foreign('user_id')->references('id')->on('s_users')->onDelete('cascade');
