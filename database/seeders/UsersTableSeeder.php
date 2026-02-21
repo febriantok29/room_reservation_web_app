@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UsersTableSeeder extends Seeder
 {
@@ -16,7 +17,8 @@ class UsersTableSeeder extends Seeder
         $users = [
             // Admin Users
             [
-                'employee_id' => 'ADM001',
+                'id' => (string) Str::uuid7(),
+                'employee_id' => 'EMP-2025-00001',
                 'email' => 'admin@roomreservation.com',
                 'password' => Hash::make('Admin@123'),
                 'first_name' => 'System',
@@ -25,7 +27,8 @@ class UsersTableSeeder extends Seeder
                 'role' => 'admin',
             ],
             [
-                'employee_id' => 'ADM002',
+                'id' => (string) Str::uuid7(),
+                'employee_id' => 'EMP-2025-00002',
                 'email' => 'john.admin@roomreservation.com',
                 'password' => Hash::make('Admin@123'),
                 'first_name' => 'John',
@@ -36,7 +39,8 @@ class UsersTableSeeder extends Seeder
 
             // Staff Users (for approval)
             [
-                'employee_id' => 'STF001',
+                'id' => (string) Str::uuid7(),
+                'employee_id' => 'EMP-2025-00003',
                 'email' => 'staff1@roomreservation.com',
                 'password' => Hash::make('Staff@123'),
                 'first_name' => 'Maria',
@@ -45,7 +49,8 @@ class UsersTableSeeder extends Seeder
                 'role' => 'staff',
             ],
             [
-                'employee_id' => 'STF002',
+                'id' => (string) Str::uuid7(),
+                'employee_id' => 'EMP-2025-00004',
                 'email' => 'staff2@roomreservation.com',
                 'password' => Hash::make('Staff@123'),
                 'first_name' => 'David',
@@ -56,7 +61,8 @@ class UsersTableSeeder extends Seeder
 
             // Regular Users (employees)
             [
-                'employee_id' => '2590001HP',
+                'id' => (string) Str::uuid7(),
+                'employee_id' => 'EMP-2025-00005',
                 'email' => 'sarah.brown@example.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'Sarah',
@@ -65,7 +71,8 @@ class UsersTableSeeder extends Seeder
                 'role' => 'user',
             ],
             [
-                'employee_id' => '2590002HP',
+                'id' => (string) Str::uuid7(),
+                'employee_id' => 'EMP-2025-00006',
                 'email' => 'michael.wilson@example.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'Michael',
@@ -74,7 +81,8 @@ class UsersTableSeeder extends Seeder
                 'role' => 'user',
             ],
             [
-                'employee_id' => '2590003HP',
+                'id' => (string) Str::uuid7(),
+                'employee_id' => 'EMP-2025-00007',
                 'email' => 'jennifer.davis@example.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'Jennifer',
@@ -83,7 +91,8 @@ class UsersTableSeeder extends Seeder
                 'role' => 'user',
             ],
             [
-                'employee_id' => '2590004HP',
+                'id' => (string) Str::uuid7(),
+                'employee_id' => 'EMP-2025-00008',
                 'email' => 'robert.miller@example.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'Robert',
@@ -92,7 +101,8 @@ class UsersTableSeeder extends Seeder
                 'role' => 'user',
             ],
             [
-                'employee_id' => '2590005HP',
+                'id' => (string) Str::uuid7(),
+                'employee_id' => 'EMP-2025-00009',
                 'email' => 'lisa.anderson@example.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'Lisa',
@@ -101,7 +111,8 @@ class UsersTableSeeder extends Seeder
                 'role' => 'user',
             ],
             [
-                'employee_id' => '2590006HP',
+                'id' => (string) Str::uuid7(),
+                'employee_id' => 'EMP-2025-00010',
                 'email' => 'william.taylor@example.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'William',

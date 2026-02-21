@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class RoomsTableSeeder extends Seeder
 {
@@ -17,6 +18,7 @@ class RoomsTableSeeder extends Seeder
 
         $rooms = [
             [
+                'id' => (string) Str::uuid7(),
                 'name' => 'R. Serbaguna',
                 'location' => 'Lantai 1',
                 'description' => 'Ruang serbaguna untuk berbagai keperluan meeting dan acara. Dilengkapi dengan proyektor, whiteboard, dan sistem audio.',
@@ -24,6 +26,7 @@ class RoomsTableSeeder extends Seeder
                 'is_maintenance' => false,
             ],
             [
+                'id' => (string) Str::uuid7(),
                 'name' => 'R. Meeting Utama',
                 'location' => 'Lantai 2',
                 'description' => 'Ruang meeting utama dengan fasilitas lengkap termasuk video conference, AC, dan koneksi internet berkecepatan tinggi.',
@@ -31,6 +34,7 @@ class RoomsTableSeeder extends Seeder
                 'is_maintenance' => false,
             ],
             [
+                'id' => (string) Str::uuid7(),
                 'name' => 'R. Eksekutif',
                 'location' => 'Lantai 3',
                 'description' => 'Ruang meeting eksekutif untuk rapat tingkat manajemen. Tersedia coffee station dan tata cahaya yang dapat diatur.',
@@ -38,6 +42,7 @@ class RoomsTableSeeder extends Seeder
                 'is_maintenance' => false,
             ],
             [
+                'id' => (string) Str::uuid7(),
                 'name' => 'R. Diskusi',
                 'location' => 'Lantai 4',
                 'description' => 'Ruang diskusi yang nyaman untuk brainstorming dan meeting tim. Dilengkapi dengan whiteboard interaktif.',
