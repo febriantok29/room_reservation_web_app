@@ -17,14 +17,14 @@ class CSPService
     /**
      * Check if a room is available for the given time slot
      *
-     * @param int $roomId Room ID to check
+    * @param string $roomId Room ID to check (UUID string)
      * @param Carbon|string $startTime Start time of desired reservation
      * @param Carbon|string $endTime End time of desired reservation
      * @param string|null $excludeReservationId Reservation ID to exclude from check (for updates)
      * @return bool True if available, false if conflict exists
      */
     public function isRoomAvailable(
-        int $roomId,
+        string $roomId,
         $startTime,
         $endTime,
         ?string $excludeReservationId = null
@@ -81,10 +81,10 @@ class CSPService
     /**
      * Check if room is in maintenance mode
      *
-     * @param int $roomId Room ID to check
+    * @param string $roomId Room ID to check (UUID string)
      * @return bool True if in maintenance, false otherwise
      */
-    public function isRoomInMaintenance(int $roomId): bool
+    public function isRoomInMaintenance(string $roomId): bool
     {
         return DB::table('m_rooms')
             ->where('id', $roomId)
@@ -96,14 +96,14 @@ class CSPService
     /**
      * Get all conflicting reservations for a given time slot
      *
-     * @param int $roomId Room ID to check
+    * @param string $roomId Room ID to check (UUID string)
      * @param Carbon|string $startTime Start time
      * @param Carbon|string $endTime End time
      * @param string|null $excludeReservationId Reservation ID to exclude
      * @return array Array of conflicting reservations
      */
     public function getConflictingReservations(
-        int $roomId,
+        string $roomId,
         $startTime,
         $endTime,
         ?string $excludeReservationId = null
@@ -144,7 +144,7 @@ class CSPService
     /**
      * Validate all constraints for a new reservation
      *
-     * @param int $roomId Room ID
+     * @param string $roomId Room ID (ULID string)
      * @param Carbon|string $startTime Start time
      * @param Carbon|string $endTime End time
      * @param int $visitorCount Number of visitors
@@ -152,7 +152,7 @@ class CSPService
      * @return array ['valid' => bool, 'errors' => array]
      */
     public function validateReservation(
-        int $roomId,
+        string $roomId,
         $startTime,
         $endTime,
         int $visitorCount = 1,
@@ -208,13 +208,13 @@ class CSPService
     /**
      * Get available time slots for a room on a specific date
      *
-     * @param int $roomId Room ID
+     * @param string $roomId Room ID (ULID string)
      * @param Carbon|string $date Date to check
      * @param int $intervalMinutes Interval in minutes (default: 30)
      * @return array Available time slots
      */
     public function getAvailableTimeSlots(
-        int $roomId,
+        string $roomId,
         $date,
         int $intervalMinutes = 30
     ): array {
