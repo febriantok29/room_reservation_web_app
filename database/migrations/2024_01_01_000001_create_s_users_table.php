@@ -12,10 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('s_users', function (Blueprint $table) {
-            $table->id();
+            // Custom string ID (generated in code, not auto-increment)
+            $table->string('id', 36)->primary()->comment('UUIDv7 generated in code');
 
             // User Information
-            $table->string('employee_id', 20)->unique()->comment('Employee ID');
+            $table->string('employee_id', 20)->unique()->comment('Employee ID (EMP-YYYY-#####)');
             $table->string('email', 100)->unique()->comment('Email address');
             $table->string('password')->comment('Hashed password');
             $table->string('first_name', 50)->comment('First name');
@@ -25,11 +26,11 @@ return new class extends Migration
 
             // Audit fields
             $table->timestamp('created_at')->nullable()->useCurrent();
-            $table->unsignedBigInteger('created_by')->nullable();
+            $table->string('created_by', 36)->nullable();
             $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate();
-            $table->unsignedBigInteger('updated_by')->nullable();
+            $table->string('updated_by', 36)->nullable();
             $table->timestamp('deleted_at')->nullable();
-            $table->unsignedBigInteger('deleted_by')->nullable();
+            $table->string('deleted_by', 36)->nullable();
 
             // Indexes for performance
             $table->index('employee_id');
