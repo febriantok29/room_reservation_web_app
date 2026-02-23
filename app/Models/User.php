@@ -46,6 +46,7 @@ class User extends Authenticatable
         'last_name',
         'date_of_birth',
         'role',
+        'is_active',
     ];
 
     /**
@@ -65,6 +66,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'date_of_birth' => 'date',
+        'is_active' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
