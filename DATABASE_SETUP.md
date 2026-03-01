@@ -4,6 +4,13 @@
 
 Sistem reservasi ruang meeting dengan implementasi **Constraint Satisfaction Problem (CSP)** untuk mencegah konflik waktu booking.
 
+**ID Strategy:**
+
+- `s_users` dan `m_rooms` menggunakan **UUIDv7 (Universally Unique Identifier)** sebagai primary key
+- UUIDv7 di-generate di application layer (Laravel), bukan auto-increment dari database
+- Format: 36 karakter string (dengan tanda `-`)
+- `t_reservations` menggunakan custom format: `RSV-YYYYMMDD-XX`
+
 ## Database Tables
 
 ### 1. s_users (System Users)
@@ -12,14 +19,14 @@ Tabel pengguna sistem dengan 3 role: `admin`, `staff`, dan `user`.
 
 **Columns:**
 
-- `id`: Primary key (auto-increment)
+- `id`: Primary key (string 36 chars - **UUIDv7 generated in code**)
 - `employee_id`: Employee ID (unique, indexed)
 - `email`: Email address (unique, indexed)
 - `password`: Hashed password
 - `first_name`, `last_name`: User name
 - `date_of_birth`: Date of birth
 - `role`: Enum (`user`, `staff`, `admin`)
-- Audit fields: `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`
+- Audit fields: `created_at`, `created_by` (string UUIDv7), `updated_at`, `updated_by` (string UUIDv7), `deleted_at`, `deleted_by` (string UUIDv7)
 
 ### 2. m_rooms (Master Rooms)
 
@@ -27,13 +34,13 @@ Tabel master ruang meeting (4 lantai, 1 ruang per lantai).
 
 **Columns:**
 
-- `id`: Primary key (auto-increment)
+- `id`: Primary key (string 36 chars - **UUIDv7 generated in code**)
 - `name`: Room name
 - `location`: Location (e.g., "Lantai 1")
 - `description`: Room description
 - `capacity`: Maximum capacity (smallint)
 - `is_maintenance`: Maintenance status (boolean)
-- Audit fields: `created_at`, `created_by`, etc.
+- Audit fields: `created_at`, `created_by` (string UUIDv7), etc.
 
 ### 3. t_reservations (Transaction Reservations)
 
@@ -41,9 +48,9 @@ Tabel transaksi reservasi dengan custom ID format.
 
 **Columns:**
 
-- `id`: Primary key (string) - Format: `RSV-YYYYMMDD-XX`
-- `user_id`: Foreign key to s_users
-- `room_id`: Foreign key to m_rooms
+- `id`: Primary key (string 20 chars) - Format: `RSV-YYYYMMDD-XX` (generated in code)
+- `user_id`: Foreign key to s_users (string UUIDv7)
+- `room_id`: Foreign key to m_rooms (string UUIDv7)
 - `start_time`: Reservation start (timestamp UTC)
 - `end_time`: Reservation end (timestamp UTC)
 - `purpose`: Purpose of reservation
@@ -135,16 +142,19 @@ use Carbon\Carbon;
 
 $csp = new CSPService();
 
+// Example room ID (UUID string)
+$roomId = '550e8400-e29b-41d4-a716-446655440000';
+
 // Check if room is available
 $available = $csp->isRoomAvailable(
-    roomId: 1,
+    roomId: $roomId,
     startTime: Carbon::parse('2026-02-15 09:00:00'),
     endTime: Carbon::parse('2026-02-15 11:00:00')
 );
 
 // Validate reservation with all constraints
 $validation = $csp->validateReservation(
-    roomId: 1,
+    roomId: $roomId,
     startTime: '2026-02-15 09:00:00',
     endTime: '2026-02-15 11:00:00',
     visitorCount: 10
@@ -158,14 +168,14 @@ if ($validation['valid']) {
 
 // Get conflicting reservations
 $conflicts = $csp->getConflictingReservations(
-    roomId: 1,
+    roomId: $roomId,
     startTime: '2026-02-15 09:00:00',
     endTime: '2026-02-15 11:00:00'
 );
 
 // Get available time slots
 $slots = $csp->getAvailableTimeSlots(
-    roomId: 1,
+    roomId: $roomId,
     date: '2026-02-15',
     intervalMinutes: 30
 );
@@ -179,6 +189,43 @@ The `ReservationIdGenerator` service generates unique IDs with format: `RSV-YYYY
 use App\Services\ReservationIdGenerator;
 
 $id = ReservationIdGenerator::generate(); // RSV-20260213-01
+```
+
+## UUIDv7 Generation for System & Master Tables
+
+For `s_users` and `m_rooms` tables, IDs are generated using **UUIDv7** (time-ordered UUID):
+
+**Why UUIDv7?**
+
+- ✅ **Standar industri terbaru** untuk UUID berbasis waktu
+- ✅ **Unique** - Globally unique across distributed systems
+- ✅ **Didukung luas** di Laravel dan database
+- ✅ **Lebih ramah index insert** dibanding UUID acak (v4)
+
+**Usage Example:**
+
+```php
+use Illuminate\Support\Str;
+
+// Generate UUIDv7 for new user
+$userId = (string) Str::uuid7(); // 0194f7cf-2440-7f08-bc13-8b0f4fce9f52
+
+// In Model (using trait)
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
+class User extends Model
+{
+    use HasUuids;
+
+    // Laravel will automatically generate UUIDv7 when creating new record
+}
+
+// Or manually in controller
+$user = new User();
+$user->id = (string) Str::uuid7();
+$user->employee_id = 'EMP001';
+// ... other fields
+$user->save();
 ```
 
 ## Timezone Considerations
