@@ -614,6 +614,265 @@
                     "response": []
                 }
             ]
+        },
+        {
+            "name": "Reservations",
+            "item": [
+                {
+                    "name": "List Reservations (Default)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{current_access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/reservations",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "reservations"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Reservations (Filters)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{current_access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/reservations?status={{reservation_status_filter}}&room_id={{room_id}}&date_from={{reservation_date_from}}&date_to={{reservation_date_to}}&per_page=10",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "reservations"
+                            ],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "{{reservation_status_filter}}"
+                                },
+                                {
+                                    "key": "room_id",
+                                    "value": "{{room_id}}"
+                                },
+                                {
+                                    "key": "date_from",
+                                    "value": "{{reservation_date_from}}"
+                                },
+                                {
+                                    "key": "date_to",
+                                    "value": "{{reservation_date_to}}"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "10"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Reservation Detail",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{current_access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "reservations",
+                                "{{reservation_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Reservation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('reservation_id', jsonData.data.id);",
+                                    "    console.log('✅ Reservation berhasil dibuat:', jsonData.data.id);",
+                                    "} else {",
+                                    "    console.log('❌ Gagal create reservation:', pm.response.json());",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{current_access_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"room_id\": \"{{room_id}}\",\n  \"start_time\": \"{{reservation_start_time}}\",\n  \"end_time\": \"{{reservation_end_time}}\",\n  \"purpose\": \"Rapat koordinasi tim\",\n  \"visitor_count\": 5\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/reservations",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "reservations"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Reservation",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{current_access_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"purpose\": \"Rapat koordinasi tim (updated)\",\n  \"visitor_count\": 6\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "reservations",
+                                "{{reservation_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Cancel Reservation",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{current_access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/cancel",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "reservations",
+                                "{{reservation_id}}",
+                                "cancel"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Approve Reservation (Admin/Staff)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{current_access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/approve",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "reservations",
+                                "{{reservation_id}}",
+                                "approve"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reject Reservation (Admin/Staff)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{current_access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "reservations",
+                                "{{reservation_id}}",
+                                "reject"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
         }
     ],
     "variable": [
@@ -680,6 +939,36 @@
         {
             "key": "availability_interval",
             "value": "30",
+            "type": "string"
+        },
+        {
+            "key": "reservation_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "reservation_start_time",
+            "value": "2026-03-01 09:00:00",
+            "type": "string"
+        },
+        {
+            "key": "reservation_end_time",
+            "value": "2026-03-01 10:00:00",
+            "type": "string"
+        },
+        {
+            "key": "reservation_status_filter",
+            "value": "pending",
+            "type": "string"
+        },
+        {
+            "key": "reservation_date_from",
+            "value": "2026-03-01 00:00:00",
+            "type": "string"
+        },
+        {
+            "key": "reservation_date_to",
+            "value": "2026-03-31 23:59:59",
             "type": "string"
         }
     ]
