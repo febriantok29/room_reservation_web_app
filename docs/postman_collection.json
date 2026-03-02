@@ -21,7 +21,7 @@
                                     "    pm.collectionVariables.set('admin_refresh_token', jsonData.data.refresh_token);",
                                     "    pm.collectionVariables.set('current_access_token', jsonData.data.access_token);",
                                     "    pm.collectionVariables.set('current_refresh_token', jsonData.data.refresh_token);",
-                                    "    pm.collectionVariables.set('current_role', 'admin');",
+                                    "    pm.collectionVariables.set('current_is_admin', 'true');",
                                     "    console.log('✅ Login berhasil!');",
                                     "    console.log('Access Token:', jsonData.data.access_token.substring(0, 50) + '...');",
                                     "} else {",
@@ -41,7 +41,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"email\": \"admin@roomreservation.com\",\n  \"password\": \"Admin@123\"\n}"
+                            "raw": "{\n  \"login\": \"admin@roomreservation.com\",\n  \"password\": \"Admin@123\"\n}"
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/auth/login",
@@ -71,7 +71,7 @@
                                     "    pm.collectionVariables.set('staff_refresh_token', jsonData.data.refresh_token);",
                                     "    pm.collectionVariables.set('current_access_token', jsonData.data.access_token);",
                                     "    pm.collectionVariables.set('current_refresh_token', jsonData.data.refresh_token);",
-                                    "    pm.collectionVariables.set('current_role', 'staff');",
+                                    "    pm.collectionVariables.set('current_is_admin', 'false');",
                                     "    console.log('✅ Login Staff berhasil!');",
                                     "} else {",
                                     "    console.log('❌ Login Staff gagal:', pm.response.json());",
@@ -90,7 +90,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"email\": \"staff1@roomreservation.com\",\n  \"password\": \"Staff@123\"\n}"
+                            "raw": "{\n  \"login\": \"EMP-2025-00003\",\n  \"password\": \"Staff@123\"\n}"
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/auth/login",
@@ -108,7 +108,7 @@
                     "response": []
                 },
                 {
-                    "name": "Login - Regular User",
+                    "name": "Login - Non-Admin User",
                     "event": [
                         {
                             "listen": "test",
@@ -120,7 +120,7 @@
                                     "    pm.collectionVariables.set('user_refresh_token', jsonData.data.refresh_token);",
                                     "    pm.collectionVariables.set('current_access_token', jsonData.data.access_token);",
                                     "    pm.collectionVariables.set('current_refresh_token', jsonData.data.refresh_token);",
-                                    "    pm.collectionVariables.set('current_role', 'user');",
+                                    "    pm.collectionVariables.set('current_is_admin', 'false');",
                                     "    console.log('✅ Login User berhasil!');",
                                     "} else {",
                                     "    console.log('❌ Login User gagal:', pm.response.json());",
@@ -139,7 +139,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"email\": \"sarah.brown@example.com\",\n  \"password\": \"User@123\"\n}"
+                            "raw": "{\n  \"login\": \"EMP-2025-00005\",\n  \"password\": \"User@123\"\n}"
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/auth/login",
@@ -168,7 +168,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"email\": \"admin@roomreservation.com\",\n  \"password\": \"WrongPassword123\"\n}"
+                            "raw": "{\n  \"login\": \"admin@roomreservation.com\",\n  \"password\": \"WrongPassword123\"\n}"
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/auth/login",
@@ -186,7 +186,7 @@
                     "response": []
                 },
                 {
-                    "name": "Login - Missing Email",
+                    "name": "Login - Missing Identity",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -227,7 +227,7 @@
                                     "    pm.collectionVariables.set('admin_refresh_token', jsonData.data.refresh_token);",
                                     "    pm.collectionVariables.set('current_access_token', jsonData.data.access_token);",
                                     "    pm.collectionVariables.set('current_refresh_token', jsonData.data.refresh_token);",
-                                    "    pm.collectionVariables.set('current_role', 'admin');",
+                                    "    pm.collectionVariables.set('current_is_admin', 'true');",
                                     "    console.log('✅ Debug login berhasil!');",
                                     "    console.log('Access Token TTL: 60 seconds');",
                                     "    console.log('Refresh Token TTL: 3600 seconds');",
@@ -247,7 +247,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n  \"email\": \"admin@roomreservation.com\",\n  \"password\": \"Admin@123\",\n  \"is_debug\": true,\n  \"access_token_ttl\": 60,\n  \"refresh_token_ttl\": 3600\n}"
+                            "raw": "{\n  \"login\": \"admin@roomreservation.com\",\n  \"password\": \"Admin@123\",\n  \"is_debug\": true,\n  \"access_token_ttl\": 60,\n  \"refresh_token_ttl\": 3600\n}"
                         },
                         "url": {
                             "raw": "{{base_url}}/api/v1/auth/login",
@@ -273,11 +273,11 @@
                                 "exec": [
                                     "if (pm.response.code === 200) {",
                                     "    var jsonData = pm.response.json();",
-                                    "    var currentRole = pm.collectionVariables.get('current_role');",
+                                    "    var previousAccessToken = pm.collectionVariables.get('current_access_token');",
                                     "    pm.collectionVariables.set('current_access_token', jsonData.data.access_token);",
-                                    "    if (currentRole === 'admin') pm.collectionVariables.set('admin_access_token', jsonData.data.access_token);",
-                                    "    if (currentRole === 'staff') pm.collectionVariables.set('staff_access_token', jsonData.data.access_token);",
-                                    "    if (currentRole === 'user') pm.collectionVariables.set('user_access_token', jsonData.data.access_token);",
+                                    "    if (previousAccessToken === pm.collectionVariables.get('admin_access_token')) pm.collectionVariables.set('admin_access_token', jsonData.data.access_token);",
+                                    "    if (previousAccessToken === pm.collectionVariables.get('staff_access_token')) pm.collectionVariables.set('staff_access_token', jsonData.data.access_token);",
+                                    "    if (previousAccessToken === pm.collectionVariables.get('user_access_token')) pm.collectionVariables.set('user_access_token', jsonData.data.access_token);",
                                     "    console.log('✅ Token refresh berhasil!');",
                                     "    console.log('New Access Token expires in:', jsonData.data.expires_in, 'seconds');",
                                     "} else {",
@@ -451,7 +451,7 @@
                                     "if (pm.response.code === 200) {",
                                     "    pm.collectionVariables.unset('current_access_token');",
                                     "    pm.collectionVariables.unset('current_refresh_token');",
-                                    "    pm.collectionVariables.unset('current_role');",
+                                    "    pm.collectionVariables.unset('current_is_admin');",
                                     "    console.log('✅ Current session token dibersihkan dari collection variables');",
                                     "}"
                                 ]
@@ -553,9 +553,145 @@
                     "response": []
                 },
                 {
+                    "name": "List Rooms (Unavailable Only)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{current_access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/rooms?available_only=false",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "rooms"
+                            ],
+                            "query": [
+                                {
+                                    "key": "available_only",
+                                    "value": "false"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Room (Admin Only)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.collectionVariables.set('room_id', jsonData.data.id);",
+                                    "    console.log('✅ Room berhasil dibuat:', jsonData.data.id);",
+                                    "} else {",
+                                    "    console.log('❌ Gagal create room:', pm.response.json());",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{current_access_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"R. Uji API\",\n  \"location\": \"Lantai 5\",\n  \"description\": \"Ruangan untuk pengujian API\",\n  \"capacity\": 12,\n  \"is_maintenance\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/rooms",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "rooms"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
                     "name": "Get Room Detail",
                     "request": {
                         "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{current_access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/rooms/{{room_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "rooms",
+                                "{{room_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Room (Admin Only)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{current_access_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"R. Uji API (Updated)\",\n  \"capacity\": 20,\n  \"is_maintenance\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/rooms/{{room_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "rooms",
+                                "{{room_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Room (Admin Only)",
+                    "request": {
+                        "method": "DELETE",
                         "header": [
                             {
                                 "key": "Authorization",
@@ -821,7 +957,7 @@
                     "response": []
                 },
                 {
-                    "name": "Approve Reservation (Admin/Staff)",
+                    "name": "Approve Reservation (Admin Only)",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -847,7 +983,7 @@
                     "response": []
                 },
                 {
-                    "name": "Reject Reservation (Admin/Staff)",
+                    "name": "Reject Reservation (Admin Only)",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -892,7 +1028,7 @@
             "type": "string"
         },
         {
-            "key": "current_role",
+            "key": "current_is_admin",
             "value": "",
             "type": "string"
         },
