@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('first_name', 50)->comment('First name');
             $table->string('last_name', 50)->comment('Last name');
             $table->date('date_of_birth')->nullable()->comment('Date of birth');
-            $table->enum('role', ['user', 'staff', 'admin'])->default('user')->comment('User role');
+            $table->boolean('is_admin')->default(false)->comment('Admin access flag');
 
             // Audit fields
             $table->timestamp('created_at')->nullable()->useCurrent();
@@ -35,8 +35,8 @@ return new class extends Migration
             // Indexes for performance
             $table->index('employee_id');
             $table->index('email');
-            $table->index('role');
-            $table->index(['deleted_at', 'role']); // Composite index for filtering active users by role
+            $table->index('is_admin');
+            $table->index(['deleted_at', 'is_admin']); // Composite index for filtering users by admin flag
         });
 
         // Set timezone to UTC for this table

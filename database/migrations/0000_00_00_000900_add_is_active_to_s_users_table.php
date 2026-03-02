@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('s_users', function (Blueprint $table) {
-            $table->boolean('is_active')->default(true)->after('role')->comment('User active status');
+            $table->boolean('is_active')->default(true)->after('is_admin')->comment('User active status');
             $table->index('is_active');
         });
     }
