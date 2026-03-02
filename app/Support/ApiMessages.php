@@ -39,6 +39,12 @@ final class ApiMessages
     public const RESERVATION_CONSTRAINT_CREATE_FAILED = 'Reservasi tidak memenuhi aturan penjadwalan';
     public const RESERVATION_CONSTRAINT_UPDATE_FAILED = 'Perubahan reservasi tidak memenuhi aturan penjadwalan';
     public const RESERVATION_CONSTRAINT_APPROVE_FAILED = 'Reservasi tidak dapat disetujui karena melanggar aturan';
+    public const RESERVATION_CONSTRAINT_START_BEFORE_END = 'Waktu mulai harus sebelum waktu selesai.';
+    public const RESERVATION_CONSTRAINT_PAST_TIME = 'Tidak bisa membuat reservasi pada waktu yang sudah lewat.';
+    public const RESERVATION_CONSTRAINT_ROOM_NOT_FOUND = 'Ruangan tidak ditemukan atau sudah dihapus.';
+    public const RESERVATION_CONSTRAINT_ROOM_MAINTENANCE = 'Ruangan sedang dalam maintenance.';
+    public const RESERVATION_CONSTRAINT_CAPACITY_EXCEEDED = 'Jumlah pengunjung melebihi kapasitas ruangan.';
+    public const RESERVATION_CONSTRAINT_SLOT_UNAVAILABLE = 'Slot waktu tidak tersedia karena bentrok dengan reservasi lain.';
     public const RESERVATION_UPDATE_PENDING_ONLY = 'Hanya reservasi dengan status pending yang dapat diubah';
     public const RESERVATION_ALREADY_STARTED = 'Reservasi yang sudah dimulai tidak dapat diubah';
     public const RESERVATION_CANCEL_INVALID_STATUS = 'Status reservasi saat ini tidak dapat dibatalkan';
