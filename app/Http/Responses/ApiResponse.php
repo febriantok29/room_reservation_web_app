@@ -2,7 +2,10 @@
 
 namespace App\Http\Responses;
 
+use App\Support\ApiErrorCodes;
+use App\Support\ApiMessages;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ApiResponse
 {
@@ -17,7 +20,7 @@ class ApiResponse
      */
     public static function success(
         mixed $data = null,
-        string $message = 'Operasi berhasil',
+        string $message = ApiMessages::SUCCESS_GENERIC,
         int $statusCode = 200,
         array $metadata = []
     ): JsonResponse {
@@ -65,11 +68,11 @@ class ApiResponse
     /**
      * Paginated success response
      *
-     * @param \Illuminate\Pagination\LengthAwarePaginator $paginated
+        * @param LengthAwarePaginator $paginated
      * @param string $message User-facing message in Indonesian
      * @return JsonResponse
      */
-    public static function paginated($paginated, string $message = 'Data berhasil diambil'): JsonResponse
+        public static function paginated(LengthAwarePaginator $paginated, string $message = 'Data berhasil diambil'): JsonResponse
     {
         return self::success(
             $paginated->items(),
@@ -95,8 +98,8 @@ class ApiResponse
     public static function validationError(array $errors): JsonResponse
     {
         return self::error(
-            'VALIDATION_ERROR',
-            'Data yang dikirim tidak valid',
+            ApiErrorCodes::VALIDATION_ERROR,
+            ApiMessages::SUCCESS_VALIDATION,
             422,
             $errors
         );
@@ -110,8 +113,8 @@ class ApiResponse
     public static function unauthorized(): JsonResponse
     {
         return self::error(
-            'UNAUTHORIZED',
-            'Token tidak valid atau kadaluarsa',
+            ApiErrorCodes::UNAUTHORIZED,
+            ApiMessages::UNAUTHORIZED,
             401
         );
     }
@@ -124,8 +127,8 @@ class ApiResponse
     public static function forbidden(): JsonResponse
     {
         return self::error(
-            'FORBIDDEN',
-            'Anda tidak memiliki akses ke resource ini',
+            ApiErrorCodes::FORBIDDEN,
+            ApiMessages::FORBIDDEN,
             403
         );
     }
@@ -139,7 +142,7 @@ class ApiResponse
     public static function notFound(string $message = 'Resource tidak ditemukan'): JsonResponse
     {
         return self::error(
-            'NOT_FOUND',
+            ApiErrorCodes::NOT_FOUND,
             $message,
             404
         );
