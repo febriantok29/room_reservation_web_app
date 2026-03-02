@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Support;
+
+final class ApiErrorCodes
+{
+    public const VALIDATION_ERROR = 'VALIDATION_ERROR';
+    public const UNAUTHORIZED = 'UNAUTHORIZED';
+    public const FORBIDDEN = 'FORBIDDEN';
+    public const NOT_FOUND = 'NOT_FOUND';
+
+    public const INVALID_CREDENTIALS = 'INVALID_CREDENTIALS';
+    public const USER_INACTIVE = 'USER_INACTIVE';
+    public const INVALID_TOKEN_TYPE = 'INVALID_TOKEN_TYPE';
+
+    public const ROOM_UNDER_MAINTENANCE = 'ROOM_UNDER_MAINTENANCE';
+    public const NO_UPDATE_PAYLOAD = 'NO_UPDATE_PAYLOAD';
+    public const RESERVATION_CONSTRAINT_FAILED = 'RESERVATION_CONSTRAINT_FAILED';
+    public const INVALID_RESERVATION_STATUS = 'INVALID_RESERVATION_STATUS';
+    public const RESERVATION_ALREADY_STARTED = 'RESERVATION_ALREADY_STARTED';
+    public const RESERVATION_ALREADY_FINISHED = 'RESERVATION_ALREADY_FINISHED';
+
+    private function __construct()
+    {
+    }
+}
