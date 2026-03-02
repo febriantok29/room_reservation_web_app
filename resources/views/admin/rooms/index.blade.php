@@ -9,7 +9,6 @@
             <a href="{{ route('admin.rooms.create') }}" class="btn btn-primary btn-sm mr-2">
                 <i class="fas fa-plus"></i> Tambah Ruangan
             </a>
-            @include('admin.partials.logout_button')
         </div>
     </div>
 @stop
@@ -28,6 +27,7 @@
                         <th>Nama</th>
                         <th>Lokasi</th>
                         <th>Kapasitas</th>
+                        <th>Fasilitas</th>
                         <th>Maintenance</th>
                         <th>Aksi</th>
                     </tr>
@@ -38,6 +38,13 @@
                             <td>{{ $room->name }}</td>
                             <td>{{ $room->location }}</td>
                             <td>{{ $room->capacity }}</td>
+                            <td>
+                                @if ($room->facilities->isNotEmpty())
+                                    {{ $room->facilities->pluck('name')->implode(', ') }}
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
                             <td>
                                 @if ($room->is_maintenance)
                                     <span class="badge bg-danger">YA</span>
@@ -61,7 +68,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted">Belum ada data ruangan</td>
+                            <td colspan="6" class="text-center text-muted">Belum ada data ruangan</td>
                         </tr>
                     @endforelse
                 </tbody>

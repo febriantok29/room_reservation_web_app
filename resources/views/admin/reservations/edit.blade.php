@@ -5,7 +5,6 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1 class="m-0">Ubah Reservasi</h1>
-        @include('admin.partials.logout_button')
     </div>
 @stop
 
@@ -33,12 +32,22 @@
                         </div>
                     </div>
                     <div class="col-lg-6">
+                        @include('admin.reservations.partials.required_facility_filter_field', [
+                            'hiddenValue' => old('required_facilities_input'),
+                        ])
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6">
                         <div class="form-group">
                             <label for="room_id">Ruangan</label>
                             <select id="room_id" name="room_id" class="form-control" required>
                                 <option value="">-- Pilih Ruangan --</option>
                                 @foreach ($rooms as $room)
-                                    <option value="{{ $room->id }}" @selected(old('room_id', $reservation->room_id) === $room->id)>
+                                    <option value="{{ $room->id }}"
+                                        data-facilities="{{ $room->facilities->pluck('slug')->implode(',') }}"
+                                        @selected(old('room_id', $reservation->room_id) === $room->id)>
                                         {{ $room->name }} ({{ $room->location }})
                                     </option>
                                 @endforeach
@@ -113,6 +122,19 @@
                 const [hour, minute] = value.split(':').map(Number);
                 return (hour * 60) + minute;
             };
+
+            const allFacilities = @json(
+                $allFacilities->map(fn($facility) => [
+                            'slug' => $facility->slug,
+                            'name' => $facility->name,
+                        ])->values());
+
+            @include('admin.reservations.partials.required_facility_filter_script')
+
+            initializeRequiredFacilityFilter({
+                allFacilities,
+                prefillFromSelectedRoom: true,
+            });
 
             const pickerConfig = {
                 enableTime: true,
