@@ -125,8 +125,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             const isDebugMode = @json(config('app.debug'));
             const baseUrl = @json(url('/'));
-            const debugEmail = @json($debugUser?->email ?? 'staff1@roomreservation.com');
-            const debugPassword = @json($debugUser?->role === 'admin' ? 'Admin@123' : ($debugUser?->role === 'staff' ? 'Staff@123' : 'User@123'));
 
             const toMinutes = (value) => {
                 if (!value || !value.includes(':')) {
@@ -207,36 +205,22 @@
                     const startDateTime = `${reservationDate} ${startClock}:00`;
                     const endDateTime = `${reservationDate} ${endClock}:00`;
 
-                    const curlText = `# 1) Login admin (pemesanan pertama)\n` +
-                        `curl -X POST '${baseUrl}/api/v1/auth/login' \\\n` +
-                        `  -H 'Content-Type: application/json' \\\n` +
-                        `  -d '{"email":"admin@roomreservation.com","password":"Admin@123"}'\n\n` +
-                        `# 2) Buat reservasi pertama (seharusnya sukses)\n` +
+                    const payload = {
+                        room_id: roomId,
+                        start_time: startDateTime,
+                        end_time: endDateTime,
+                        purpose,
+                        visitor_count: Number(visitorCount),
+                    };
+
+                    const jsonPayload = JSON.stringify(payload, null, 4);
+
+                    const curlText = `URL:\n${baseUrl}/api/v1/reservations\n\n` +
+                        `BODY:\n${jsonPayload}\n\n` +
+                        `cURL:\n` +
                         `curl -X POST '${baseUrl}/api/v1/reservations' \\\n` +
-                        `  -H 'Authorization: Bearer @{{ ADMIN_ACCESS_TOKEN }}' \\\n` +
                         `  -H 'Content-Type: application/json' \\\n` +
-                        `  -d '{\n` +
-                        `    "room_id": "${roomId}",\n` +
-                        `    "start_time": "${startDateTime}",\n` +
-                        `    "end_time": "${endDateTime}",\n` +
-                        `    "purpose": ${JSON.stringify(purpose)},\n` +
-                        `    "visitor_count": ${visitorCount}\n` +
-                        `  }'\n\n` +
-                        `# 3) Login pengguna acak berbeda (pemesan kedua)\n` +
-                        `curl -X POST '${baseUrl}/api/v1/auth/login' \\\n` +
-                        `  -H 'Content-Type: application/json' \\\n` +
-                        `  -d '{"email":"${debugEmail}","password":"${debugPassword}"}'\n\n` +
-                        `# 4) Buat reservasi bentrok pada slot yang sama (seharusnya gagal/konflik)\n` +
-                        `curl -X POST '${baseUrl}/api/v1/reservations' \\\n` +
-                        `  -H 'Authorization: Bearer @{{ RANDOM_USER_ACCESS_TOKEN }}' \\\n` +
-                        `  -H 'Content-Type: application/json' \\\n` +
-                        `  -d '{\n` +
-                        `    "room_id": "${roomId}",\n` +
-                        `    "start_time": "${startDateTime}",\n` +
-                        `    "end_time": "${endDateTime}",\n` +
-                        `    "purpose": "Uji CSP - booking bentrok",\n` +
-                        `    "visitor_count": ${visitorCount}\n` +
-                        `  }'`;
+                        `  -d '${jsonPayload}'`;
 
                     outputArea.value = curlText;
                     outputWrapper.classList.remove('d-none');
