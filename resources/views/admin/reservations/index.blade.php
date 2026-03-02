@@ -40,8 +40,8 @@
                             <td>{{ $reservation->id }}</td>
                             <td>{{ $reservation->user?->full_name ?? '-' }}</td>
                             <td>{{ $reservation->room?->name ?? '-' }}</td>
-                            <td>{{ $reservation->start_time?->format('Y-m-d H:i') }}</td>
-                            <td>{{ $reservation->end_time?->format('Y-m-d H:i') }}</td>
+                            <td>{{ $reservation->start_time_label }}</td>
+                            <td>{{ $reservation->end_time_label }}</td>
                             <td>
                                 <span
                                     class="badge

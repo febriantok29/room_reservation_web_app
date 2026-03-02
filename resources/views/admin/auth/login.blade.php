@@ -13,11 +13,11 @@
         @csrf
 
         <div class="input-group mb-3">
-            <input type="email" name="email" class="form-control" value="{{ old('email') }}" placeholder="Email" required
-                autofocus>
+            <input type="text" name="login" class="form-control" value="{{ old('login') }}"
+                placeholder="Email / Employee ID" required autofocus>
             <div class="input-group-append">
                 <div class="input-group-text">
-                    <span class="fas fa-envelope"></span>
+                    <span class="fas fa-user"></span>
                 </div>
             </div>
         </div>
