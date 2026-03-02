@@ -25,3 +25,4 @@ Thumbs.db
 dummy
 composer.lock
 public/vendor
+lang/vendor
