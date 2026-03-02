@@ -11,6 +11,12 @@ final class WebMessages
     public const ROOM_UPDATED_SUCCESS = 'Data ruangan berhasil diperbarui.';
     public const ROOM_DELETED_SUCCESS = 'Data ruangan berhasil dihapus.';
 
+    public const FACILITY_CREATED_SUCCESS = 'Data fasilitas berhasil ditambahkan.';
+    public const FACILITY_UPDATED_SUCCESS = 'Data fasilitas berhasil diperbarui.';
+    public const FACILITY_DELETED_SUCCESS = 'Data fasilitas berhasil dihapus.';
+    public const FACILITY_DUPLICATE_NAME = 'Nama fasilitas sudah digunakan.';
+    public const FACILITY_INVALID_NAME = 'Nama fasilitas tidak valid.';
+
     public const RESERVATION_END_AFTER_START = 'Jam selesai harus setelah jam mulai.';
     public const RESERVATION_START_AFTER_NOW = 'Waktu mulai harus lebih dari waktu saat ini.';
     public const RESERVATION_CREATED_SUCCESS = 'Reservasi berhasil ditambahkan.';
