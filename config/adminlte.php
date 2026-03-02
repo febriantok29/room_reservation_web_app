@@ -196,8 +196,8 @@ return [
     'classes_content_wrapper' => '',
     'classes_content_header' => '',
     'classes_content' => '',
-    'classes_sidebar' => 'sidebar-dark-primary elevation-4',
-    'classes_sidebar_nav' => '',
+    'classes_sidebar' => 'sidebar-dark-primary elevation-4 d-flex flex-column',
+    'classes_sidebar_nav' => 'd-flex flex-column min-vh-100',
     'classes_topnav' => 'navbar-white navbar-light',
     'classes_topnav_nav' => 'navbar-expand',
     'classes_topnav_container' => 'container',
@@ -320,6 +320,11 @@ return [
             'icon' => 'fas fa-fw fa-door-open',
         ],
         [
+            'text' => 'Fasilitas',
+            'route' => 'admin.facilities',
+            'icon' => 'fas fa-fw fa-plug',
+        ],
+        [
             'header' => 'TRANSAKSI',
         ],
         [
@@ -331,6 +336,12 @@ return [
             'text' => 'Antrian Persetujuan',
             'route' => 'admin.approvals',
             'icon' => 'fas fa-fw fa-clipboard-check',
+        ],
+        [
+            'text' => 'Keluar',
+            'route' => 'admin.logout',
+            'icon' => 'fas fa-fw fa-sign-out-alt',
+            'classes' => 'mt-auto pb-2',
         ],
     ],
 
@@ -436,6 +447,16 @@ return [
                     'type' => 'js',
                     'asset' => false,
                     'location' => '//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js',
+                ],
+            ],
+        ],
+        'CustomSidebarStyles' => [
+            'active' => true,
+            'files' => [
+                [
+                    'type' => 'css',
+                    'asset' => true,
+                    'location' => 'css/admin-custom.css',
                 ],
             ],
         ],

@@ -9,7 +9,6 @@
             <a href="{{ route('admin.reservations.create') }}" class="btn btn-primary btn-sm mr-2">
                 <i class="fas fa-plus"></i> Tambah Reservasi
             </a>
-            @include('admin.partials.logout_button')
         </div>
     </div>
 @stop

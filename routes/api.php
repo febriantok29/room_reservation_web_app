@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\FacilityController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\RoomController;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,13 @@ Route::prefix('v1')->middleware('jwt')->group(function () {
     Route::put('/rooms/{id}', [RoomController::class, 'update']);
     Route::delete('/rooms/{id}', [RoomController::class, 'destroy']);
     Route::get('/rooms/{id}/availability', [RoomController::class, 'availability']);
+
+    // Facility master endpoints
+    Route::get('/facilities', [FacilityController::class, 'index']);
+    Route::post('/facilities', [FacilityController::class, 'store']);
+    Route::get('/facilities/{id}', [FacilityController::class, 'show']);
+    Route::put('/facilities/{id}', [FacilityController::class, 'update']);
+    Route::delete('/facilities/{id}', [FacilityController::class, 'destroy']);
 
     // Reservation endpoints
     Route::get('/reservations', [ReservationController::class, 'index']);

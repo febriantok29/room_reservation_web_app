@@ -5,7 +5,6 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1 class="m-0">Dashboard Admin</h1>
-        @include('admin.partials.logout_button')
     </div>
 @stop
 

@@ -1,0 +1,76 @@
+@extends('adminlte::page')
+
+@section('title', 'Fasilitas')
+
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="m-0">Fasilitas</h1>
+        <div class="d-flex gap-2">
+            <a href="{{ route('admin.facilities.create') }}" class="btn btn-primary btn-sm mr-2">
+                <i class="fas fa-plus"></i> Tambah Fasilitas
+            </a>
+        </div>
+    </div>
+@stop
+
+@section('content')
+    @include('admin.partials.flash_message')
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Daftar Fasilitas</h3>
+            <div class="card-tools">
+                <form action="{{ route('admin.facilities') }}" method="GET" class="input-group input-group-sm"
+                    style="width: 260px;">
+                    <input type="text" name="q" class="form-control float-right" placeholder="Cari nama/slug"
+                        value="{{ request('q') }}">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-default">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card-body table-responsive p-0">
+            <table class="table table-hover text-nowrap mb-0">
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Slug</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($facilities as $facility)
+                        <tr>
+                            <td>{{ $facility->name }}</td>
+                            <td>{{ $facility->slug }}</td>
+                            <td>
+                                <a href="{{ route('admin.facilities.edit', $facility->id) }}"
+                                    class="btn btn-warning btn-xs">
+                                    <i class="fas fa-edit"></i> Ubah
+                                </a>
+                                <form action="{{ route('admin.facilities.destroy', $facility->id) }}" method="POST"
+                                    class="d-inline" onsubmit="return confirm('Yakin ingin menghapus fasilitas ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-xs">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">Belum ada data fasilitas</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer clearfix">
+            {{ $facilities->links() }}
+        </div>
+    </div>
+@stop

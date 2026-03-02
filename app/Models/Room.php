@@ -66,6 +66,15 @@ class Room extends Model
     }
 
     /**
+     * Get the facilities available in the room.
+     */
+    public function facilities()
+    {
+        return $this->belongsToMany(Facility::class, 'm_room_facilities', 'room_id', 'facility_id')
+            ->withTimestamps();
+    }
+
+    /**
      * Get the user who created the room.
      */
     public function creator()
@@ -111,5 +120,19 @@ class Room extends Model
     public function scopeMinCapacity($query, int $capacity)
     {
         return $query->where('capacity', '>=', $capacity);
+    }
+
+    /**
+     * Scope a query to only include rooms that contain all required facilities.
+     */
+    public function scopeWithFacilities($query, array $facilityIds)
+    {
+        foreach (Facility::normalizeSlugs($facilityIds) as $facilitySlug) {
+            $query->whereHas('facilities', function ($facilityQuery) use ($facilitySlug) {
+                $facilityQuery->where('slug', $facilitySlug);
+            });
+        }
+
+        return $query;
     }
 }

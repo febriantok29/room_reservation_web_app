@@ -27,6 +27,13 @@ final class ApiMessages
     public const ROOM_AVAILABILITY_SUCCESS = 'Slot tersedia berhasil diambil';
     public const ROOM_UNDER_MAINTENANCE = 'Ruangan sedang dalam perawatan';
 
+    public const FACILITY_NOT_FOUND = 'Fasilitas tidak ditemukan';
+    public const FACILITY_LIST_SUCCESS = 'Data fasilitas berhasil diambil';
+    public const FACILITY_DETAIL_SUCCESS = 'Detail fasilitas berhasil diambil';
+    public const FACILITY_CREATED_SUCCESS = 'Fasilitas berhasil ditambahkan';
+    public const FACILITY_UPDATED_SUCCESS = 'Fasilitas berhasil diperbarui';
+    public const FACILITY_DELETED_SUCCESS = 'Fasilitas berhasil dihapus';
+
     public const RESERVATION_NOT_FOUND = 'Reservasi tidak ditemukan';
     public const RESERVATION_LIST_SUCCESS = 'Data reservasi berhasil diambil';
     public const RESERVATION_DETAIL_SUCCESS = 'Detail reservasi berhasil diambil';

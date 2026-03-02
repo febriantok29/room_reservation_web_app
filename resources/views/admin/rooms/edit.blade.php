@@ -5,7 +5,6 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1 class="m-0">Ubah Ruangan</h1>
-        @include('admin.partials.logout_button')
     </div>
 @stop
 
@@ -47,6 +46,10 @@
                     <textarea id="description" name="description" class="form-control" rows="3">{{ old('description', $room->description) }}</textarea>
                 </div>
 
+                @include('admin.rooms.partials.facility_chip_input_field', [
+                    'hiddenValue' => old('facility_ids_input', $room->facilities->pluck('name')->implode(', ')),
+                ])
+
                 <div class="form-group form-check">
                     <input type="checkbox" id="is_maintenance" name="is_maintenance" value="1" class="form-check-input"
                         @checked(old('is_maintenance', $room->is_maintenance))>
@@ -60,4 +63,18 @@
             </form>
         </div>
     </div>
+@stop
+
+@section('js')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const allFacilities = @json($allFacilities->pluck('name')->values());
+
+            @include('admin.rooms.partials.facility_chip_input_script')
+
+            initializeRoomFacilityChipInput({
+                allFacilities,
+            });
+        });
+    </script>
 @stop
