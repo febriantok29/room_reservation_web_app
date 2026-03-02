@@ -3,19 +3,23 @@
 @section('title', 'Ubah Ruangan')
 
 @section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
+    <div>
         <h1 class="m-0">Ubah Ruangan</h1>
+        <div class="page-subtitle">Perbarui detail ruangan, fasilitas, dan status maintenance.</div>
     </div>
 @stop
 
 @section('content')
     @include('admin.partials.flash_message')
 
-    <div class="card">
+    <div class="card card-admin">
         <div class="card-body">
-            <form action="{{ route('admin.rooms.update', $room->id) }}" method="POST">
+            <form action="{{ route('admin.rooms.update', $room->id) }}" method="POST" data-submit-guard
+                data-loading-text="Memperbarui...">
                 @csrf
                 @method('PUT')
+
+                <div class="form-section-title">Informasi Dasar</div>
 
                 <div class="row">
                     <div class="col-lg-4 col-md-6">
@@ -46,6 +50,8 @@
                     <textarea id="description" name="description" class="form-control" rows="3">{{ old('description', $room->description) }}</textarea>
                 </div>
 
+                <div class="form-section-title">Fasilitas & Status</div>
+
                 @include('admin.rooms.partials.facility_chip_input_field', [
                     'hiddenValue' => old('facility_ids_input', $room->facilities->pluck('name')->implode(', ')),
                 ])
@@ -66,6 +72,8 @@
 @stop
 
 @section('js')
+    @include('admin.partials.form_submit_guard_script')
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const allFacilities = @json($allFacilities->pluck('name')->values());

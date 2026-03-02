@@ -3,19 +3,23 @@
 @section('title', 'Ubah Reservasi')
 
 @section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
+    <div>
         <h1 class="m-0">Ubah Reservasi</h1>
+        <div class="page-subtitle">Sesuaikan jadwal, ruangan, atau detail permintaan reservasi.</div>
     </div>
 @stop
 
 @section('content')
     @include('admin.partials.flash_message')
 
-    <div class="card">
+    <div class="card card-admin">
         <div class="card-body">
-            <form action="{{ route('admin.reservations.update', $reservation->id) }}" method="POST">
+            <form action="{{ route('admin.reservations.update', $reservation->id) }}" method="POST" data-submit-guard
+                data-loading-text="Memperbarui...">
                 @csrf
                 @method('PUT')
+
+                <div class="form-section-title">Pemohon & Kebutuhan Ruangan</div>
 
                 <div class="row">
                     <div class="col-lg-6">
@@ -37,6 +41,8 @@
                         ])
                     </div>
                 </div>
+
+                <div class="form-section-title">Jadwal & Detail Reservasi</div>
 
                 <div class="row">
                     <div class="col-lg-6">
@@ -112,6 +118,8 @@
 
 @section('js')
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    @include('admin.partials.form_submit_guard_script')
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const toMinutes = (value) => {

@@ -3,13 +3,26 @@
 @section('title', 'Dasbor Admin')
 
 @section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
+    <div>
         <h1 class="m-0">Dashboard Admin</h1>
+        <div class="page-subtitle">Ringkasan operasional reservasi ruangan hari ini.</div>
     </div>
 @stop
 
 @section('content')
     @include('admin.partials.flash_message')
+
+    <div class="mb-3 d-flex flex-wrap" style="gap: .5rem;">
+        <a href="{{ route('admin.reservations.create') }}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus mr-1"></i> Buat Reservasi
+        </a>
+        <a href="{{ route('admin.rooms.create') }}" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-door-open mr-1"></i> Tambah Ruangan
+        </a>
+        <a href="{{ route('admin.approvals') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-clipboard-check mr-1"></i> Buka Antrian Persetujuan
+        </a>
+    </div>
 
     <div class="row">
         <div class="col-lg-3 col-6">
@@ -61,12 +74,12 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="card card-admin">
         <div class="card-header">
             <h3 class="card-title">Reservasi Terbaru</h3>
         </div>
         <div class="card-body table-responsive p-0">
-            <table class="table table-hover text-nowrap mb-0">
+            <table class="table table-hover table-striped text-nowrap mb-0">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -103,7 +116,14 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center text-muted">Belum ada data reservasi</td>
+                            <td colspan="5" class="empty-state-cell">
+                                <div class="empty-icon"><i class="far fa-calendar-times"></i></div>
+                                <div class="empty-title">Belum ada reservasi terbaru</div>
+                                <div class="empty-desc">Mulai dengan membuat reservasi baru untuk pengguna.</div>
+                                <a href="{{ route('admin.reservations.create') }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus mr-1"></i> Tambah Reservasi
+                                </a>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
