@@ -26,3 +26,4 @@ dummy
 composer.lock
 public/vendor
 lang/vendor
+DATABASE_SETUP.md
