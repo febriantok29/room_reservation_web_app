@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\ReservationIdGenerator;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -259,5 +260,33 @@ class Reservation extends Model
     public function isUpcoming(): bool
     {
         return $this->start_time > now() && in_array($this->status, ['pending', 'approved']);
+    }
+
+    /**
+     * Readable Indonesian label for start time.
+     */
+    public function getStartTimeLabelAttribute(): string
+    {
+        return $this->formatReadableDateTime($this->start_time);
+    }
+
+    /**
+     * Readable Indonesian label for end time.
+     */
+    public function getEndTimeLabelAttribute(): string
+    {
+        return $this->formatReadableDateTime($this->end_time);
+    }
+
+    /**
+     * Format datetime to Indonesian readable text.
+     */
+    private function formatReadableDateTime(?CarbonInterface $dateTime): string
+    {
+        if (!$dateTime) {
+            return '-';
+        }
+
+        return $dateTime->locale('id')->translatedFormat('l, d F Y H:i');
     }
 }
