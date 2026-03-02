@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Models\Facility;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\User;
@@ -56,6 +57,7 @@ class AdminDashboardController extends Controller
         $this->ensureAdminAccess($request);
 
         $rooms = Room::query()
+            ->with('facilities:id,name,slug')
             ->whereNull('deleted_at')
             ->orderBy('location')
             ->orderBy('name')
@@ -70,7 +72,9 @@ class AdminDashboardController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        return view('admin.rooms.create');
+        return view('admin.rooms.create', [
+            'allFacilities' => Facility::query()->orderBy('name')->get(['id', 'name', 'slug']),
+        ]);
     }
 
     public function storeRoom(Request $request): RedirectResponse
@@ -82,15 +86,24 @@ class AdminDashboardController extends Controller
             'location' => 'required|string|max:100',
             'description' => 'nullable|string',
             'capacity' => 'required|integer|min:1|max:1000',
+            'facility_ids_input' => 'nullable|string|max:500',
             'is_maintenance' => 'nullable|boolean',
         ]);
 
         $room = new Room();
-        $room->fill($validated);
+        $room->fill([
+            'name' => $validated['name'],
+            'location' => $validated['location'],
+            'description' => $validated['description'] ?? null,
+            'capacity' => $validated['capacity'],
+        ]);
         $room->is_maintenance = $request->boolean('is_maintenance', false);
         $room->created_by = $request->user()->id;
         $room->updated_by = $request->user()->id;
         $room->save();
+
+        $facilityIds = Facility::resolveIds(Facility::parseInput($validated['facility_ids_input'] ?? null));
+        $room->facilities()->sync($facilityIds);
 
         return redirect()
             ->route('admin.rooms')
@@ -101,8 +114,11 @@ class AdminDashboardController extends Controller
     {
         $this->ensureAdminAccess($request);
 
+        $room->load('facilities:id,name,slug');
+
         return view('admin.rooms.edit', [
             'room' => $room,
+            'allFacilities' => Facility::query()->orderBy('name')->get(['id', 'name', 'slug']),
         ]);
     }
 
@@ -115,13 +131,22 @@ class AdminDashboardController extends Controller
             'location' => 'required|string|max:100',
             'description' => 'nullable|string',
             'capacity' => 'required|integer|min:1|max:1000',
+            'facility_ids_input' => 'nullable|string|max:500',
             'is_maintenance' => 'nullable|boolean',
         ]);
 
-        $room->fill($validated);
+        $room->fill([
+            'name' => $validated['name'],
+            'location' => $validated['location'],
+            'description' => $validated['description'] ?? null,
+            'capacity' => $validated['capacity'],
+        ]);
         $room->is_maintenance = $request->boolean('is_maintenance', false);
         $room->updated_by = $request->user()->id;
         $room->save();
+
+        $facilityIds = Facility::resolveIds(Facility::parseInput($validated['facility_ids_input'] ?? null));
+        $room->facilities()->sync($facilityIds);
 
         return redirect()
             ->route('admin.rooms')
@@ -160,10 +185,15 @@ class AdminDashboardController extends Controller
         $this->ensureAdminAccess($request);
 
         $rooms = Room::query()
+            ->with('facilities:id,name,slug')
             ->whereNull('deleted_at')
             ->orderBy('location')
             ->orderBy('name')
             ->get();
+
+        $allFacilities = Facility::query()
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug']);
 
         $users = User::query()
             ->whereNull('deleted_at')
@@ -179,6 +209,7 @@ class AdminDashboardController extends Controller
         return view('admin.reservations.create', [
             'rooms' => $rooms,
             'users' => $users,
+            'allFacilities' => $allFacilities,
             'debugUser' => $debugUser,
         ]);
     }
@@ -238,10 +269,15 @@ class AdminDashboardController extends Controller
         $this->ensureAdminAccess($request);
 
         $rooms = Room::query()
+            ->with('facilities:id,name,slug')
             ->whereNull('deleted_at')
             ->orderBy('location')
             ->orderBy('name')
             ->get();
+
+        $allFacilities = Facility::query()
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug']);
 
         $users = User::query()
             ->whereNull('deleted_at')
@@ -254,6 +290,7 @@ class AdminDashboardController extends Controller
             'reservation' => $reservation,
             'rooms' => $rooms,
             'users' => $users,
+            'allFacilities' => $allFacilities,
         ]);
     }
 
