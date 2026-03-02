@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\User;
 use App\Services\JwtService;
+use App\Support\ApiErrorCodes;
+use App\Support\ApiMessages;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -29,7 +31,9 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'login' => 'required_without:email,employee_id|string|max:100',
+            'email' => 'nullable|email|max:100',
+            'employee_id' => 'nullable|string|max:20',
             'password' => 'required|string|min:6',
             'is_debug' => 'nullable|boolean',
             'access_token_ttl' => 'nullable|integer|min:1',
@@ -40,13 +44,17 @@ class AuthController extends Controller
             return ApiResponse::validationError($validator->errors()->toArray());
         }
 
-        // Find user by email
-        $user = User::where('email', $request->email)->first();
+        $login = trim((string) ($request->input('login') ?? $request->input('email') ?? $request->input('employee_id')));
+
+        // Find user by email or employee_id
+        $user = User::where('email', $login)
+            ->orWhere('employee_id', $login)
+            ->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return ApiResponse::error(
-                'INVALID_CREDENTIALS',
-                'Email atau password salah',
+                ApiErrorCodes::INVALID_CREDENTIALS,
+                ApiMessages::AUTH_INVALID_CREDENTIALS,
                 401
             );
         }
@@ -54,8 +62,8 @@ class AuthController extends Controller
         // Check if user is active
         if ($user->is_active === false) {
             return ApiResponse::error(
-                'USER_INACTIVE',
-                'Akun Anda telah dinonaktifkan',
+                ApiErrorCodes::USER_INACTIVE,
+                ApiMessages::AUTH_USER_INACTIVE,
                 403
             );
         }
@@ -74,7 +82,7 @@ class AuthController extends Controller
 
         return ApiResponse::success(
             $tokens,
-            'Login berhasil',
+            ApiMessages::AUTH_LOGIN_SUCCESS,
             200
         );
     }
@@ -112,7 +120,7 @@ class AuthController extends Controller
 
         return ApiResponse::success(
             $tokens,
-            'Token refresh berhasil',
+            ApiMessages::AUTH_REFRESH_SUCCESS,
             200
         );
     }
@@ -130,7 +138,7 @@ class AuthController extends Controller
 
         return ApiResponse::success(
             null,
-            'Logout berhasil. Mohon hapus token dari perangkat Anda',
+            ApiMessages::AUTH_LOGOUT_SUCCESS,
             200
         );
     }
@@ -152,13 +160,13 @@ class AuthController extends Controller
         return ApiResponse::success(
             [
                 'id' => $user->id,
-                'name' => $user->name,
+                'name' => $user->full_name,
                 'email' => $user->email,
                 'employee_id' => $user->employee_id,
-                'role' => $user->role,
+                'is_admin' => $user->is_admin,
                 'is_active' => $user->is_active,
             ],
-            'Data pengguna berhasil diambil',
+            ApiMessages::AUTH_ME_SUCCESS,
             200
         );
     }

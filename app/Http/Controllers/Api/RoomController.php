@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\Room;
 use App\Services\CSPService;
+use App\Support\ApiErrorCodes;
+use App\Support\ApiMessages;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -50,9 +52,18 @@ class RoomController extends Controller
             $query->minCapacity((int) $request->input('min_capacity'));
         }
 
-        // Use request()->boolean() which handles both query and form data
-        if ($request->boolean('available_only', false)) {
-            $query->available();
+        // Apply explicit availability filter when parameter is provided:
+        // true  => only available rooms (is_maintenance = false)
+        // false => only unavailable rooms (is_maintenance = true)
+        if ($request->has('available_only')) {
+            $rawAvailableOnly = strtolower((string) $request->input('available_only'));
+            $isAvailableOnly = in_array($rawAvailableOnly, ['true', '1'], true);
+
+            if ($isAvailableOnly) {
+                $query->available();
+            } else {
+                $query->where('is_maintenance', true);
+            }
         }
 
         $query->orderBy('location')->orderBy('name');
@@ -60,12 +71,12 @@ class RoomController extends Controller
         $perPage = $request->input('per_page');
         if ($perPage) {
             $paginated = $query->paginate((int) $perPage);
-            return ApiResponse::paginated($paginated, 'Data ruangan berhasil diambil');
+            return ApiResponse::paginated($paginated, ApiMessages::ROOM_LIST_SUCCESS);
         }
 
         $rooms = $query->get();
 
-        return ApiResponse::success($rooms, 'Data ruangan berhasil diambil', 200);
+        return ApiResponse::success($rooms, ApiMessages::ROOM_LIST_SUCCESS, 200);
     }
 
     /**
@@ -76,10 +87,114 @@ class RoomController extends Controller
         $room = Room::where('id', $id)->whereNull('deleted_at')->first();
 
         if (!$room) {
-            return ApiResponse::notFound('Ruangan tidak ditemukan');
+            return ApiResponse::notFound(ApiMessages::ROOM_NOT_FOUND);
         }
 
-        return ApiResponse::success($room, 'Detail ruangan berhasil diambil', 200);
+        return ApiResponse::success($room, ApiMessages::ROOM_DETAIL_SUCCESS, 200);
+    }
+
+    /**
+     * Create new room (admin only).
+     */
+    public function store(Request $request): JsonResponse
+    {
+        if ($forbidden = $this->ensureAdmin($request)) {
+            return $forbidden;
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:100',
+            'location' => 'required|string|max:100',
+            'description' => 'nullable|string',
+            'capacity' => 'required|integer|min:1|max:1000',
+            'is_maintenance' => 'nullable|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator->errors()->toArray());
+        }
+
+        $validated = $validator->validated();
+
+        $room = new Room();
+        $room->fill($validated);
+        $room->is_maintenance = $request->boolean('is_maintenance', false);
+        $room->created_by = $request->user()->id;
+        $room->updated_by = $request->user()->id;
+        $room->save();
+
+        return ApiResponse::success($room, ApiMessages::ROOM_CREATED_SUCCESS, 201);
+    }
+
+    /**
+     * Update room (admin only).
+     */
+    public function update(Request $request, string $id): JsonResponse
+    {
+        if ($forbidden = $this->ensureAdmin($request)) {
+            return $forbidden;
+        }
+
+        $room = Room::query()->where('id', $id)->whereNull('deleted_at')->first();
+
+        if (!$room) {
+            return ApiResponse::notFound(ApiMessages::ROOM_NOT_FOUND);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|required|string|max:100',
+            'location' => 'sometimes|required|string|max:100',
+            'description' => 'sometimes|nullable|string',
+            'capacity' => 'sometimes|required|integer|min:1|max:1000',
+            'is_maintenance' => 'sometimes|boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator->errors()->toArray());
+        }
+
+        $validated = $validator->validated();
+
+        if (empty($validated)) {
+            return ApiResponse::error(
+                ApiErrorCodes::NO_UPDATE_PAYLOAD,
+                ApiMessages::NO_UPDATE_PAYLOAD,
+                422
+            );
+        }
+
+        $room->fill($validated);
+
+        if (array_key_exists('is_maintenance', $validated)) {
+            $room->is_maintenance = (bool) $validated['is_maintenance'];
+        }
+
+        $room->updated_by = $request->user()->id;
+        $room->save();
+
+        return ApiResponse::success($room, ApiMessages::ROOM_UPDATED_SUCCESS, 200);
+    }
+
+    /**
+     * Delete room (admin only).
+     */
+    public function destroy(Request $request, string $id): JsonResponse
+    {
+        if ($forbidden = $this->ensureAdmin($request)) {
+            return $forbidden;
+        }
+
+        $room = Room::query()->where('id', $id)->whereNull('deleted_at')->first();
+
+        if (!$room) {
+            return ApiResponse::notFound(ApiMessages::ROOM_NOT_FOUND);
+        }
+
+        $room->deleted_by = $request->user()->id;
+        $room->save();
+        $room->delete();
+
+        return ApiResponse::success(null, ApiMessages::ROOM_DELETED_SUCCESS, 200);
     }
 
     /**
@@ -99,13 +214,13 @@ class RoomController extends Controller
         $room = Room::where('id', $id)->whereNull('deleted_at')->first();
 
         if (!$room) {
-            return ApiResponse::notFound('Ruangan tidak ditemukan');
+            return ApiResponse::notFound(ApiMessages::ROOM_NOT_FOUND);
         }
 
         if ($room->is_maintenance) {
             return ApiResponse::error(
-                'ROOM_UNDER_MAINTENANCE',
-                'Ruangan sedang dalam perawatan',
+                ApiErrorCodes::ROOM_UNDER_MAINTENANCE,
+                ApiMessages::ROOM_UNDER_MAINTENANCE,
                 400
             );
         }
@@ -118,6 +233,15 @@ class RoomController extends Controller
             'date' => $request->input('date'),
             'interval_minutes' => $intervalMinutes,
             'available_slots' => $slots,
-        ], 'Slot tersedia berhasil diambil', 200);
+        ], ApiMessages::ROOM_AVAILABILITY_SUCCESS, 200);
+    }
+
+    private function ensureAdmin(Request $request): ?JsonResponse
+    {
+        if (!$request->user()?->isAdmin()) {
+            return ApiResponse::forbidden();
+        }
+
+        return null;
     }
 }

@@ -7,10 +7,12 @@ use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\User;
 use App\Services\ReservationService;
+use App\Support\WebMessages;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Throwable;
 
 class AdminDashboardController extends Controller
 {
@@ -92,7 +94,7 @@ class AdminDashboardController extends Controller
 
         return redirect()
             ->route('admin.rooms')
-            ->with('success', 'Data ruangan berhasil ditambahkan.');
+            ->with('success', WebMessages::ROOM_CREATED_SUCCESS);
     }
 
     public function editRoom(Request $request, Room $room): View
@@ -123,7 +125,7 @@ class AdminDashboardController extends Controller
 
         return redirect()
             ->route('admin.rooms')
-            ->with('success', 'Data ruangan berhasil diperbarui.');
+            ->with('success', WebMessages::ROOM_UPDATED_SUCCESS);
     }
 
     public function destroyRoom(Request $request, Room $room): RedirectResponse
@@ -136,7 +138,7 @@ class AdminDashboardController extends Controller
 
         return redirect()
             ->route('admin.rooms')
-            ->with('success', 'Data ruangan berhasil dihapus.');
+            ->with('success', WebMessages::ROOM_DELETED_SUCCESS);
     }
 
     public function reservations(Request $request): View
@@ -202,11 +204,11 @@ class AdminDashboardController extends Controller
         [$startTime, $endTime] = $this->buildReservationDateTimes($validated['reservation_date'], $validated['start_clock'], $validated['end_clock']);
 
         if ($startTime->gte($endTime)) {
-            return back()->withErrors(['end_clock' => 'Jam selesai harus setelah jam mulai.'])->withInput();
+            return back()->withErrors(['end_clock' => WebMessages::RESERVATION_END_AFTER_START])->withInput();
         }
 
         if ($startTime->lte(now())) {
-            return back()->withErrors(['start_clock' => 'Waktu mulai harus lebih dari waktu saat ini.'])->withInput();
+            return back()->withErrors(['start_clock' => WebMessages::RESERVATION_START_AFTER_NOW])->withInput();
         }
 
         try {
@@ -225,9 +227,9 @@ class AdminDashboardController extends Controller
 
             return redirect()
                 ->route('admin.reservations')
-                ->with('success', 'Reservasi berhasil ditambahkan.');
-        } catch (\Throwable $exception) {
-            return back()->withErrors(['reservation' => 'Terjadi kesalahan saat menyimpan reservasi.'])->withInput();
+                ->with('success', WebMessages::RESERVATION_CREATED_SUCCESS);
+        } catch (Throwable $exception) {
+            return back()->withErrors(['reservation' => WebMessages::RESERVATION_STORE_FAILED])->withInput();
         }
     }
 
@@ -276,11 +278,11 @@ class AdminDashboardController extends Controller
         [$startTime, $endTime] = $this->buildReservationDateTimes($validated['reservation_date'], $validated['start_clock'], $validated['end_clock']);
 
         if ($startTime->gte($endTime)) {
-            return back()->withErrors(['end_clock' => 'Jam selesai harus setelah jam mulai.'])->withInput();
+            return back()->withErrors(['end_clock' => WebMessages::RESERVATION_END_AFTER_START])->withInput();
         }
 
         if ($startTime->lte(now())) {
-            return back()->withErrors(['start_clock' => 'Waktu mulai harus lebih dari waktu saat ini.'])->withInput();
+            return back()->withErrors(['start_clock' => WebMessages::RESERVATION_START_AFTER_NOW])->withInput();
         }
 
         try {
@@ -299,9 +301,9 @@ class AdminDashboardController extends Controller
 
             return redirect()
                 ->route('admin.reservations')
-                ->with('success', 'Reservasi berhasil diperbarui.');
-        } catch (\Throwable $exception) {
-            return back()->withErrors(['reservation' => 'Terjadi kesalahan saat memperbarui reservasi.'])->withInput();
+                ->with('success', WebMessages::RESERVATION_UPDATED_SUCCESS);
+        } catch (Throwable $exception) {
+            return back()->withErrors(['reservation' => WebMessages::RESERVATION_UPDATE_FAILED])->withInput();
         }
     }
 
@@ -317,7 +319,7 @@ class AdminDashboardController extends Controller
 
         return redirect()
             ->route('admin.reservations')
-            ->with('success', 'Reservasi berhasil dibatalkan.');
+            ->with('success', WebMessages::RESERVATION_CANCELLED_SUCCESS);
     }
 
     public function approvals(Request $request): View
@@ -347,7 +349,7 @@ class AdminDashboardController extends Controller
 
         return redirect()
             ->route('admin.approvals')
-            ->with('success', 'Reservasi berhasil disetujui.');
+            ->with('success', WebMessages::RESERVATION_APPROVED_SUCCESS);
     }
 
     public function rejectReservation(Request $request, Reservation $reservation): RedirectResponse
@@ -362,34 +364,17 @@ class AdminDashboardController extends Controller
 
         return redirect()
             ->route('admin.approvals')
-            ->with('success', 'Reservasi berhasil ditolak.');
+            ->with('success', WebMessages::RESERVATION_REJECTED_SUCCESS);
     }
 
     private function reservationValidationMessages(): array
     {
-        return [
-            'required' => ':attribute wajib diisi.',
-            'exists' => ':attribute tidak ditemukan.',
-            'date' => ':attribute harus berupa tanggal yang valid.',
-            'date_format' => ':attribute harus menggunakan format HH:MM.',
-            'integer' => ':attribute harus berupa angka bulat.',
-            'min' => ':attribute minimal :min.',
-            'max' => ':attribute maksimal :max.',
-            'string' => ':attribute harus berupa teks.',
-        ];
+        return WebMessages::RESERVATION_VALIDATION_MESSAGES;
     }
 
     private function reservationValidationAttributes(): array
     {
-        return [
-            'user_id' => 'pegawai',
-            'room_id' => 'ruangan',
-            'reservation_date' => 'tanggal reservasi',
-            'start_clock' => 'jam mulai',
-            'end_clock' => 'jam selesai',
-            'purpose' => 'tujuan',
-            'visitor_count' => 'jumlah pengunjung',
-        ];
+        return WebMessages::RESERVATION_VALIDATION_ATTRIBUTES;
     }
 
     private function buildReservationDateTimes(string $date, string $startClock, string $endClock): array
@@ -403,21 +388,9 @@ class AdminDashboardController extends Controller
     private function formatReservationServiceErrors(array $result): array
     {
         if (empty($result['errors']['constraints']) || !is_array($result['errors']['constraints'])) {
-            return ['reservation' => $result['message'] ?? 'Terjadi kesalahan pada data reservasi.'];
+            return ['reservation' => $result['message'] ?? WebMessages::RESERVATION_INVALID_DATA];
         }
 
-        $translated = array_map(function (string $message) {
-            return match (true) {
-                str_contains($message, 'Start time must be before end time') => 'Waktu mulai harus sebelum waktu selesai.',
-                str_contains($message, 'Cannot make reservations for past time') => 'Tidak bisa membuat reservasi pada waktu yang sudah lewat.',
-                str_contains($message, 'Room does not exist or has been deleted') => 'Ruangan tidak ditemukan atau sudah dihapus.',
-                str_contains($message, 'Room is currently under maintenance') => 'Ruangan sedang dalam maintenance.',
-                str_contains($message, 'Visitor count') && str_contains($message, 'exceeds room capacity') => 'Jumlah pengunjung melebihi kapasitas ruangan.',
-                str_contains($message, 'Time slot is not available') => 'Slot waktu tidak tersedia karena bentrok dengan reservasi lain.',
-                default => 'Data reservasi tidak memenuhi aturan penjadwalan.',
-            };
-        }, $result['errors']['constraints']);
-
-        return ['reservation' => implode(' ', array_unique($translated))];
+        return ['reservation' => implode(' ', array_unique($result['errors']['constraints']))];
     }
 }

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\Reservation;
 use App\Services\ReservationService;
+use App\Support\ApiErrorCodes;
+use App\Support\ApiMessages;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -56,10 +58,10 @@ class ReservationController extends Controller
         if ($perPage) {
             $paginated = $query->paginate((int) $perPage);
 
-            return ApiResponse::paginated($paginated, 'Data reservasi berhasil diambil');
+            return ApiResponse::paginated($paginated, ApiMessages::RESERVATION_LIST_SUCCESS);
         }
 
-        return ApiResponse::success($query->get(), 'Data reservasi berhasil diambil');
+        return ApiResponse::success($query->get(), ApiMessages::RESERVATION_LIST_SUCCESS);
     }
 
     public function show(Request $request, string $id): JsonResponse
@@ -70,14 +72,14 @@ class ReservationController extends Controller
             ->first();
 
         if (!$reservation) {
-            return ApiResponse::notFound('Reservasi tidak ditemukan');
+            return ApiResponse::notFound(ApiMessages::RESERVATION_NOT_FOUND);
         }
 
         if (!$this->reservationService->canAccess($request->user(), $reservation)) {
             return ApiResponse::forbidden();
         }
 
-        return ApiResponse::success($reservation, 'Detail reservasi berhasil diambil');
+        return ApiResponse::success($reservation, ApiMessages::RESERVATION_DETAIL_SUCCESS);
     }
 
     public function store(Request $request): JsonResponse
@@ -113,7 +115,7 @@ class ReservationController extends Controller
         $reservation = Reservation::query()->where('id', $id)->first();
 
         if (!$reservation) {
-            return ApiResponse::notFound('Reservasi tidak ditemukan');
+            return ApiResponse::notFound(ApiMessages::RESERVATION_NOT_FOUND);
         }
 
         $validator = Validator::make($request->all(), [
@@ -131,8 +133,8 @@ class ReservationController extends Controller
         $validated = $validator->validated();
         if (empty($validated)) {
             return ApiResponse::error(
-                'NO_UPDATE_PAYLOAD',
-                'Tidak ada data yang dikirim untuk diperbarui',
+                ApiErrorCodes::NO_UPDATE_PAYLOAD,
+                ApiMessages::NO_UPDATE_PAYLOAD,
                 422
             );
         }
@@ -148,7 +150,7 @@ class ReservationController extends Controller
         if (isset($validated['start_time'], $validated['end_time'])
             && strtotime((string) $validated['start_time']) >= strtotime((string) $validated['end_time'])) {
             return ApiResponse::validationError([
-                'end_time' => ['Waktu selesai harus setelah waktu mulai'],
+                'end_time' => [ApiMessages::RESERVATION_END_TIME_AFTER_START],
             ]);
         }
 
@@ -171,7 +173,7 @@ class ReservationController extends Controller
         $reservation = Reservation::query()->where('id', $id)->first();
 
         if (!$reservation) {
-            return ApiResponse::notFound('Reservasi tidak ditemukan');
+            return ApiResponse::notFound(ApiMessages::RESERVATION_NOT_FOUND);
         }
 
         $result = $this->reservationService->cancel($request->user(), $reservation);
@@ -193,7 +195,7 @@ class ReservationController extends Controller
         $reservation = Reservation::query()->where('id', $id)->first();
 
         if (!$reservation) {
-            return ApiResponse::notFound('Reservasi tidak ditemukan');
+            return ApiResponse::notFound(ApiMessages::RESERVATION_NOT_FOUND);
         }
 
         $result = $this->reservationService->approve($request->user(), $reservation);
@@ -215,7 +217,7 @@ class ReservationController extends Controller
         $reservation = Reservation::query()->where('id', $id)->first();
 
         if (!$reservation) {
-            return ApiResponse::notFound('Reservasi tidak ditemukan');
+            return ApiResponse::notFound(ApiMessages::RESERVATION_NOT_FOUND);
         }
 
         $result = $this->reservationService->reject($request->user(), $reservation);
