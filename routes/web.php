@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Web\AdminAuthController;
 use App\Http\Controllers\Web\AdminDashboardController;
+use App\Http\Controllers\Web\AdminFacilityController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -33,6 +34,14 @@ Route::prefix('admin')->group(function () {
         Route::put('/rooms/{room}', [AdminDashboardController::class, 'updateRoom'])->name('admin.rooms.update');
         Route::delete('/rooms/{room}', [AdminDashboardController::class, 'destroyRoom'])->name('admin.rooms.destroy');
 
+        // Facility master CRUD
+        Route::get('/facilities', [AdminFacilityController::class, 'index'])->name('admin.facilities');
+        Route::get('/facilities/create', [AdminFacilityController::class, 'create'])->name('admin.facilities.create');
+        Route::post('/facilities', [AdminFacilityController::class, 'store'])->name('admin.facilities.store');
+        Route::get('/facilities/{facility}/edit', [AdminFacilityController::class, 'edit'])->name('admin.facilities.edit');
+        Route::put('/facilities/{facility}', [AdminFacilityController::class, 'update'])->name('admin.facilities.update');
+        Route::delete('/facilities/{facility}', [AdminFacilityController::class, 'destroy'])->name('admin.facilities.destroy');
+
         // Reservations CRUD
         Route::get('/reservations', [AdminDashboardController::class, 'reservations'])->name('admin.reservations');
         Route::get('/reservations/create', [AdminDashboardController::class, 'createReservation'])->name('admin.reservations.create');
@@ -46,6 +55,6 @@ Route::prefix('admin')->group(function () {
         Route::post('/approvals/{reservation}/approve', [AdminDashboardController::class, 'approveReservation'])->name('admin.approvals.approve');
         Route::post('/approvals/{reservation}/reject', [AdminDashboardController::class, 'rejectReservation'])->name('admin.approvals.reject');
 
-        Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
+        Route::match(['get', 'post'], '/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
     });
 });
