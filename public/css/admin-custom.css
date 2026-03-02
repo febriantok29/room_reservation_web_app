@@ -14,3 +14,90 @@
     margin-top: auto !important;
     padding-bottom: 8px;
 }
+
+.content-header h1 {
+    font-weight: 600;
+}
+
+.page-subtitle {
+    color: #6c757d;
+    font-size: 0.925rem;
+    margin-top: 0.2rem;
+}
+
+.card-admin {
+    border-top: 3px solid #007bff;
+    box-shadow: 0 0.125rem 0.35rem rgba(0, 0, 0, 0.06);
+}
+
+.card-admin .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.form-section-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6c757d;
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.field-error-highlight {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.12rem rgba(220, 53, 69, 0.16) !important;
+}
+
+.form-group .invalid-feedback.d-block {
+    font-size: 0.82rem;
+}
+
+.btn.is-loading {
+    pointer-events: none;
+}
+
+.table-action-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.table-action-group .btn {
+    white-space: nowrap;
+}
+
+.empty-state-cell {
+    padding: 2rem 1rem !important;
+    text-align: center;
+}
+
+.empty-state-cell .empty-icon {
+    font-size: 1.6rem;
+    color: #adb5bd;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state-cell .empty-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.empty-state-cell .empty-desc {
+    color: #6c757d;
+    margin-bottom: 0.75rem;
+}
+
+.alert ul {
+    padding-left: 1rem;
+}
+
+@media (max-width: 576px) {
+    .card-admin .card-tools form {
+        width: 100% !important;
+    }
+}
