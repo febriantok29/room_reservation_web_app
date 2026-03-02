@@ -12,6 +12,7 @@ use App\Support\ApiMessages;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class RoomController extends Controller
 {
@@ -130,7 +131,12 @@ class RoomController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100',
+            'name' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('m_rooms', 'name'),
+            ],
             'location' => 'required|string|max:100',
             'description' => 'nullable|string',
             'capacity' => 'required|integer|min:1|max:1000',
@@ -175,7 +181,13 @@ class RoomController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|required|string|max:100',
+            'name' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('m_rooms', 'name')->ignore($room->id),
+            ],
             'location' => 'sometimes|required|string|max:100',
             'description' => 'sometimes|nullable|string',
             'capacity' => 'sometimes|required|integer|min:1|max:1000',

@@ -4,7 +4,7 @@ namespace App\Support;
 
 final class WebMessages
 {
-    public const AUTH_INVALID_CREDENTIALS = 'Email/employee_id atau password salah';
+    public const AUTH_INVALID_CREDENTIALS = 'Email/No. Induk Karyawan atau password salah';
     public const AUTH_NO_ADMIN_ACCESS = 'Akun Anda tidak memiliki akses admin';
 
     public const ROOM_CREATED_SUCCESS = 'Data ruangan berhasil ditambahkan.';

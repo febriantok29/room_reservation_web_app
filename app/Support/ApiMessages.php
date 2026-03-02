@@ -8,7 +8,7 @@ final class ApiMessages
     public const SUCCESS_DATA_RETRIEVED = 'Data berhasil diambil';
     public const SUCCESS_VALIDATION = 'Data yang dikirim tidak valid';
 
-    public const AUTH_INVALID_CREDENTIALS = 'Email/employee_id atau password salah';
+    public const AUTH_INVALID_CREDENTIALS = 'Email/No. Induk Karyawan atau password salah';
     public const AUTH_USER_INACTIVE = 'Akun Anda telah dinonaktifkan';
     public const AUTH_LOGIN_SUCCESS = 'Login berhasil';
     public const AUTH_REFRESH_SUCCESS = 'Token refresh berhasil';

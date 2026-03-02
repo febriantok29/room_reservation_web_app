@@ -12,6 +12,7 @@ use App\Support\WebMessages;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Throwable;
 
@@ -56,15 +57,33 @@ class AdminDashboardController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $rooms = Room::query()
+        $searchQuery = trim((string) $request->query('q', ''));
+
+        $roomsQuery = Room::query()
             ->with('facilities:id,name,slug')
-            ->whereNull('deleted_at')
+            ->whereNull('deleted_at');
+
+        if ($searchQuery !== '') {
+            $roomsQuery->where(function ($query) use ($searchQuery) {
+                $query->where('name', 'like', "%{$searchQuery}%")
+                    ->orWhere('location', 'like', "%{$searchQuery}%")
+                    ->orWhere('description', 'like', "%{$searchQuery}%")
+                    ->orWhereHas('facilities', function ($facilityQuery) use ($searchQuery) {
+                        $facilityQuery->where('name', 'like', "%{$searchQuery}%")
+                            ->orWhere('slug', 'like', "%{$searchQuery}%");
+                    });
+            });
+        }
+
+        $rooms = $roomsQuery
             ->orderBy('location')
             ->orderBy('name')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.rooms.index', [
             'rooms' => $rooms,
+            'searchQuery' => $searchQuery,
         ]);
     }
 
@@ -82,7 +101,12 @@ class AdminDashboardController extends Controller
         $this->ensureAdminAccess($request);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:100',
+            'name' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('m_rooms', 'name'),
+            ],
             'location' => 'required|string|max:100',
             'description' => 'nullable|string',
             'capacity' => 'required|integer|min:1|max:1000',
@@ -127,7 +151,12 @@ class AdminDashboardController extends Controller
         $this->ensureAdminAccess($request);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:100',
+            'name' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('m_rooms', 'name')->ignore($room->id),
+            ],
             'location' => 'required|string|max:100',
             'description' => 'nullable|string',
             'capacity' => 'required|integer|min:1|max:1000',
@@ -170,13 +199,42 @@ class AdminDashboardController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $reservations = Reservation::query()
-            ->with(['room', 'user'])
+        $searchQuery = trim((string) $request->query('q', ''));
+        $statusFilter = trim((string) $request->query('status', ''));
+
+        $reservationsQuery = Reservation::query()
+            ->with(['room', 'user']);
+
+        if ($searchQuery !== '') {
+            $reservationsQuery->where(function ($query) use ($searchQuery) {
+                $query->where('id', 'like', "%{$searchQuery}%")
+                    ->orWhere('purpose', 'like', "%{$searchQuery}%")
+                    ->orWhereHas('room', function ($roomQuery) use ($searchQuery) {
+                        $roomQuery->where('name', 'like', "%{$searchQuery}%")
+                            ->orWhere('location', 'like', "%{$searchQuery}%");
+                    })
+                    ->orWhereHas('user', function ($userQuery) use ($searchQuery) {
+                        $userQuery->where('first_name', 'like', "%{$searchQuery}%")
+                            ->orWhere('last_name', 'like', "%{$searchQuery}%")
+                            ->orWhere('employee_id', 'like', "%{$searchQuery}%")
+                            ->orWhere('email', 'like', "%{$searchQuery}%");
+                    });
+            });
+        }
+
+        if ($statusFilter !== '') {
+            $reservationsQuery->where('status', $statusFilter);
+        }
+
+        $reservations = $reservationsQuery
             ->orderByDesc('start_time')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.reservations.index', [
             'reservations' => $reservations,
+            'searchQuery' => $searchQuery,
+            'statusFilter' => $statusFilter,
         ]);
     }
 
@@ -363,14 +421,37 @@ class AdminDashboardController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $pendingReservations = Reservation::query()
+        $searchQuery = trim((string) $request->query('q', ''));
+
+        $pendingReservationsQuery = Reservation::query()
             ->with(['room', 'user'])
-            ->pending()
+            ->pending();
+
+        if ($searchQuery !== '') {
+            $pendingReservationsQuery->where(function ($query) use ($searchQuery) {
+                $query->where('id', 'like', "%{$searchQuery}%")
+                    ->orWhere('purpose', 'like', "%{$searchQuery}%")
+                    ->orWhereHas('room', function ($roomQuery) use ($searchQuery) {
+                        $roomQuery->where('name', 'like', "%{$searchQuery}%")
+                            ->orWhere('location', 'like', "%{$searchQuery}%");
+                    })
+                    ->orWhereHas('user', function ($userQuery) use ($searchQuery) {
+                        $userQuery->where('first_name', 'like', "%{$searchQuery}%")
+                            ->orWhere('last_name', 'like', "%{$searchQuery}%")
+                            ->orWhere('employee_id', 'like', "%{$searchQuery}%")
+                            ->orWhere('email', 'like', "%{$searchQuery}%");
+                    });
+            });
+        }
+
+        $pendingReservations = $pendingReservationsQuery
             ->orderBy('start_time')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.approvals.index', [
             'pendingReservations' => $pendingReservations,
+            'searchQuery' => $searchQuery,
         ]);
     }
 
