@@ -45,7 +45,7 @@ class User extends Authenticatable
         'first_name',
         'last_name',
         'date_of_birth',
-        'role',
+        'is_admin',
         'is_active',
     ];
 
@@ -66,6 +66,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'date_of_birth' => 'date',
+        'is_admin' => 'boolean',
         'is_active' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -90,35 +91,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Scope a query to only include users of a given role.
-     */
-    public function scopeRole($query, string $role)
-    {
-        return $query->where('role', $role);
-    }
-
-    /**
      * Scope a query to only include admin users.
      */
     public function scopeAdmins($query)
     {
-        return $query->where('role', 'admin');
-    }
-
-    /**
-     * Scope a query to only include staff users.
-     */
-    public function scopeStaff($query)
-    {
-        return $query->where('role', 'staff');
-    }
-
-    /**
-     * Scope a query to only include regular users.
-     */
-    public function scopeRegularUsers($query)
-    {
-        return $query->where('role', 'user');
+        return $query->where('is_admin', true);
     }
 
     /**
@@ -134,15 +111,7 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
-    }
-
-    /**
-     * Check if user is staff.
-     */
-    public function isStaff(): bool
-    {
-        return $this->role === 'staff';
+        return (bool) $this->is_admin;
     }
 
     /**
@@ -150,7 +119,7 @@ class User extends Authenticatable
      */
     public function canApprove(): bool
     {
-        return in_array($this->role, ['admin', 'staff']);
+        return $this->isAdmin();
     }
 
     /**

@@ -14,7 +14,7 @@ class RoomsTableSeeder extends Seeder
     public function run(): void
     {
         // Get admin user ID for created_by field
-        $adminId = DB::table('s_users')->where('role', 'admin')->first()->id ?? null;
+        $adminId = DB::table('s_users')->where('is_admin', true)->first()->id ?? null;
 
         $rooms = [
             [

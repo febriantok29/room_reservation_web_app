@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Reservation;
 use App\Models\User;
+use App\Support\ApiErrorCodes;
+use App\Support\ApiMessages;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -67,8 +69,8 @@ class ReservationService
                 return [
                     'success' => false,
                     'status_code' => 422,
-                    'error_code' => 'RESERVATION_CONSTRAINT_FAILED',
-                    'message' => 'Reservasi tidak memenuhi aturan penjadwalan',
+                    'error_code' => ApiErrorCodes::RESERVATION_CONSTRAINT_FAILED,
+                    'message' => ApiMessages::RESERVATION_CONSTRAINT_CREATE_FAILED,
                     'errors' => ['constraints' => $constraint['errors']],
                 ];
             }
@@ -90,7 +92,7 @@ class ReservationService
             return [
                 'success' => true,
                 'data' => $reservation,
-                'message' => 'Reservasi berhasil dibuat dan menunggu persetujuan',
+                'message' => ApiMessages::RESERVATION_CREATED_SUCCESS,
             ];
         }, 3);
     }
@@ -98,21 +100,15 @@ class ReservationService
     public function update(User $actor, Reservation $reservation, array $payload): array
     {
         if (!$this->canAccess($actor, $reservation)) {
-            return [
-                'success' => false,
-                'status_code' => 403,
-                'error_code' => 'FORBIDDEN',
-                'message' => 'Anda tidak memiliki akses ke resource ini',
-                'errors' => [],
-            ];
+            return $this->forbidden();
         }
 
         if (!$reservation->isPending()) {
             return [
                 'success' => false,
                 'status_code' => 422,
-                'error_code' => 'INVALID_RESERVATION_STATUS',
-                'message' => 'Hanya reservasi dengan status pending yang dapat diubah',
+                'error_code' => ApiErrorCodes::INVALID_RESERVATION_STATUS,
+                'message' => ApiMessages::RESERVATION_UPDATE_PENDING_ONLY,
                 'errors' => [],
             ];
         }
@@ -121,8 +117,8 @@ class ReservationService
             return [
                 'success' => false,
                 'status_code' => 422,
-                'error_code' => 'RESERVATION_ALREADY_STARTED',
-                'message' => 'Reservasi yang sudah dimulai tidak dapat diubah',
+                'error_code' => ApiErrorCodes::RESERVATION_ALREADY_STARTED,
+                'message' => ApiMessages::RESERVATION_ALREADY_STARTED,
                 'errors' => [],
             ];
         }
@@ -161,8 +157,8 @@ class ReservationService
                 return [
                     'success' => false,
                     'status_code' => 422,
-                    'error_code' => 'RESERVATION_CONSTRAINT_FAILED',
-                    'message' => 'Perubahan reservasi tidak memenuhi aturan penjadwalan',
+                    'error_code' => ApiErrorCodes::RESERVATION_CONSTRAINT_FAILED,
+                    'message' => ApiMessages::RESERVATION_CONSTRAINT_UPDATE_FAILED,
                     'errors' => ['constraints' => $constraint['errors']],
                 ];
             }
@@ -183,7 +179,7 @@ class ReservationService
             return [
                 'success' => true,
                 'data' => $reservation,
-                'message' => 'Reservasi berhasil diperbarui',
+                'message' => ApiMessages::RESERVATION_UPDATED_SUCCESS,
             ];
         }, 3);
     }
@@ -191,21 +187,15 @@ class ReservationService
     public function cancel(User $actor, Reservation $reservation): array
     {
         if (!$this->canAccess($actor, $reservation)) {
-            return [
-                'success' => false,
-                'status_code' => 403,
-                'error_code' => 'FORBIDDEN',
-                'message' => 'Anda tidak memiliki akses ke resource ini',
-                'errors' => [],
-            ];
+            return $this->forbidden();
         }
 
         if (in_array($reservation->status, ['rejected', 'completed', 'cancelled'], true)) {
             return [
                 'success' => false,
                 'status_code' => 422,
-                'error_code' => 'INVALID_RESERVATION_STATUS',
-                'message' => 'Status reservasi saat ini tidak dapat dibatalkan',
+                'error_code' => ApiErrorCodes::INVALID_RESERVATION_STATUS,
+                'message' => ApiMessages::RESERVATION_CANCEL_INVALID_STATUS,
                 'errors' => [],
             ];
         }
@@ -214,8 +204,8 @@ class ReservationService
             return [
                 'success' => false,
                 'status_code' => 422,
-                'error_code' => 'RESERVATION_ALREADY_FINISHED',
-                'message' => 'Reservasi yang sudah selesai tidak dapat dibatalkan',
+                'error_code' => ApiErrorCodes::RESERVATION_ALREADY_FINISHED,
+                'message' => ApiMessages::RESERVATION_ALREADY_FINISHED,
                 'errors' => [],
             ];
         }
@@ -228,28 +218,22 @@ class ReservationService
         return [
             'success' => true,
             'data' => $reservation,
-            'message' => 'Reservasi berhasil dibatalkan',
+            'message' => ApiMessages::RESERVATION_CANCELLED_SUCCESS,
         ];
     }
 
     public function approve(User $actor, Reservation $reservation): array
     {
         if (!$actor->canApprove()) {
-            return [
-                'success' => false,
-                'status_code' => 403,
-                'error_code' => 'FORBIDDEN',
-                'message' => 'Anda tidak memiliki akses ke resource ini',
-                'errors' => [],
-            ];
+            return $this->forbidden();
         }
 
         if (!$reservation->isPending()) {
             return [
                 'success' => false,
                 'status_code' => 422,
-                'error_code' => 'INVALID_RESERVATION_STATUS',
-                'message' => 'Hanya reservasi dengan status pending yang dapat disetujui',
+                'error_code' => ApiErrorCodes::INVALID_RESERVATION_STATUS,
+                'message' => ApiMessages::RESERVATION_APPROVE_PENDING_ONLY,
                 'errors' => [],
             ];
         }
@@ -266,8 +250,8 @@ class ReservationService
             return [
                 'success' => false,
                 'status_code' => 422,
-                'error_code' => 'RESERVATION_CONSTRAINT_FAILED',
-                'message' => 'Reservasi tidak dapat disetujui karena melanggar aturan',
+                'error_code' => ApiErrorCodes::RESERVATION_CONSTRAINT_FAILED,
+                'message' => ApiMessages::RESERVATION_CONSTRAINT_APPROVE_FAILED,
                 'errors' => ['constraints' => $constraint['errors']],
             ];
         }
@@ -280,28 +264,22 @@ class ReservationService
         return [
             'success' => true,
             'data' => $reservation,
-            'message' => 'Reservasi berhasil disetujui',
+            'message' => ApiMessages::RESERVATION_APPROVED_SUCCESS,
         ];
     }
 
     public function reject(User $actor, Reservation $reservation): array
     {
         if (!$actor->canApprove()) {
-            return [
-                'success' => false,
-                'status_code' => 403,
-                'error_code' => 'FORBIDDEN',
-                'message' => 'Anda tidak memiliki akses ke resource ini',
-                'errors' => [],
-            ];
+            return $this->forbidden();
         }
 
         if (!$reservation->isPending()) {
             return [
                 'success' => false,
                 'status_code' => 422,
-                'error_code' => 'INVALID_RESERVATION_STATUS',
-                'message' => 'Hanya reservasi dengan status pending yang dapat ditolak',
+                'error_code' => ApiErrorCodes::INVALID_RESERVATION_STATUS,
+                'message' => ApiMessages::RESERVATION_REJECT_PENDING_ONLY,
                 'errors' => [],
             ];
         }
@@ -314,7 +292,18 @@ class ReservationService
         return [
             'success' => true,
             'data' => $reservation,
-            'message' => 'Reservasi berhasil ditolak',
+            'message' => ApiMessages::RESERVATION_REJECTED_SUCCESS,
+        ];
+    }
+
+    private function forbidden(): array
+    {
+        return [
+            'success' => false,
+            'status_code' => 403,
+            'error_code' => ApiErrorCodes::FORBIDDEN,
+            'message' => ApiMessages::FORBIDDEN,
+            'errors' => [],
         ];
     }
 }

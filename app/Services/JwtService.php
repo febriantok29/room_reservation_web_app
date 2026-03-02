@@ -6,6 +6,7 @@ use App\Models\User;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use stdClass;
+use Exception;
 
 class JwtService
 {
@@ -70,9 +71,9 @@ class JwtService
             'user' => [
                 'id' => $user->id,
                 'email' => $user->email,
-                'name' => $user->name,
+                'name' => $user->full_name,
                 'employee_id' => $user->employee_id,
-                'role' => $user->role,
+                'is_admin' => $user->is_admin,
             ],
         ];
 
@@ -95,7 +96,7 @@ class JwtService
                 'data' => $decoded,
                 'error' => null,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [
                 'success' => false,
                 'data' => null,

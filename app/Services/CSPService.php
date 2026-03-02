@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Support\ApiMessages;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use InvalidArgumentException;
 
 /**
  * Constraint Satisfaction Problem (CSP) Service for Room Reservations
@@ -34,7 +36,7 @@ class CSPService
 
         // Validate time range
         if ($startTime->gte($endTime)) {
-            throw new \InvalidArgumentException('Start time must be before end time');
+            throw new InvalidArgumentException(ApiMessages::RESERVATION_CONSTRAINT_START_BEFORE_END);
         }
 
         // Check for conflicts using CSP constraint checking
@@ -165,12 +167,12 @@ class CSPService
 
         // Constraint 1: Start time must be before end time
         if ($startTime->gte($endTime)) {
-            $errors[] = 'Start time must be before end time';
+            $errors[] = ApiMessages::RESERVATION_CONSTRAINT_START_BEFORE_END;
         }
 
         // Constraint 2: Cannot book in the past
         if ($startTime->lt(now())) {
-            $errors[] = 'Cannot make reservations for past time';
+            $errors[] = ApiMessages::RESERVATION_CONSTRAINT_PAST_TIME;
         }
 
         // Constraint 3: Check if room exists and is not deleted
@@ -180,23 +182,23 @@ class CSPService
             ->first();
 
         if (!$room) {
-            $errors[] = 'Room does not exist or has been deleted';
+            $errors[] = ApiMessages::RESERVATION_CONSTRAINT_ROOM_NOT_FOUND;
             return ['valid' => false, 'errors' => $errors];
         }
 
         // Constraint 4: Room must not be in maintenance
         if ($this->isRoomInMaintenance($roomId)) {
-            $errors[] = 'Room is currently under maintenance';
+            $errors[] = ApiMessages::RESERVATION_CONSTRAINT_ROOM_MAINTENANCE;
         }
 
         // Constraint 5: Visitor count must not exceed room capacity
         if ($visitorCount > $room->capacity) {
-            $errors[] = "Visitor count ({$visitorCount}) exceeds room capacity ({$room->capacity})";
+            $errors[] = ApiMessages::RESERVATION_CONSTRAINT_CAPACITY_EXCEEDED;
         }
 
         // Constraint 6: No time conflicts (CSP main constraint)
         if (!$this->isRoomAvailable($roomId, $startTime, $endTime, $excludeReservationId)) {
-            $errors[] = 'Time slot is not available. Conflict with existing reservation(s)';
+            $errors[] = ApiMessages::RESERVATION_CONSTRAINT_SLOT_UNAVAILABLE;
         }
 
         return [

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use App\Http\Responses\ApiResponse;
 use App\Services\JwtService;
 use Closure;
@@ -20,7 +21,7 @@ class JwtMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+        * @param Closure(Request): Response $next
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
@@ -52,15 +53,17 @@ class JwtMiddleware
         }
 
         // Get user from database
-        $user = \App\Models\User::find($decoded->sub);
+        $user = User::find($decoded->sub);
 
         if (!$user || !$user->is_active) {
             return ApiResponse::unauthorized();
         }
 
-        // Check role authorization if specified
+        // Check admin authorization if specified via middleware args
         if (!empty($roles)) {
-            if (!in_array($user->role, $roles)) {
+            $requiresAdmin = in_array('admin', $roles, true);
+
+            if ($requiresAdmin && !$user->isAdmin()) {
                 return ApiResponse::forbidden();
             }
         }
