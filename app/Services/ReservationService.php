@@ -6,6 +6,7 @@ use App\Models\Reservation;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class ReservationService
 {
@@ -38,42 +39,60 @@ class ReservationService
 
     public function create(User $actor, array $payload): array
     {
-        $constraint = $this->cspService->validateReservation(
-            $payload['room_id'],
-            $payload['start_time'],
-            $payload['end_time'],
-            (int) $payload['visitor_count']
-        );
+        $reservationUserId = $payload['user_id'] ?? $actor->id;
+        $roomId = $payload['room_id'];
+        $startTime = Carbon::parse($payload['start_time'])->utc();
+        $endTime = Carbon::parse($payload['end_time'])->utc();
+        $visitorCount = (int) $payload['visitor_count'];
 
-        if (!$constraint['valid']) {
+        return DB::transaction(function () use (
+            $actor,
+            $reservationUserId,
+            $roomId,
+            $startTime,
+            $endTime,
+            $visitorCount,
+            $payload
+        ) {
+            DB::table('m_rooms')->where('id', $roomId)->lockForUpdate()->first();
+
+            $constraint = $this->cspService->validateReservation(
+                $roomId,
+                $startTime,
+                $endTime,
+                $visitorCount
+            );
+
+            if (!$constraint['valid']) {
+                return [
+                    'success' => false,
+                    'status_code' => 422,
+                    'error_code' => 'RESERVATION_CONSTRAINT_FAILED',
+                    'message' => 'Reservasi tidak memenuhi aturan penjadwalan',
+                    'errors' => ['constraints' => $constraint['errors']],
+                ];
+            }
+
+            $reservation = Reservation::create([
+                'user_id' => $reservationUserId,
+                'room_id' => $roomId,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'purpose' => $payload['purpose'] ?? null,
+                'visitor_count' => $visitorCount,
+                'status' => 'pending',
+                'created_by' => $actor->id,
+                'updated_by' => $actor->id,
+            ]);
+
+            $reservation->load(['room', 'user']);
+
             return [
-                'success' => false,
-                'status_code' => 422,
-                'error_code' => 'RESERVATION_CONSTRAINT_FAILED',
-                'message' => 'Reservasi tidak memenuhi aturan penjadwalan',
-                'errors' => ['constraints' => $constraint['errors']],
+                'success' => true,
+                'data' => $reservation,
+                'message' => 'Reservasi berhasil dibuat dan menunggu persetujuan',
             ];
-        }
-
-        $reservation = Reservation::create([
-            'user_id' => $actor->id,
-            'room_id' => $payload['room_id'],
-            'start_time' => Carbon::parse($payload['start_time']),
-            'end_time' => Carbon::parse($payload['end_time']),
-            'purpose' => $payload['purpose'] ?? null,
-            'visitor_count' => (int) $payload['visitor_count'],
-            'status' => 'pending',
-            'created_by' => $actor->id,
-            'updated_by' => $actor->id,
-        ]);
-
-        $reservation->load(['room', 'user']);
-
-        return [
-            'success' => true,
-            'data' => $reservation,
-            'message' => 'Reservasi berhasil dibuat dan menunggu persetujuan',
-        ];
+        }, 3);
     }
 
     public function update(User $actor, Reservation $reservation, array $payload): array
@@ -109,45 +128,64 @@ class ReservationService
         }
 
         $roomId = $payload['room_id'] ?? $reservation->room_id;
-        $startTime = $payload['start_time'] ?? $reservation->start_time;
-        $endTime = $payload['end_time'] ?? $reservation->end_time;
+        $userId = $payload['user_id'] ?? $reservation->user_id;
+        $startTime = isset($payload['start_time'])
+            ? Carbon::parse($payload['start_time'])->utc()
+            : Carbon::parse($reservation->start_time)->utc();
+        $endTime = isset($payload['end_time'])
+            ? Carbon::parse($payload['end_time'])->utc()
+            : Carbon::parse($reservation->end_time)->utc();
         $visitorCount = (int) ($payload['visitor_count'] ?? $reservation->visitor_count);
 
-        $constraint = $this->cspService->validateReservation(
+        return DB::transaction(function () use (
+            $actor,
+            $reservation,
             $roomId,
+            $userId,
             $startTime,
             $endTime,
             $visitorCount,
-            $reservation->id
-        );
+            $payload
+        ) {
+            DB::table('m_rooms')->where('id', $roomId)->lockForUpdate()->first();
 
-        if (!$constraint['valid']) {
+            $constraint = $this->cspService->validateReservation(
+                $roomId,
+                $startTime,
+                $endTime,
+                $visitorCount,
+                $reservation->id
+            );
+
+            if (!$constraint['valid']) {
+                return [
+                    'success' => false,
+                    'status_code' => 422,
+                    'error_code' => 'RESERVATION_CONSTRAINT_FAILED',
+                    'message' => 'Perubahan reservasi tidak memenuhi aturan penjadwalan',
+                    'errors' => ['constraints' => $constraint['errors']],
+                ];
+            }
+
+            $reservation->fill([
+                'user_id' => $userId,
+                'room_id' => $roomId,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'purpose' => $payload['purpose'] ?? $reservation->purpose,
+                'visitor_count' => $visitorCount,
+                'updated_by' => $actor->id,
+            ]);
+
+            $reservation->save();
+            $reservation->load(['room', 'user']);
+
             return [
-                'success' => false,
-                'status_code' => 422,
-                'error_code' => 'RESERVATION_CONSTRAINT_FAILED',
-                'message' => 'Perubahan reservasi tidak memenuhi aturan penjadwalan',
-                'errors' => ['constraints' => $constraint['errors']],
+                'success' => true,
+                'data' => $reservation,
+                'message' => 'Reservasi berhasil diperbarui',
             ];
-        }
-
-        $reservation->fill([
-            'room_id' => $roomId,
-            'start_time' => Carbon::parse($startTime),
-            'end_time' => Carbon::parse($endTime),
-            'purpose' => $payload['purpose'] ?? $reservation->purpose,
-            'visitor_count' => $visitorCount,
-            'updated_by' => $actor->id,
-        ]);
-
-        $reservation->save();
-        $reservation->load(['room', 'user']);
-
-        return [
-            'success' => true,
-            'data' => $reservation,
-            'message' => 'Reservasi berhasil diperbarui',
-        ];
+        }, 3);
     }
 
     public function cancel(User $actor, Reservation $reservation): array
