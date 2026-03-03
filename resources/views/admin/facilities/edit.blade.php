@@ -12,47 +12,26 @@
 @section('content')
     @include('admin.partials.flash_message')
 
-    <div class="card card-admin">
-        <div class="card-body">
-            <form action="{{ route('admin.facilities.update', $facility->id) }}" method="POST" data-submit-guard
-                data-loading-text="Memperbarui...">
-                @csrf
-                @method('PUT')
+    <x-form.card action="{{ route('admin.facilities.update', $facility->id) }}" method="PUT" loading-text="Memperbarui...">
+        <x-form.section title="Informasi Fasilitas">
+            <x-form.row>
+                <x-form.field name="name" label="Nama Fasilitas" type="text" :value="old('name', $facility->name)" required />
 
-                <div class="form-section-title">Informasi Fasilitas</div>
+                <x-form.field name="slug" label="Slug (Auto-generated)" type="text" :value="$facility->slug"
+                    hint="Slug dihasilkan otomatis dari nama fasilitas." disabled />
+            </x-form.row>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="name">Nama Fasilitas <span class="text-danger">*</span></label>
-                            <input type="text" id="name" name="name" class="form-control"
-                                value="{{ old('name', $facility->name) }}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Slug (Auto-generated)</label>
-                            <input type="text" class="form-control" value="{{ $facility->slug }}" disabled>
-                            <small class="text-muted">Slug dihasilkan otomatis dari nama fasilitas.</small>
-                        </div>
-                    </div>
+            @if ($facility->rooms->isNotEmpty())
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Fasilitas ini digunakan di <strong>{{ $facility->rooms->count() }} ruangan</strong>. Perubahan nama
+                    akan mempengaruhi tampilan di semua ruangan tersebut.
                 </div>
+            @endif
+        </x-form.section>
 
-                @if ($facility->rooms->isNotEmpty())
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        Fasilitas ini digunakan di <strong>{{ $facility->rooms->count() }} ruangan</strong>. Perubahan nama
-                        akan mempengaruhi tampilan di semua ruangan tersebut.
-                    </div>
-                @endif
-
-                <div class="d-flex justify-content-between mt-4">
-                    <a href="{{ route('admin.facilities') }}" class="btn btn-secondary">Kembali</a>
-                    <button type="submit" class="btn btn-primary">Perbarui</button>
-                </div>
-            </form>
-        </div>
-    </div>
+        <x-form.actions back-url="{{ route('admin.facilities') }}" submit-text="Perbarui" />
+    </x-form.card>
 @stop
 
 @section('js')

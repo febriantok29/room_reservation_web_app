@@ -12,96 +12,65 @@
 @section('content')
     @include('admin.partials.flash_message')
 
-    <div class="card card-admin">
-        <div class="card-body">
-            <form action="{{ route('admin.reservations.store') }}" method="POST" data-submit-guard
-                data-loading-text="Menyimpan...">
-                @csrf
+    <x-form.card action="{{ route('admin.reservations.store') }}" submit-guard loading-text="Menyimpan...">
+        <x-form.section title="Pemohon & Kebutuhan Ruangan" />
 
-                <div class="form-section-title">Pemohon & Kebutuhan Ruangan</div>
+        <div class="row">
+            <x-form.field name="user_id" label="Pegawai/Pemohon" col-class="col-lg-6 col-md-6">
+                <select id="user_id" name="user_id" class="form-control">
+                    <option value="">-- Gunakan akun login (Admin) --</option>
+                    @foreach ($users as $user)
+                        <option value="{{ $user->id }}" @selected(old('user_id') === $user->id)>
+                            {{ $user->full_name }} - {{ $user->employee_id }}
+                        </option>
+                    @endforeach
+                </select>
+            </x-form.field>
 
-                <div class="row">
-                    <div class="col-lg-6 col-md-6">
-                        <div class="form-group">
-                            <label for="user_id">Pegawai/Pemohon</label>
-                            <select id="user_id" name="user_id" class="form-control">
-                                <option value="">-- Gunakan akun login (Admin) --</option>
-                                @foreach ($users as $user)
-                                    <option value="{{ $user->id }}" @selected(old('user_id') === $user->id)>
-                                        {{ $user->full_name }} - {{ $user->employee_id }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 col-md-6">
-                        @include('admin.reservations.partials.required_facility_filter_field')
-                    </div>
-                </div>
-
-                <div class="form-section-title">Jadwal & Detail Reservasi</div>
-
-                <div class="form-group">
-                    <label for="room_id">Ruangan <span class="text-danger">*</span></label>
-                    <select id="room_id" name="room_id" class="form-control" required>
-                        <option value="">-- Pilih Ruangan --</option>
-                        @foreach ($rooms as $room)
-                            <option value="{{ $room->id }}"
-                                data-facilities="{{ $room->facilities->pluck('slug')->implode(',') }}"
-                                @selected(old('room_id') === $room->id)>
-                                {{ $room->name }} ({{ $room->location }}) - Kapasitas: {{ $room->capacity }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-4 col-md-6">
-                        <div class="form-group">
-                            <label for="reservation_date">Tanggal <span class="text-danger">*</span></label>
-                            <input type="date" id="reservation_date" name="reservation_date" class="form-control"
-                                value="{{ old('reservation_date') }}" required>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6">
-                        <div class="form-group">
-                            <label for="start_clock">Jam Mulai <span class="text-danger">*</span></label>
-                            <input type="text" id="start_clock" name="start_clock" class="form-control js-timepicker"
-                                value="{{ old('start_clock') }}" placeholder="Pilih jam" autocomplete="off" required>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6">
-                        <div class="form-group">
-                            <label for="end_clock">Jam Selesai <span class="text-danger">*</span></label>
-                            <input type="text" id="end_clock" name="end_clock" class="form-control js-timepicker"
-                                value="{{ old('end_clock') }}" placeholder="Pilih jam" autocomplete="off" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-6 col-md-6">
-                        <div class="form-group">
-                            <label for="visitor_count">Jumlah Pengunjung <span class="text-danger">*</span></label>
-                            <input type="number" id="visitor_count" name="visitor_count" class="form-control"
-                                value="{{ old('visitor_count', 1) }}" min="1" required>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="purpose">Tujuan</label>
-                    <textarea id="purpose" name="purpose" class="form-control" rows="3">{{ old('purpose') }}</textarea>
-                    <small class="text-muted">Opsional: Jelaskan keperluan reservasi ruangan ini.</small>
-                </div>
-
-                <div class="d-flex justify-content-between mt-4">
-                    <a href="{{ route('admin.reservations') }}" class="btn btn-secondary">Kembali</a>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
+            <div class="col-lg-6 col-md-6">
+                @include('admin.reservations.partials.required_facility_filter_field')
+            </div>
         </div>
-    </div>
+
+        <x-form.section title="Jadwal & Detail Reservasi" />
+
+        <x-form.field name="room_id" label="Ruangan" required col-class="col-md-12">
+            <select id="room_id" name="room_id" class="form-control" required>
+                <option value="">-- Pilih Ruangan --</option>
+                @foreach ($rooms as $room)
+                    <option value="{{ $room->id }}"
+                        data-facilities="{{ $room->facilities->pluck('slug')->implode(',') }}" @selected(old('room_id') === $room->id)>
+                        {{ $room->name }} ({{ $room->location }}) - Kapasitas: {{ $room->capacity }}
+                    </option>
+                @endforeach
+            </select>
+        </x-form.field>
+
+        <div class="row">
+            <x-form.field name="reservation_date" label="Tanggal" type="date" value="{{ old('reservation_date') }}"
+                required col-class="col-lg-4 col-md-6" />
+
+            <x-form.field name="start_clock" label="Jam Mulai" required col-class="col-lg-4 col-md-6">
+                <input type="text" id="start_clock" name="start_clock" class="form-control js-timepicker"
+                    value="{{ old('start_clock') }}" placeholder="Pilih jam" autocomplete="off" required>
+            </x-form.field>
+
+            <x-form.field name="end_clock" label="Jam Selesai" required col-class="col-lg-4 col-md-6">
+                <input type="text" id="end_clock" name="end_clock" class="form-control js-timepicker"
+                    value="{{ old('end_clock') }}" placeholder="Pilih jam" autocomplete="off" required>
+            </x-form.field>
+        </div>
+
+        <div class="row">
+            <x-form.field name="visitor_count" label="Jumlah Pengunjung" type="number"
+                value="{{ old('visitor_count', 1) }}" min="1" required col-class="col-lg-6 col-md-6" />
+        </div>
+
+        <x-form.field name="purpose" label="Tujuan" type="textarea" value="{{ old('purpose') }}" rows="3"
+            hint="Opsional: Jelaskan keperluan reservasi ruangan ini." col-class="col-md-12" />
+
+        <x-form.actions back-url="{{ route('admin.reservations') }}" submit-text="Simpan" />
+    </x-form.card>
 
     @if (config('app.debug'))
         <div class="card card-outline card-warning mt-3">

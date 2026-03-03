@@ -12,32 +12,16 @@
 @section('content')
     @include('admin.partials.flash_message')
 
-    <div class="card card-admin">
-        <div class="card-body">
-            <form action="{{ route('admin.facilities.store') }}" method="POST" data-submit-guard
-                data-loading-text="Menyimpan...">
-                @csrf
+    <x-form.card action="{{ route('admin.facilities.store') }}">
+        <x-form.section title="Informasi Fasilitas">
+            <x-form.row>
+                <x-form.field name="name" label="Nama Fasilitas" type="text" :value="old('name')"
+                    hint="Contoh: Proyektor, Whiteboard, Video Conference." required />
+            </x-form.row>
+        </x-form.section>
 
-                <div class="form-section-title">Informasi Fasilitas</div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="name">Nama Fasilitas <span class="text-danger">*</span></label>
-                            <input type="text" id="name" name="name" class="form-control"
-                                value="{{ old('name') }}" required>
-                            <small class="text-muted">Contoh: Proyektor, Whiteboard, Video Conference.</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-flex justify-content-between mt-4">
-                    <a href="{{ route('admin.facilities') }}" class="btn btn-secondary">Kembali</a>
-                    <button type="submit" class="btn btn-primary">Simpan</button>
-                </div>
-            </form>
-        </div>
-    </div>
+        <x-form.actions back-url="{{ route('admin.facilities') }}" submit-text="Simpan" />
+    </x-form.card>
 @stop
 
 @section('js')
