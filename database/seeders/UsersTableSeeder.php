@@ -25,6 +25,7 @@ class UsersTableSeeder extends Seeder
                 'last_name' => 'Administrator',
                 'date_of_birth' => '1985-01-15',
                 'is_admin' => true,
+                'is_active' => true,
             ],
             [
                 'id' => (string) Str::uuid7(),
@@ -35,6 +36,7 @@ class UsersTableSeeder extends Seeder
                 'last_name' => 'Administrator',
                 'date_of_birth' => '1987-03-20',
                 'is_admin' => true,
+                'is_active' => true,
             ],
 
             // Staff Users (non-admin)
@@ -47,6 +49,7 @@ class UsersTableSeeder extends Seeder
                 'last_name' => 'Garcia',
                 'date_of_birth' => '1990-05-10',
                 'is_admin' => false,
+                'is_active' => true,
             ],
             [
                 'id' => (string) Str::uuid7(),
@@ -57,6 +60,7 @@ class UsersTableSeeder extends Seeder
                 'last_name' => 'Johnson',
                 'date_of_birth' => '1992-08-25',
                 'is_admin' => false,
+                'is_active' => true,
             ],
 
             // Additional Staff Users (non-admin)
@@ -69,6 +73,7 @@ class UsersTableSeeder extends Seeder
                 'last_name' => 'Brown',
                 'date_of_birth' => '1990-10-31',
                 'is_admin' => false,
+                'is_active' => true,
             ],
             [
                 'id' => (string) Str::uuid7(),
@@ -79,6 +84,7 @@ class UsersTableSeeder extends Seeder
                 'last_name' => 'Wilson',
                 'date_of_birth' => '1988-07-15',
                 'is_admin' => false,
+                'is_active' => true,
             ],
             [
                 'id' => (string) Str::uuid7(),
@@ -89,6 +95,7 @@ class UsersTableSeeder extends Seeder
                 'last_name' => 'Davis',
                 'date_of_birth' => '1993-12-05',
                 'is_admin' => false,
+                'is_active' => true,
             ],
             [
                 'id' => (string) Str::uuid7(),
@@ -99,6 +106,7 @@ class UsersTableSeeder extends Seeder
                 'last_name' => 'Miller',
                 'date_of_birth' => '1991-04-22',
                 'is_admin' => false,
+                'is_active' => true,
             ],
             [
                 'id' => (string) Str::uuid7(),
@@ -109,6 +117,7 @@ class UsersTableSeeder extends Seeder
                 'last_name' => 'Anderson',
                 'date_of_birth' => '1989-09-18',
                 'is_admin' => false,
+                'is_active' => true,
             ],
             [
                 'id' => (string) Str::uuid7(),
@@ -119,6 +128,7 @@ class UsersTableSeeder extends Seeder
                 'last_name' => 'Taylor',
                 'date_of_birth' => '1994-02-28',
                 'is_admin' => false,
+                'is_active' => true,
             ],
         ];
 

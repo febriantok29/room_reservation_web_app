@@ -36,7 +36,7 @@ return new class extends Migration
             $table->foreign('deleted_by')->references('id')->on('s_users')->onDelete('set null');
 
             // Indexes for performance
-            $table->index('name');
+            $table->unique('name');
             $table->index('location');
             $table->index('is_maintenance');
             $table->index(['deleted_at', 'is_maintenance']); // Composite index for filtering available rooms
