@@ -22,24 +22,40 @@
     <div class="card card-admin">
         <div class="card-header">
             <h3 class="card-title">Daftar Reservasi</h3>
-            <div class="card-tools d-flex" style="gap: .5rem;">
-                <form action="{{ route('admin.reservations') }}" method="GET" class="d-flex" style="gap: .5rem;">
-                    <input type="text" name="q" class="form-control form-control-sm" style="width: 220px;"
-                        placeholder="Cari ID, pengguna, ruangan" value="{{ $searchQuery ?? '' }}">
-                    <select name="status" class="form-control form-control-sm" style="width: 170px;">
-                        <option value="">Semua Status</option>
-                        <option value="pending" @selected(($statusFilter ?? '') === 'pending')>Menunggu</option>
-                        <option value="approved" @selected(($statusFilter ?? '') === 'approved')>Disetujui</option>
-                        <option value="rejected" @selected(($statusFilter ?? '') === 'rejected')>Ditolak</option>
-                        <option value="completed" @selected(($statusFilter ?? '') === 'completed')>Selesai</option>
-                        <option value="cancelled" @selected(($statusFilter ?? '') === 'cancelled')>Dibatalkan</option>
-                    </select>
-                    <button type="submit" class="btn btn-default btn-sm">
-                        <i class="fas fa-filter mr-1"></i> Filter
-                    </button>
-                </form>
-            </div>
         </div>
+
+        {{-- Filter Section --}}
+        <div class="card-body border-bottom">
+            <form action="{{ route('admin.reservations') }}" method="GET">
+                <div class="row">
+                    <div class="col-lg-5 col-md-6">
+                        <div class="form-group mb-0">
+                            <input type="text" name="q" class="form-control form-control-sm"
+                                placeholder="Cari ID reservasi, nama pengguna, atau ruangan..."
+                                value="{{ $searchQuery ?? '' }}">
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4">
+                        <div class="form-group mb-0">
+                            <select name="status" class="form-control form-control-sm">
+                                <option value="">Semua Status</option>
+                                <option value="pending" @selected(($statusFilter ?? '') === 'pending')>Menunggu</option>
+                                <option value="approved" @selected(($statusFilter ?? '') === 'approved')>Disetujui</option>
+                                <option value="rejected" @selected(($statusFilter ?? '') === 'rejected')>Ditolak</option>
+                                <option value="completed" @selected(($statusFilter ?? '') === 'completed')>Selesai</option>
+                                <option value="cancelled" @selected(($statusFilter ?? '') === 'cancelled')>Dibatalkan</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-2">
+                        <button type="submit" class="btn btn-primary btn-sm btn-block">
+                            <i class="fas fa-search"></i> Cari
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <div class="card-body border-bottom py-2 text-sm text-muted">
             Menampilkan {{ $reservations->count() }} dari {{ $reservations->total() }} reservasi.
         </div>

@@ -22,19 +22,36 @@
     <div class="card card-admin">
         <div class="card-header">
             <h3 class="card-title">Daftar Ruangan</h3>
-            <div class="card-tools">
-                <form action="{{ route('admin.rooms') }}" method="GET" class="input-group input-group-sm"
-                    style="width: 300px;">
-                    <input type="text" name="q" class="form-control" placeholder="Cari nama, lokasi, fasilitas"
-                        value="{{ $searchQuery ?? '' }}">
-                    <div class="input-group-append">
-                        <button type="submit" class="btn btn-default">
-                            <i class="fas fa-search"></i>
+        </div>
+
+        {{-- Filter Section --}}
+        <div class="card-body border-bottom">
+            <form action="{{ route('admin.rooms') }}" method="GET">
+                <div class="row">
+                    <div class="col-lg-6 col-md-7">
+                        <div class="form-group mb-0">
+                            <input type="text" name="q" class="form-control form-control-sm"
+                                placeholder="Cari nama ruangan, lokasi, atau fasilitas..." value="{{ $searchQuery ?? '' }}">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-4">
+                        <div class="form-group mb-0">
+                            <select name="maintenance" class="form-control form-control-sm">
+                                <option value="">Semua Ruangan</option>
+                                <option value="0" @selected(request('maintenance') === '0')>Tidak Maintenance</option>
+                                <option value="1" @selected(request('maintenance') === '1')>Sedang Maintenance</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-1">
+                        <button type="submit" class="btn btn-primary btn-sm btn-block">
+                            <i class="fas fa-search"></i> Cari
                         </button>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
+
         <div class="card-body border-bottom py-2 text-sm text-muted">
             Menampilkan {{ $rooms->count() }} dari {{ $rooms->total() }} ruangan.
         </div>
@@ -72,6 +89,17 @@
                             </td>
                             <td>
                                 <div class="table-action-group">
+                                    <button type="button" class="btn btn-info btn-xs" data-toggle="modal"
+                                        data-target="#roomDetailModal" data-room-id="{{ $room->id }}"
+                                        data-room-name="{{ $room->name }}" data-room-location="{{ $room->location }}"
+                                        data-room-capacity="{{ $room->capacity }}"
+                                        data-room-description="{{ $room->description ?? '-' }}"
+                                        data-room-facilities="{{ $room->facilities->pluck('name')->implode(', ') ?: '-' }}"
+                                        data-room-maintenance="{{ $room->is_maintenance ? 'Ya' : 'Tidak' }}"
+                                        data-room-created="{{ $room->created_at?->format('d M Y H:i') ?? '-' }}"
+                                        data-room-updated="{{ $room->updated_at?->format('d M Y H:i') ?? '-' }}">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
                                     <a href="{{ route('admin.rooms.edit', $room->id) }}" class="btn btn-warning btn-xs">
                                         <i class="fas fa-edit"></i> Ubah
                                     </a>
@@ -105,4 +133,98 @@
             {{ $rooms->links() }}
         </div>
     </div>
+
+    {{-- Room Detail Modal --}}
+    <div class="modal fade" id="roomDetailModal" tabindex="-1" role="dialog" aria-labelledby="roomDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white" id="roomDetailModalLabel">
+                        <i class="fas fa-door-open"></i> Detail Ruangan
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <td class="text-muted" width="40%">ID:</td>
+                                    <td class="font-weight-bold" id="modal-room-id">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Nama:</td>
+                                    <td class="font-weight-bold" id="modal-room-name">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Lokasi:</td>
+                                    <td id="modal-room-location">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Kapasitas:</td>
+                                    <td id="modal-room-capacity">-</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <td class="text-muted" width="40%">Maintenance:</td>
+                                    <td id="modal-room-maintenance">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Dibuat:</td>
+                                    <td id="modal-room-created">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Diupdate:</td>
+                                    <td id="modal-room-updated">-</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="font-weight-bold">Deskripsi:</h6>
+                            <p id="modal-room-description" class="text-muted">-</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <h6 class="font-weight-bold">Fasilitas:</h6>
+                            <p id="modal-room-facilities" class="text-muted">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@stop
+
+@section('js')
+    <script>
+        $(document).ready(function() {
+            $('#roomDetailModal').on('show.bs.modal', function(event) {
+                var button = $(event.relatedTarget);
+                var modal = $(this);
+
+                modal.find('#modal-room-id').text(button.data('room-id'));
+                modal.find('#modal-room-name').text(button.data('room-name'));
+                modal.find('#modal-room-location').text(button.data('room-location'));
+                modal.find('#modal-room-capacity').text(button.data('room-capacity') + ' orang');
+                modal.find('#modal-room-description').text(button.data('room-description'));
+                modal.find('#modal-room-facilities').text(button.data('room-facilities'));
+                modal.find('#modal-room-maintenance').text(button.data('room-maintenance'));
+                modal.find('#modal-room-created').text(button.data('room-created'));
+                modal.find('#modal-room-updated').text(button.data('room-updated'));
+            });
+        });
+    </script>
 @stop

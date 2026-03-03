@@ -22,19 +22,27 @@
     <div class="card card-admin">
         <div class="card-header">
             <h3 class="card-title">Daftar Fasilitas</h3>
-            <div class="card-tools">
-                <form action="{{ route('admin.facilities') }}" method="GET" class="input-group input-group-sm"
-                    style="width: 260px;">
-                    <input type="text" name="q" class="form-control float-right" placeholder="Cari nama/slug"
-                        value="{{ request('q') }}">
-                    <div class="input-group-append">
-                        <button type="submit" class="btn btn-default">
-                            <i class="fas fa-search"></i>
+        </div>
+
+        {{-- Filter Section --}}
+        <div class="card-body border-bottom">
+            <form action="{{ route('admin.facilities') }}" method="GET">
+                <div class="row">
+                    <div class="col-lg-9 col-md-8">
+                        <div class="form-group mb-0">
+                            <input type="text" name="q" class="form-control form-control-sm"
+                                placeholder="Cari nama atau slug fasilitas..." value="{{ request('q') }}">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-4">
+                        <button type="submit" class="btn btn-primary btn-sm btn-block">
+                            <i class="fas fa-search"></i> Cari
                         </button>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
+
         <div class="card-body border-bottom py-2 text-sm text-muted">
             Menampilkan {{ $facilities->count() }} dari {{ $facilities->total() }} fasilitas.
         </div>

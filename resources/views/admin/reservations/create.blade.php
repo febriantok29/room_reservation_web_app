@@ -21,7 +21,7 @@
                 <div class="form-section-title">Pemohon & Kebutuhan Ruangan</div>
 
                 <div class="row">
-                    <div class="col-lg-6">
+                    <div class="col-lg-6 col-md-6">
                         <div class="form-group">
                             <label for="user_id">Pegawai/Pemohon</label>
                             <select id="user_id" name="user_id" class="form-control">
@@ -34,60 +34,55 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-lg-6">
-                        @include('admin.reservations.partials.required_facility_filter_field', [
-                            'hiddenValue' => old(
-                                'required_facilities_input',
-                                implode(', ', old('required_facilities', []))),
-                        ])
+                    <div class="col-lg-6 col-md-6">
+                        @include('admin.reservations.partials.required_facility_filter_field')
                     </div>
                 </div>
 
                 <div class="form-section-title">Jadwal & Detail Reservasi</div>
 
+                <div class="form-group">
+                    <label for="room_id">Ruangan <span class="text-danger">*</span></label>
+                    <select id="room_id" name="room_id" class="form-control" required>
+                        <option value="">-- Pilih Ruangan --</option>
+                        @foreach ($rooms as $room)
+                            <option value="{{ $room->id }}"
+                                data-facilities="{{ $room->facilities->pluck('slug')->implode(',') }}"
+                                @selected(old('room_id') === $room->id)>
+                                {{ $room->name }} ({{ $room->location }}) - Kapasitas: {{ $room->capacity }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
                 <div class="row">
-                    <div class="col-lg-6">
+                    <div class="col-lg-4 col-md-6">
                         <div class="form-group">
-                            <label for="room_id">Ruangan</label>
-                            <select id="room_id" name="room_id" class="form-control" required>
-                                <option value="">-- Pilih Ruangan --</option>
-                                @foreach ($rooms as $room)
-                                    <option value="{{ $room->id }}"
-                                        data-facilities="{{ $room->facilities->pluck('slug')->implode(',') }}"
-                                        @selected(old('room_id') === $room->id)>
-                                        {{ $room->name }} ({{ $room->location }})
-                                    </option>
-                                @endforeach
-                            </select>
+                            <label for="reservation_date">Tanggal <span class="text-danger">*</span></label>
+                            <input type="date" id="reservation_date" name="reservation_date" class="form-control"
+                                value="{{ old('reservation_date') }}" required>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="form-group">
+                            <label for="start_clock">Jam Mulai <span class="text-danger">*</span></label>
+                            <input type="text" id="start_clock" name="start_clock" class="form-control js-timepicker"
+                                value="{{ old('start_clock') }}" placeholder="Pilih jam" autocomplete="off" required>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="form-group">
+                            <label for="end_clock">Jam Selesai <span class="text-danger">*</span></label>
+                            <input type="text" id="end_clock" name="end_clock" class="form-control js-timepicker"
+                                value="{{ old('end_clock') }}" placeholder="Pilih jam" autocomplete="off" required>
                         </div>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-lg-3 col-md-6">
+                    <div class="col-lg-6 col-md-6">
                         <div class="form-group">
-                            <label for="reservation_date">Tanggal Reservasi</label>
-                            <input type="date" id="reservation_date" name="reservation_date" class="form-control"
-                                value="{{ old('reservation_date') }}" required>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="form-group">
-                            <label for="start_clock">Jam Mulai</label>
-                            <input type="text" id="start_clock" name="start_clock" class="form-control js-timepicker"
-                                value="{{ old('start_clock') }}" placeholder="Pilih jam" autocomplete="off" required>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="form-group">
-                            <label for="end_clock">Jam Selesai</label>
-                            <input type="text" id="end_clock" name="end_clock" class="form-control js-timepicker"
-                                value="{{ old('end_clock') }}" placeholder="Pilih jam" autocomplete="off" required>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="form-group">
-                            <label for="visitor_count">Jumlah Pengunjung</label>
+                            <label for="visitor_count">Jumlah Pengunjung <span class="text-danger">*</span></label>
                             <input type="number" id="visitor_count" name="visitor_count" class="form-control"
                                 value="{{ old('visitor_count', 1) }}" min="1" required>
                         </div>
@@ -97,11 +92,10 @@
                 <div class="form-group">
                     <label for="purpose">Tujuan</label>
                     <textarea id="purpose" name="purpose" class="form-control" rows="3">{{ old('purpose') }}</textarea>
+                    <small class="text-muted">Opsional: Jelaskan keperluan reservasi ruangan ini.</small>
                 </div>
 
-                <small class="text-muted d-block mb-3">Gunakan jam kerja (contoh: 08:00 - 18:00).</small>
-
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between mt-4">
                     <a href="{{ route('admin.reservations') }}" class="btn btn-secondary">Kembali</a>
                     <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>
@@ -134,10 +128,14 @@
 
 @section('css')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css"
+        rel="stylesheet" />
 @stop
 
 @section('js')
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     @include('admin.partials.form_submit_guard_script')
 
     <script>
@@ -163,8 +161,7 @@
             @include('admin.reservations.partials.required_facility_filter_script')
 
             initializeRequiredFacilityFilter({
-                allFacilities,
-                prefillFromSelectedRoom: false,
+                allFacilities
             });
 
             const pickerConfig = {
