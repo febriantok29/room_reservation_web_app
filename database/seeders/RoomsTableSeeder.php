@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Facility;
+use App\Services\RoomIdGenerator;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class RoomsTableSeeder extends Seeder
 {
@@ -19,36 +19,32 @@ class RoomsTableSeeder extends Seeder
 
         $rooms = [
             [
-                'id' => (string) Str::uuid7(),
                 'name' => 'R. Serbaguna',
-                'location' => 'Lantai 1',
+                'floor' => 1,
                 'description' => 'Ruang serbaguna untuk berbagai keperluan meeting dan acara. Dilengkapi dengan proyektor, whiteboard, dan sistem audio.',
                 'capacity' => 35,
                 'facilities' => ['proyektor', 'whiteboard', 'audio system', 'wifi'],
                 'is_maintenance' => false,
             ],
             [
-                'id' => (string) Str::uuid7(),
                 'name' => 'R. Meeting Utama',
-                'location' => 'Lantai 2',
+                'floor' => 2,
                 'description' => 'Ruang meeting utama dengan fasilitas lengkap termasuk video conference, AC, dan koneksi internet berkecepatan tinggi.',
                 'capacity' => 25,
                 'facilities' => ['proyektor', 'video conference', 'ac', 'wifi'],
                 'is_maintenance' => false,
             ],
             [
-                'id' => (string) Str::uuid7(),
                 'name' => 'R. Eksekutif',
-                'location' => 'Lantai 3',
+                'floor' => 3,
                 'description' => 'Ruang meeting eksekutif untuk rapat tingkat manajemen. Tersedia coffee station dan tata cahaya yang dapat diatur.',
                 'capacity' => 15,
                 'facilities' => ['display', 'coffee station', 'ac', 'wifi'],
                 'is_maintenance' => false,
             ],
             [
-                'id' => (string) Str::uuid7(),
                 'name' => 'R. Diskusi',
-                'location' => 'Lantai 4',
+                'floor' => 4,
                 'description' => 'Ruang diskusi yang nyaman untuk brainstorming dan meeting tim. Dilengkapi dengan whiteboard interaktif.',
                 'capacity' => 20,
                 'facilities' => ['whiteboard', 'dispenser', 'wifi'],
@@ -57,9 +53,15 @@ class RoomsTableSeeder extends Seeder
         ];
 
         foreach ($rooms as $room) {
+            $roomId = RoomIdGenerator::generate((int) $room['floor']);
             $facilities = $room['facilities'] ?? [];
 
-            DB::table('m_rooms')->insert(array_merge(collect($room)->except('facilities')->toArray(), [
+            $roomPayload = array_merge(
+                collect($room)->except('facilities')->toArray(),
+                ['id' => $roomId]
+            );
+
+            DB::table('m_rooms')->insert(array_merge($roomPayload, [
                 'created_at' => now(),
                 'created_by' => $adminId,
             ]));
@@ -68,7 +70,7 @@ class RoomsTableSeeder extends Seeder
 
             foreach ($facilityIds as $facilityId) {
                 DB::table('m_room_facilities')->updateOrInsert(
-                    ['room_id' => $room['id'], 'facility_id' => $facilityId],
+                    ['room_id' => $roomId, 'facility_id' => $facilityId],
                     ['created_at' => now(), 'updated_at' => now()]
                 );
             }

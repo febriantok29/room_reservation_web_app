@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('m_rooms', function (Blueprint $table) {
             // Custom string ID (generated in code, not auto-increment)
-            $table->string('id', 36)->primary()->comment('UUIDv7 generated in code');
+            $table->string('id', 36)->primary()->comment('Format: RM-LLXX');
 
             // Room Information
             $table->string('name', 100)->comment('Room name');
-            $table->string('location', 100)->comment('Room location (e.g., Lantai 1)');
+            $table->unsignedTinyInteger('floor')->comment('Floor number (1-99)');
             $table->text('description')->nullable()->comment('Room description');
             $table->unsignedSmallInteger('capacity')->default(0)->comment('Room capacity (max people)');
             $table->boolean('is_maintenance')->default(false)->comment('Maintenance status');
@@ -37,7 +37,7 @@ return new class extends Migration
 
             // Indexes for performance
             $table->unique('name');
-            $table->index('location');
+            $table->index('floor');
             $table->index('is_maintenance');
             $table->index(['deleted_at', 'is_maintenance']); // Composite index for filtering available rooms
         });
