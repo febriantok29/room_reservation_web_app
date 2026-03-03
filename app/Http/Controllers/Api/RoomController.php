@@ -29,13 +29,13 @@ class RoomController extends Controller
     public function index(Request $request): JsonResponse
     {
         $validator = Validator::make([
-            'location' => $request->input('location'),
+            'floor' => $request->input('floor'),
             'min_capacity' => $request->input('min_capacity'),
             'facility_ids' => $request->input('facility_ids'),
             'available_only' => $request->input('available_only'),
             'per_page' => $request->input('per_page'),
         ], [
-            'location' => 'nullable|string|max:100',
+            'floor' => 'nullable|integer|min:1|max:99',
             'min_capacity' => 'nullable|integer|min:1',
             'facility_ids' => 'nullable',
             'available_only' => 'nullable|in:true,false,1,0,True,False',
@@ -50,8 +50,8 @@ class RoomController extends Controller
             ->with('facilities:id,name,slug')
             ->whereNull('deleted_at');
 
-        if ($request->filled('location')) {
-            $query->byLocation($request->input('location'));
+        if ($request->filled('floor')) {
+            $query->byFloor((int) $request->input('floor'));
         }
 
         if ($request->filled('min_capacity')) {
@@ -90,7 +90,7 @@ class RoomController extends Controller
             }
         }
 
-        $query->orderBy('location')->orderBy('name');
+        $query->orderBy('floor')->orderBy('name');
 
         $perPage = $request->input('per_page');
         if ($perPage) {
@@ -137,7 +137,7 @@ class RoomController extends Controller
                 'max:100',
                 Rule::unique('m_rooms', 'name'),
             ],
-            'location' => 'required|string|max:100',
+            'floor' => 'required|integer|min:1|max:99',
             'description' => 'nullable|string',
             'capacity' => 'required|integer|min:1|max:1000',
             'facility_ids' => 'nullable|array',
@@ -188,7 +188,7 @@ class RoomController extends Controller
                 'max:100',
                 Rule::unique('m_rooms', 'name')->ignore($room->id),
             ],
-            'location' => 'sometimes|required|string|max:100',
+            'floor' => 'sometimes|required|integer|min:1|max:99',
             'description' => 'sometimes|nullable|string',
             'capacity' => 'sometimes|required|integer|min:1|max:1000',
             'facility_ids' => 'sometimes|array',

@@ -58,6 +58,7 @@ class AdminDashboardController extends Controller
         $this->ensureAdminAccess($request);
 
         $searchQuery = trim((string) $request->query('q', ''));
+        $maintenanceFilter = trim((string) $request->query('maintenance', ''));
 
         $roomsQuery = Room::query()
             ->with('facilities:id,name,slug')
@@ -66,7 +67,7 @@ class AdminDashboardController extends Controller
         if ($searchQuery !== '') {
             $roomsQuery->where(function ($query) use ($searchQuery) {
                 $query->where('name', 'like', "%{$searchQuery}%")
-                    ->orWhere('location', 'like', "%{$searchQuery}%")
+                        ->orWhereRaw('CAST(floor AS CHAR) LIKE ?', ["%{$searchQuery}%"])
                     ->orWhere('description', 'like', "%{$searchQuery}%")
                     ->orWhereHas('facilities', function ($facilityQuery) use ($searchQuery) {
                         $facilityQuery->where('name', 'like', "%{$searchQuery}%")
@@ -75,8 +76,12 @@ class AdminDashboardController extends Controller
             });
         }
 
+        if (in_array($maintenanceFilter, ['0', '1'], true)) {
+            $roomsQuery->where('is_maintenance', $maintenanceFilter === '1');
+        }
+
         $rooms = $roomsQuery
-            ->orderBy('location')
+                ->orderBy('floor')
             ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
@@ -84,6 +89,7 @@ class AdminDashboardController extends Controller
         return view('admin.rooms.index', [
             'rooms' => $rooms,
             'searchQuery' => $searchQuery,
+            'maintenanceFilter' => $maintenanceFilter,
         ]);
     }
 
@@ -107,9 +113,11 @@ class AdminDashboardController extends Controller
                 'max:100',
                 Rule::unique('m_rooms', 'name'),
             ],
-            'location' => 'required|string|max:100',
+            'floor' => 'required|integer|min:1|max:99',
             'description' => 'nullable|string',
             'capacity' => 'required|integer|min:1|max:1000',
+            'facility_ids' => 'nullable|array',
+            'facility_ids.*' => 'nullable|string|max:50',
             'facility_ids_input' => 'nullable|string|max:500',
             'is_maintenance' => 'nullable|boolean',
         ]);
@@ -117,7 +125,7 @@ class AdminDashboardController extends Controller
         $room = new Room();
         $room->fill([
             'name' => $validated['name'],
-            'location' => $validated['location'],
+            'floor' => (int) $validated['floor'],
             'description' => $validated['description'] ?? null,
             'capacity' => $validated['capacity'],
         ]);
@@ -126,7 +134,8 @@ class AdminDashboardController extends Controller
         $room->updated_by = $request->user()->id;
         $room->save();
 
-        $facilityIds = Facility::resolveIds(Facility::parseInput($validated['facility_ids_input'] ?? null));
+        $facilityInputs = $validated['facility_ids'] ?? Facility::parseInput($validated['facility_ids_input'] ?? null);
+        $facilityIds = Facility::resolveIds($facilityInputs);
         $room->facilities()->sync($facilityIds);
 
         return redirect()
@@ -157,16 +166,18 @@ class AdminDashboardController extends Controller
                 'max:100',
                 Rule::unique('m_rooms', 'name')->ignore($room->id),
             ],
-            'location' => 'required|string|max:100',
+            'floor' => 'required|integer|min:1|max:99',
             'description' => 'nullable|string',
             'capacity' => 'required|integer|min:1|max:1000',
+            'facility_ids' => 'nullable|array',
+            'facility_ids.*' => 'nullable|string|max:50',
             'facility_ids_input' => 'nullable|string|max:500',
             'is_maintenance' => 'nullable|boolean',
         ]);
 
         $room->fill([
             'name' => $validated['name'],
-            'location' => $validated['location'],
+            'floor' => (int) $validated['floor'],
             'description' => $validated['description'] ?? null,
             'capacity' => $validated['capacity'],
         ]);
@@ -174,7 +185,8 @@ class AdminDashboardController extends Controller
         $room->updated_by = $request->user()->id;
         $room->save();
 
-        $facilityIds = Facility::resolveIds(Facility::parseInput($validated['facility_ids_input'] ?? null));
+        $facilityInputs = $validated['facility_ids'] ?? Facility::parseInput($validated['facility_ids_input'] ?? null);
+        $facilityIds = Facility::resolveIds($facilityInputs);
         $room->facilities()->sync($facilityIds);
 
         return redirect()
@@ -200,7 +212,11 @@ class AdminDashboardController extends Controller
         $this->ensureAdminAccess($request);
 
         $searchQuery = trim((string) $request->query('q', ''));
-        $statusFilter = trim((string) $request->query('status', ''));
+        $statusFilter = strtolower(trim((string) $request->query('status', '')));
+        $allowedStatuses = ['pending', 'approved', 'rejected', 'completed', 'cancelled'];
+        if (!in_array($statusFilter, $allowedStatuses, true)) {
+            $statusFilter = '';
+        }
 
         $reservationsQuery = Reservation::query()
             ->with(['room', 'user']);
@@ -211,11 +227,12 @@ class AdminDashboardController extends Controller
                     ->orWhere('purpose', 'like', "%{$searchQuery}%")
                     ->orWhereHas('room', function ($roomQuery) use ($searchQuery) {
                         $roomQuery->where('name', 'like', "%{$searchQuery}%")
-                            ->orWhere('location', 'like', "%{$searchQuery}%");
+                                ->orWhereRaw('CAST(floor AS CHAR) LIKE ?', ["%{$searchQuery}%"]);
                     })
                     ->orWhereHas('user', function ($userQuery) use ($searchQuery) {
                         $userQuery->where('first_name', 'like', "%{$searchQuery}%")
                             ->orWhere('last_name', 'like', "%{$searchQuery}%")
+                            ->orWhereRaw("TRIM(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, ''))) LIKE ?", ["%{$searchQuery}%"])
                             ->orWhere('employee_id', 'like', "%{$searchQuery}%")
                             ->orWhere('email', 'like', "%{$searchQuery}%");
                     });
@@ -245,7 +262,7 @@ class AdminDashboardController extends Controller
         $rooms = Room::query()
             ->with('facilities:id,name,slug')
             ->whereNull('deleted_at')
-            ->orderBy('location')
+            ->orderBy('floor')
             ->orderBy('name')
             ->get();
 
@@ -329,7 +346,7 @@ class AdminDashboardController extends Controller
         $rooms = Room::query()
             ->with('facilities:id,name,slug')
             ->whereNull('deleted_at')
-            ->orderBy('location')
+            ->orderBy('floor')
             ->orderBy('name')
             ->get();
 
@@ -433,7 +450,7 @@ class AdminDashboardController extends Controller
                     ->orWhere('purpose', 'like', "%{$searchQuery}%")
                     ->orWhereHas('room', function ($roomQuery) use ($searchQuery) {
                         $roomQuery->where('name', 'like', "%{$searchQuery}%")
-                            ->orWhere('location', 'like', "%{$searchQuery}%");
+                            ->orWhereRaw('CAST(floor AS CHAR) LIKE ?', ["%{$searchQuery}%"]);
                     })
                     ->orWhereHas('user', function ($userQuery) use ($searchQuery) {
                         $userQuery->where('first_name', 'like', "%{$searchQuery}%")
