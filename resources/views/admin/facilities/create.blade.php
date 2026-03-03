@@ -20,14 +20,18 @@
 
                 <div class="form-section-title">Informasi Fasilitas</div>
 
-                <div class="form-group">
-                    <label for="name">Nama Fasilitas</label>
-                    <input type="text" id="name" name="name" class="form-control" value="{{ old('name') }}"
-                        required>
-                    <small class="text-muted">Contoh: Proyektor, Whiteboard, Video Conference.</small>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="name">Nama Fasilitas <span class="text-danger">*</span></label>
+                            <input type="text" id="name" name="name" class="form-control"
+                                value="{{ old('name') }}" required>
+                            <small class="text-muted">Contoh: Proyektor, Whiteboard, Video Conference.</small>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between mt-4">
                     <a href="{{ route('admin.facilities') }}" class="btn btn-secondary">Kembali</a>
                     <button type="submit" class="btn btn-primary">Simpan</button>
                 </div>

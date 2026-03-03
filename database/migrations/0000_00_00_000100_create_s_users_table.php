@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('last_name', 50)->comment('Last name');
             $table->date('date_of_birth')->nullable()->comment('Date of birth');
             $table->boolean('is_admin')->default(false)->comment('Admin access flag');
+            $table->boolean('is_active')->default(true)->comment('User active status');
 
             // Audit fields
             $table->timestamp('created_at')->nullable()->useCurrent();
@@ -36,6 +37,7 @@ return new class extends Migration
             $table->index('employee_id');
             $table->index('email');
             $table->index('is_admin');
+            $table->index('is_active');
             $table->index(['deleted_at', 'is_admin']); // Composite index for filtering users by admin flag
         });
 
