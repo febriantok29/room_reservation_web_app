@@ -41,7 +41,7 @@
                 @foreach ($rooms as $room)
                     <option value="{{ $room->id }}"
                         data-facilities="{{ $room->facilities->pluck('slug')->implode(',') }}" @selected(old('room_id', $reservation->room_id) === $room->id)>
-                        {{ $room->name }} ({{ $room->location }}) - Kapasitas: {{ $room->capacity }}
+                        {{ $room->name }} (Lantai {{ $room->floor }}) - Kapasitas: {{ $room->capacity }}
                     </option>
                 @endforeach
             </select>

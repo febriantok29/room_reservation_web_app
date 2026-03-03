@@ -18,8 +18,8 @@
                 <x-form.field name="name" label="Nama Ruangan" type="text" :value="old('name', $room->name)" col-class="col-lg-4 col-md-6"
                     required />
 
-                <x-form.field name="location" label="Lokasi" type="text" :value="old('location', $room->location)" col-class="col-lg-4 col-md-6"
-                    hint="Contoh: Lantai 1, Gedung A" required />
+                <x-form.field name="floor" label="Lantai" type="number" :value="old('floor', $room->floor)" col-class="col-lg-4 col-md-6"
+                    hint="Contoh: 1" min="1" max="99" required />
 
                 <x-form.field name="capacity" label="Kapasitas (Orang)" type="number" :value="old('capacity', $room->capacity)"
                     col-class="col-lg-4 col-md-6" min="1" required />

@@ -31,7 +31,7 @@
                     <div class="col-lg-6 col-md-7">
                         <div class="form-group mb-0">
                             <input type="text" name="q" class="form-control form-control-sm"
-                                placeholder="Cari nama ruangan, lokasi, atau fasilitas..." value="{{ $searchQuery ?? '' }}">
+                                placeholder="Cari nama ruangan, lantai, atau fasilitas..." value="{{ $searchQuery ?? '' }}">
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-4">
@@ -60,7 +60,7 @@
                 <thead>
                     <tr>
                         <th>Nama</th>
-                        <th>Lokasi</th>
+                        <th>Lantai</th>
                         <th>Kapasitas</th>
                         <th>Fasilitas</th>
                         <th>Maintenance</th>
@@ -71,7 +71,7 @@
                     @forelse($rooms as $room)
                         <tr>
                             <td>{{ $room->name }}</td>
-                            <td>{{ $room->location }}</td>
+                            <td>Lantai {{ $room->floor }}</td>
                             <td>{{ $room->capacity }}</td>
                             <td>
                                 @if ($room->facilities->isNotEmpty())
@@ -91,7 +91,7 @@
                                 <div class="table-action-group">
                                     <button type="button" class="btn btn-info btn-xs" data-toggle="modal"
                                         data-target="#roomDetailModal" data-room-id="{{ $room->id }}"
-                                        data-room-name="{{ $room->name }}" data-room-location="{{ $room->location }}"
+                                        data-room-name="{{ $room->name }}" data-room-floor="{{ $room->floor }}"
                                         data-room-capacity="{{ $room->capacity }}"
                                         data-room-description="{{ $room->description ?? '-' }}"
                                         data-room-facilities="{{ $room->facilities->pluck('name')->implode(', ') ?: '-' }}"
@@ -160,8 +160,8 @@
                                     <td class="font-weight-bold" id="modal-room-name">-</td>
                                 </tr>
                                 <tr>
-                                    <td class="text-muted">Lokasi:</td>
-                                    <td id="modal-room-location">-</td>
+                                    <td class="text-muted">Lantai:</td>
+                                    <td id="modal-room-floor">-</td>
                                 </tr>
                                 <tr>
                                     <td class="text-muted">Kapasitas:</td>
@@ -217,7 +217,7 @@
 
                 modal.find('#modal-room-id').text(button.data('room-id'));
                 modal.find('#modal-room-name').text(button.data('room-name'));
-                modal.find('#modal-room-location').text(button.data('room-location'));
+                modal.find('#modal-room-floor').text('Lantai ' + button.data('room-floor'));
                 modal.find('#modal-room-capacity').text(button.data('room-capacity') + ' orang');
                 modal.find('#modal-room-description').text(button.data('room-description'));
                 modal.find('#modal-room-facilities').text(button.data('room-facilities'));
