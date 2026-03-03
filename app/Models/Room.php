@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Services\RoomIdGenerator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Room extends Model
 {
-    use HasUuids, SoftDeletes;
+    use SoftDeletes;
 
     /**
      * The table associated with the model.
@@ -38,7 +38,7 @@ class Room extends Model
      */
     protected $fillable = [
         'name',
-        'location',
+        'floor',
         'description',
         'capacity',
         'is_maintenance',
@@ -50,12 +50,27 @@ class Room extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'floor' => 'integer',
         'capacity' => 'integer',
         'is_maintenance' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
+
+    /**
+     * Boot the model and register events.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($room) {
+            if (empty($room->id)) {
+                $room->id = RoomIdGenerator::generate($room->floor);
+            }
+        });
+    }
 
     /**
      * Get the reservations for the room.
@@ -107,11 +122,11 @@ class Room extends Model
     }
 
     /**
-     * Scope a query to only include rooms by location.
+     * Scope a query to only include rooms by floor.
      */
-    public function scopeByLocation($query, string $location)
+    public function scopeByFloor($query, int $floor)
     {
-        return $query->where('location', $location);
+        return $query->where('floor', $floor);
     }
 
     /**
