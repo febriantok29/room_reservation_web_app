@@ -974,6 +974,32 @@
                     "response": []
                 },
                 {
+                    "name": "Complete Reservation",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/complete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "reservations",
+                                "{{reservation_id}}",
+                                "complete"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
                     "name": "Reject Reservation (Admin Only)",
                     "request": {
                         "method": "POST",
