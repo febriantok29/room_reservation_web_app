@@ -23,6 +23,9 @@ class ReservationController extends Controller
 
     public function index(Request $request): JsonResponse
     {
+        // ensure statuses are up‑to‑date in case the scheduler hasn't run yet
+        $this->reservationService->autoTransition();
+
         $validator = Validator::make($request->all(), [
             'status' => 'nullable|in:pending,approved,rejected,completed,cancelled',
             'room_id' => 'nullable|string|exists:m_rooms,id',
@@ -184,6 +187,28 @@ class ReservationController extends Controller
                 $result['message'],
                 $result['status_code'],
                 $result['errors']
+            );
+        }
+
+        return ApiResponse::success($result['data'], $result['message']);
+    }
+
+    public function complete(Request $request, string $id): JsonResponse
+    {
+        $reservation = Reservation::query()->where('id', $id)->first();
+
+        if (!$reservation) {
+            return ApiResponse::notFound(ApiMessages::RESERVATION_NOT_FOUND);
+        }
+
+        $result = $this->reservationService->complete($request->user(), $reservation);
+
+        if (!$result['success']) {
+            return ApiResponse::error(
+                $result['error_code'],
+                $result['message'],
+                $result['status_code'],
+                $result['errors'] ?? []
             );
         }
 

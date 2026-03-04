@@ -222,6 +222,71 @@ class ReservationService
         ];
     }
 
+    /**
+     * Mark a reservation as completed (manual endpoint or UI button).
+     * Only allowed when the reservation has already ended.
+     */
+    public function complete(User $actor, Reservation $reservation): array
+    {
+        if (!$this->canAccess($actor, $reservation) && !$actor->canApprove()) {
+            // only owner or admin may complete
+            return $this->forbidden();
+        }
+
+        if ($reservation->status !== 'approved') {
+            return [
+                'success' => false,
+                'status_code' => 422,
+                'error_code' => ApiErrorCodes::INVALID_RESERVATION_STATUS,
+                'message' => ApiMessages::RESERVATION_COMPLETE_INVALID_STATUS,
+                'errors' => [],
+            ];
+        }
+
+        if ($reservation->end_time->gt(now())) {
+            return [
+                'success' => false,
+                'status_code' => 422,
+                'error_code' => ApiErrorCodes::RESERVATION_NOT_FINISHED,
+                'message' => ApiMessages::RESERVATION_NOT_FINISHED,
+                'errors' => [],
+            ];
+        }
+
+        $reservation->status = 'completed';
+        $reservation->updated_by = $actor->id;
+        $reservation->save();
+        $reservation->load(['room', 'user']);
+
+        return [
+            'success' => true,
+            'data' => $reservation,
+            'message' => ApiMessages::RESERVATION_COMPLETED_SUCCESS,
+        ];
+    }
+
+    /**
+     * Automatic sweep run by scheduler/cron.
+     *
+     * @return array counts of modified rows ['expired' => int, 'completed' => int]
+     */
+    public function autoTransition(): array
+    {
+        $now = now();
+
+        $expired = Reservation::query()
+            ->where('status', 'pending')
+            ->where('start_time', '<', $now)
+            ->update(['status' => 'cancelled', 'updated_by' => null]);
+
+        $completed = Reservation::query()
+            ->where('status', 'approved')
+            ->where('end_time', '<', $now)
+            ->update(['status' => 'completed', 'updated_by' => null]);
+
+        return ['expired' => $expired, 'completed' => $completed];
+    }
+
     public function approve(User $actor, Reservation $reservation): array
     {
         if (!$actor->canApprove()) {
