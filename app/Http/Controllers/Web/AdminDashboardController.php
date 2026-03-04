@@ -210,6 +210,8 @@ class AdminDashboardController extends Controller
     public function reservations(Request $request): View
     {
         $this->ensureAdminAccess($request);
+        // backstop: run automatic transition whenever admin views list
+        $this->reservationService->autoTransition();
 
         $searchQuery = trim((string) $request->query('q', ''));
         $statusFilter = strtolower(trim((string) $request->query('status', '')));
@@ -432,6 +434,21 @@ class AdminDashboardController extends Controller
         return redirect()
             ->route('admin.reservations')
             ->with('success', WebMessages::RESERVATION_CANCELLED_SUCCESS);
+    }
+
+    public function completeReservation(Request $request, Reservation $reservation): RedirectResponse
+    {
+        $this->ensureAdminAccess($request);
+
+        $result = $this->reservationService->complete($request->user(), $reservation);
+
+        if (!$result['success']) {
+            return back()->withErrors(['reservation' => $result['message']]);
+        }
+
+        return redirect()
+            ->route('admin.reservations')
+            ->with('success', WebMessages::RESERVATION_COMPLETED_SUCCESS);
     }
 
     public function approvals(Request $request): View
