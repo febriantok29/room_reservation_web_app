@@ -504,7 +504,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{base_url}}/api/v1/rooms?floor=1&min_capacity=5&available_only=true&per_page=10",
+                            "raw": "{{base_url}}/api/v1/rooms?floor=1&min_capacity=5&available_only=true&start_time=2025-07-01T09:00:00&end_time=2025-07-01T10:00:00&per_page=10",
                             "host": [
                                 "{{base_url}}"
                             ],
@@ -525,6 +525,14 @@
                                 {
                                     "key": "available_only",
                                     "value": "true"
+                                },
+                                {
+                                    "key": "start_time",
+                                    "value": "2025-07-01T09:00:00"
+                                },
+                                {
+                                    "key": "end_time",
+                                    "value": "2025-07-01T10:00:00"
                                 },
                                 {
                                     "key": "per_page",
