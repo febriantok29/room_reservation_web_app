@@ -40,6 +40,7 @@ final class ApiMessages
     public const RESERVATION_CREATED_SUCCESS = 'Reservasi berhasil dibuat dan menunggu persetujuan';
     public const RESERVATION_UPDATED_SUCCESS = 'Reservasi berhasil diperbarui';
     public const RESERVATION_CANCELLED_SUCCESS = 'Reservasi berhasil dibatalkan';
+    public const RESERVATION_COMPLETED_SUCCESS = 'Reservasi berhasil selesai';
     public const RESERVATION_APPROVED_SUCCESS = 'Reservasi berhasil disetujui';
     public const RESERVATION_REJECTED_SUCCESS = 'Reservasi berhasil ditolak';
 
@@ -56,6 +57,8 @@ final class ApiMessages
     public const RESERVATION_ALREADY_STARTED = 'Reservasi yang sudah dimulai tidak dapat diubah';
     public const RESERVATION_CANCEL_INVALID_STATUS = 'Status reservasi saat ini tidak dapat dibatalkan';
     public const RESERVATION_ALREADY_FINISHED = 'Reservasi yang sudah selesai tidak dapat dibatalkan';
+    public const RESERVATION_COMPLETE_INVALID_STATUS = 'Reservasi tidak dapat ditandai selesai';
+    public const RESERVATION_NOT_FINISHED = 'Reservasi belum berakhir';
     public const RESERVATION_APPROVE_PENDING_ONLY = 'Hanya reservasi dengan status pending yang dapat disetujui';
     public const RESERVATION_REJECT_PENDING_ONLY = 'Hanya reservasi dengan status pending yang dapat ditolak';
     public const RESERVATION_END_TIME_AFTER_START = 'Waktu selesai harus setelah waktu mulai';

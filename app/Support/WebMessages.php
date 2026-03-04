@@ -22,8 +22,11 @@ final class WebMessages
     public const RESERVATION_CREATED_SUCCESS = 'Reservasi berhasil ditambahkan.';
     public const RESERVATION_UPDATED_SUCCESS = 'Reservasi berhasil diperbarui.';
     public const RESERVATION_CANCELLED_SUCCESS = 'Reservasi berhasil dibatalkan.';
+    public const RESERVATION_COMPLETED_SUCCESS = 'Reservasi berhasil diselesaikan.';
     public const RESERVATION_APPROVED_SUCCESS = 'Reservasi berhasil disetujui.';
     public const RESERVATION_REJECTED_SUCCESS = 'Reservasi berhasil ditolak.';
+    public const RESERVATION_COMPLETE_INVALID_STATUS = 'Reservasi tidak dapat ditandai selesai.';
+    public const RESERVATION_NOT_FINISHED = 'Reservasi belum berakhir.';
     public const RESERVATION_STORE_FAILED = 'Terjadi kesalahan saat menyimpan reservasi.';
     public const RESERVATION_UPDATE_FAILED = 'Terjadi kesalahan saat memperbarui reservasi.';
     public const RESERVATION_INVALID_DATA = 'Terjadi kesalahan pada data reservasi.';
