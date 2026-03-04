@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Carbon\Carbon;
 
 class RoomController extends Controller
 {
@@ -33,12 +34,16 @@ class RoomController extends Controller
             'min_capacity' => $request->input('min_capacity'),
             'facility_ids' => $request->input('facility_ids'),
             'available_only' => $request->input('available_only'),
+            'start_time' => $request->input('start_time'),
+            'end_time' => $request->input('end_time'),
             'per_page' => $request->input('per_page'),
         ], [
             'floor' => 'nullable|integer|min:1|max:99',
             'min_capacity' => 'nullable|integer|min:1',
             'facility_ids' => 'nullable',
             'available_only' => 'nullable|in:true,false,1,0,True,False',
+            'start_time' => 'nullable|date',
+            'end_time' => 'nullable|required_with:start_time|date|after:start_time',
             'per_page' => 'nullable|integer|min:1|max:100',
         ]);
 
@@ -88,6 +93,37 @@ class RoomController extends Controller
             } else {
                 $query->where('is_maintenance', true);
             }
+        }
+
+        // Time-range availability filters. When both start_time and end_time are
+        // provided we exclude rooms that have an overlapping reservation in the
+        // given interval. The logic mirrors CSPService::isRoomAvailable().
+        if ($request->filled('start_time') && $request->filled('end_time')) {
+            $start = Carbon::parse($request->input('start_time'));
+            $end = Carbon::parse($request->input('end_time'));
+
+            $query->whereDoesntHave('reservations', function ($q) use ($start, $end) {
+                $q->whereNull('deleted_at')
+                  ->whereIn('status', ['pending', 'approved'])
+                  ->where(function ($sub) use ($start, $end) {
+                      $sub->where(function ($a) use ($start, $end) {
+                          $a->where('start_time', '<=', $start)
+                            ->where('end_time', '>', $start);
+                      })
+                      ->orWhere(function ($a) use ($start, $end) {
+                          $a->where('start_time', '<', $end)
+                            ->where('end_time', '>=', $end);
+                      })
+                      ->orWhere(function ($a) use ($start, $end) {
+                          $a->where('start_time', '>=', $start)
+                            ->where('end_time', '<=', $end);
+                      })
+                      ->orWhere(function ($a) use ($start, $end) {
+                          $a->where('start_time', '<=', $start)
+                            ->where('end_time', '>=', $end);
+                      });
+                  });
+            });
         }
 
         $query->orderBy('floor')->orderBy('name');
