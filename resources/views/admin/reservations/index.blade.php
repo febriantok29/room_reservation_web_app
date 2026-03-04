@@ -103,6 +103,18 @@
                                         class="btn btn-warning btn-xs">
                                         <i class="fas fa-edit"></i> Ubah
                                     </a>
+
+                                    @if ($reservation->status === 'approved' && $reservation->end_time->lte(now()))
+                                        <form action="{{ route('admin.reservations.complete', $reservation->id) }}"
+                                            method="POST" class="d-inline"
+                                            onsubmit="return confirm('Tandai reservasi ini sebagai selesai?')">
+                                            @csrf
+                                            <button type="submit" class="btn btn-success btn-xs">
+                                                <i class="fas fa-check"></i> Selesai
+                                            </button>
+                                        </form>
+                                    @endif
+
                                     <form action="{{ route('admin.reservations.destroy', $reservation->id) }}"
                                         method="POST" class="d-inline"
                                         onsubmit="return confirm('Yakin ingin membatalkan reservasi ini?')">
