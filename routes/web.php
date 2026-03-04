@@ -49,6 +49,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/reservations/{reservation}/edit', [AdminDashboardController::class, 'editReservation'])->name('admin.reservations.edit');
         Route::put('/reservations/{reservation}', [AdminDashboardController::class, 'updateReservation'])->name('admin.reservations.update');
         Route::delete('/reservations/{reservation}', [AdminDashboardController::class, 'destroyReservation'])->name('admin.reservations.destroy');
+        Route::post('/reservations/{reservation}/complete', [AdminDashboardController::class, 'completeReservation'])->name('admin.reservations.complete');
 
         // Approval
         Route::get('/approvals', [AdminDashboardController::class, 'approvals'])->name('admin.approvals');

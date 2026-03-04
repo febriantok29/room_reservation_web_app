@@ -38,6 +38,7 @@ Route::prefix('v1')->middleware('jwt')->group(function () {
     Route::post('/reservations', [ReservationController::class, 'store']);
     Route::put('/reservations/{id}', [ReservationController::class, 'update']);
     Route::post('/reservations/{id}/cancel', [ReservationController::class, 'cancel']);
+    Route::post('/reservations/{id}/complete', [ReservationController::class, 'complete']);
     Route::post('/reservations/{id}/approve', [ReservationController::class, 'approve']);
     Route::post('/reservations/{id}/reject', [ReservationController::class, 'reject']);
 });
