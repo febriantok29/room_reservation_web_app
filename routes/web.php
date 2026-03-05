@@ -51,6 +51,9 @@ Route::prefix('admin')->group(function () {
         Route::delete('/reservations/{reservation}', [AdminDashboardController::class, 'destroyReservation'])->name('admin.reservations.destroy');
         Route::post('/reservations/{reservation}/complete', [AdminDashboardController::class, 'completeReservation'])->name('admin.reservations.complete');
 
+        // User timezone
+        Route::post('/set-timezone', [AdminDashboardController::class, 'setUserTimezone'])->name('admin.set-timezone');
+
         // Approval
         Route::get('/approvals', [AdminDashboardController::class, 'approvals'])->name('admin.approvals');
         Route::post('/approvals/{reservation}/approve', [AdminDashboardController::class, 'approveReservation'])->name('admin.approvals.approve');

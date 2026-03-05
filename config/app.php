@@ -69,6 +69,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application User Timezone
+    |--------------------------------------------------------------------------
+    |
+    | This is the default timezone for displaying dates/times to users in the web interface.
+    | API responses will still use UTC. This can be overridden per user or dynamically
+    | based on browser timezone detection.
+    |
+    */
+
+    'timezone_user' => env('APP_TIMEZONE_USER', 'Asia/Jakarta'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Locale Configuration
     |--------------------------------------------------------------------------
     |
