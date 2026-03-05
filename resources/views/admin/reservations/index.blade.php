@@ -99,31 +99,40 @@
                             </td>
                             <td>
                                 <div class="table-action-group">
-                                    <a href="{{ route('admin.reservations.edit', $reservation->id) }}"
-                                        class="btn btn-warning btn-xs">
-                                        <i class="fas fa-edit"></i> Ubah
-                                    </a>
+                                    {{-- For final status (completed, rejected, cancelled), show detail only --}}
+                                    @if (in_array($reservation->status, ['completed', 'rejected', 'cancelled']))
+                                        <a href="{{ route('admin.reservations.edit', $reservation->id) }}"
+                                            class="btn btn-info btn-xs">
+                                            <i class="fas fa-eye"></i> Detail
+                                        </a>
+                                    @else
+                                        {{-- For pending/approved, show edit & action buttons --}}
+                                        <a href="{{ route('admin.reservations.edit', $reservation->id) }}"
+                                            class="btn btn-warning btn-xs">
+                                            <i class="fas fa-edit"></i> Ubah
+                                        </a>
 
-                                    @if ($reservation->status === 'approved' && $reservation->end_time->lte(now()))
-                                        <form action="{{ route('admin.reservations.complete', $reservation->id) }}"
+                                        @if ($reservation->status === 'approved' && $reservation->end_time->lte(now()))
+                                            <form action="{{ route('admin.reservations.complete', $reservation->id) }}"
+                                                method="POST" class="d-inline"
+                                                onsubmit="return confirm('Tandai reservasi ini sebagai selesai?')">
+                                                @csrf
+                                                <button type="submit" class="btn btn-success btn-xs">
+                                                    <i class="fas fa-check"></i> Selesai
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        <form action="{{ route('admin.reservations.destroy', $reservation->id) }}"
                                             method="POST" class="d-inline"
-                                            onsubmit="return confirm('Tandai reservasi ini sebagai selesai?')">
+                                            onsubmit="return confirm('Yakin ingin membatalkan reservasi ini?')">
                                             @csrf
-                                            <button type="submit" class="btn btn-success btn-xs">
-                                                <i class="fas fa-check"></i> Selesai
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-xs">
+                                                <i class="fas fa-times"></i> Batalkan
                                             </button>
                                         </form>
                                     @endif
-
-                                    <form action="{{ route('admin.reservations.destroy', $reservation->id) }}"
-                                        method="POST" class="d-inline"
-                                        onsubmit="return confirm('Yakin ingin membatalkan reservasi ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-xs">
-                                            <i class="fas fa-times"></i> Batalkan
-                                        </button>
-                                    </form>
                                 </div>
                             </td>
                         </tr>
