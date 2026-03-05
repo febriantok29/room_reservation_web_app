@@ -9,7 +9,7 @@ use App\Models\Room;
 use App\Models\User;
 use App\Services\ReservationService;
 use App\Support\WebMessages;
-use Carbon\Carbon;
+use App\Helpers\TimezoneHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -538,18 +538,17 @@ class AdminDashboardController extends Controller
 
     private function buildReservationDateTimes(string $date, string $startClock, string $endClock): array
     {
-        $startTime = Carbon::parse($date . ' ' . $startClock . ':00');
-        $endTime = Carbon::parse($date . ' ' . $endClock . ':00');
-
-        return [$startTime, $endTime];
+        return TimezoneHelper::buildDateTimes($date, $startClock, $endClock);
     }
 
-    private function formatReservationServiceErrors(array $result): array
+    public function setUserTimezone(Request $request): JsonResponse
     {
-        if (empty($result['errors']['constraints']) || !is_array($result['errors']['constraints'])) {
-            return ['reservation' => $result['message'] ?? WebMessages::RESERVATION_INVALID_DATA];
-        }
+        $request->validate([
+            'timezone' => 'required|string|timezone',
+        ]);
 
-        return ['reservation' => implode(' ', array_unique($result['errors']['constraints']))];
+        session(['user_timezone' => $request->input('timezone')]);
+
+        return response()->json(['success' => true]);
     }
 }
