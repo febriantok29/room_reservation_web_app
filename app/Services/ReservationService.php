@@ -274,14 +274,16 @@ class ReservationService
     {
         $now = now();
 
+        // Mark pending reservations as cancelled if they've started
         $expired = Reservation::query()
             ->where('status', 'pending')
-            ->where('start_time', '<', $now)
+            ->where('start_time', '<=', $now)  // Changed from < to <= to handle exact time edge cases
             ->update(['status' => 'cancelled', 'updated_by' => null]);
 
+        // Mark approved reservations as completed if they've ended
         $completed = Reservation::query()
             ->where('status', 'approved')
-            ->where('end_time', '<', $now)
+            ->where('end_time', '<=', $now)  // Changed from < to <= to handle exact time edge cases
             ->update(['status' => 'completed', 'updated_by' => null]);
 
         return ['expired' => $expired, 'completed' => $completed];

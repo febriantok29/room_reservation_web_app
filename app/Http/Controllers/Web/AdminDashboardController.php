@@ -211,6 +211,8 @@ class AdminDashboardController extends Controller
     {
         $this->ensureAdminAccess($request);
         // backstop: run automatic transition whenever admin views list
+        // This ensures approved reservations that have passed their end_time become 'completed'
+        // and pending reservations that have passed their start_time become 'cancelled'
         $this->reservationService->autoTransition();
 
         $searchQuery = trim((string) $request->query('q', ''));
@@ -344,6 +346,11 @@ class AdminDashboardController extends Controller
     public function editReservation(Request $request, Reservation $reservation): View
     {
         $this->ensureAdminAccess($request);
+
+        // Ensure status is current in case scheduler hasn't run yet
+        $this->reservationService->autoTransition();
+        // Reload reservation to get possibly updated status
+        $reservation->refresh();
 
         $rooms = Room::query()
             ->with('facilities:id,name,slug')
