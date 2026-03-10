@@ -8,6 +8,7 @@ use App\Models\Reservation;
 use App\Services\ReservationService;
 use App\Support\ApiErrorCodes;
 use App\Support\ApiMessages;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -23,6 +24,9 @@ class ReservationController extends Controller
 
     public function index(Request $request): JsonResponse
     {
+        // ensure statuses are up‑to‑date in case the scheduler hasn't run yet
+        $this->reservationService->autoTransition();
+
         $validator = Validator::make($request->all(), [
             'status' => 'nullable|in:pending,approved,rejected,completed,cancelled',
             'room_id' => 'nullable|string|exists:m_rooms,id',
@@ -86,6 +90,7 @@ class ReservationController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'room_id' => 'required|string|exists:m_rooms,id',
+            'user_id' => 'nullable|string|exists:s_users,id',
             'start_time' => 'required|date|after:now',
             'end_time' => 'required|date|after:start_time',
             'purpose' => 'nullable|string|max:1000',
@@ -94,6 +99,11 @@ class ReservationController extends Controller
 
         if ($validator->fails()) {
             return ApiResponse::validationError($validator->errors()->toArray());
+        }
+
+        // Only admins may specify a different user_id
+        if ($request->filled('user_id') && !$request->user()?->isAdmin()) {
+            return ApiResponse::forbidden();
         }
 
         $result = $this->reservationService->create($request->user(), $validator->validated());
@@ -190,6 +200,28 @@ class ReservationController extends Controller
         return ApiResponse::success($result['data'], $result['message']);
     }
 
+    public function complete(Request $request, string $id): JsonResponse
+    {
+        $reservation = Reservation::query()->where('id', $id)->first();
+
+        if (!$reservation) {
+            return ApiResponse::notFound(ApiMessages::RESERVATION_NOT_FOUND);
+        }
+
+        $result = $this->reservationService->complete($request->user(), $reservation);
+
+        if (!$result['success']) {
+            return ApiResponse::error(
+                $result['error_code'],
+                $result['message'],
+                $result['status_code'],
+                $result['errors'] ?? []
+            );
+        }
+
+        return ApiResponse::success($result['data'], $result['message']);
+    }
+
     public function approve(Request $request, string $id): JsonResponse
     {
         $reservation = Reservation::query()->where('id', $id)->first();
@@ -232,5 +264,48 @@ class ReservationController extends Controller
         }
 
         return ApiResponse::success($result['data'], $result['message']);
+    }
+
+    public function calendar(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'year'  => 'required|integer|min:2000|max:2100',
+            'month' => 'required|integer|min:1|max:12',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator->errors()->toArray());
+        }
+
+        $year  = (int) $request->input('year');
+        $month = (int) $request->input('month');
+
+        $from = Carbon::createFromDate($year, $month, 1)->startOfDay()->utc();
+        $to   = $from->copy()->endOfMonth()->endOfDay();
+
+        $reservations = $this->reservationService->queryFor($request->user())
+            ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id'])
+            ->where('start_time', '>=', $from)
+            ->where('start_time', '<=', $to)
+            ->whereIn('status', ['pending', 'approved', 'completed'])
+            ->orderBy('start_time')
+            ->get();
+
+        $summary = [];
+        foreach ($reservations as $reservation) {
+            $day = $reservation->start_time->toDateString();
+            if (!isset($summary[$day])) {
+                $summary[$day] = ['total' => 0, 'pending' => 0, 'approved' => 0, 'completed' => 0];
+            }
+            $summary[$day]['total']++;
+            $summary[$day][$reservation->status]++;
+        }
+
+        return ApiResponse::success([
+            'year'         => $year,
+            'month'        => $month,
+            'summary'      => $summary,
+            'reservations' => $reservations,
+        ], ApiMessages::RESERVATION_CALENDAR_SUCCESS);
     }
 }

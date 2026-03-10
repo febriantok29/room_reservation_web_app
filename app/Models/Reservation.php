@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\TimezoneHelper;
 use App\Services\ReservationIdGenerator;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
@@ -60,6 +61,32 @@ class Reservation extends Model
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
+
+    /**
+     * Get start time in local timezone.
+     */
+    public function getStartTimeLocalAttribute()
+    {
+        return $this->start_time?->setTimezone($this->getLocalTimezone());
+    }
+
+    /**
+     * Get end time in local timezone.
+     */
+    public function getEndTimeLocalAttribute()
+    {
+        return $this->end_time?->setTimezone($this->getLocalTimezone());
+    }
+
+    /**
+     * Get local timezone for the current context.
+     * For web requests, this could be dynamic based on user/browser.
+     * For API, remains UTC.
+     */
+    protected function getLocalTimezone(): string
+    {
+        return TimezoneHelper::getLocalTimezone();
+    }
 
     /**
      * Boot the model and register events.
@@ -267,7 +294,7 @@ class Reservation extends Model
      */
     public function getStartTimeLabelAttribute(): string
     {
-        return $this->formatReadableDateTime($this->start_time);
+        return $this->formatReadableDateTime($this->start_time_local);
     }
 
     /**
@@ -275,7 +302,7 @@ class Reservation extends Model
      */
     public function getEndTimeLabelAttribute(): string
     {
-        return $this->formatReadableDateTime($this->end_time);
+        return $this->formatReadableDateTime($this->end_time_local);
     }
 
     /**

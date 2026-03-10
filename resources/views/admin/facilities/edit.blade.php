@@ -37,3 +37,5 @@
 @section('js')
     @include('admin.partials.form_submit_guard_script')
 @stop
+
+@include('admin.partials.timezone_detector')

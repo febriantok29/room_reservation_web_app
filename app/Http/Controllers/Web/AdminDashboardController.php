@@ -9,7 +9,7 @@ use App\Models\Room;
 use App\Models\User;
 use App\Services\ReservationService;
 use App\Support\WebMessages;
-use Carbon\Carbon;
+use App\Helpers\TimezoneHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -210,6 +210,10 @@ class AdminDashboardController extends Controller
     public function reservations(Request $request): View
     {
         $this->ensureAdminAccess($request);
+        // backstop: run automatic transition whenever admin views list
+        // This ensures approved reservations that have passed their end_time become 'completed'
+        // and pending reservations that have passed their start_time become 'cancelled'
+        $this->reservationService->autoTransition();
 
         $searchQuery = trim((string) $request->query('q', ''));
         $statusFilter = strtolower(trim((string) $request->query('status', '')));
@@ -343,6 +347,11 @@ class AdminDashboardController extends Controller
     {
         $this->ensureAdminAccess($request);
 
+        // Ensure status is current in case scheduler hasn't run yet
+        $this->reservationService->autoTransition();
+        // Reload reservation to get possibly updated status
+        $reservation->refresh();
+
         $rooms = Room::query()
             ->with('facilities:id,name,slug')
             ->whereNull('deleted_at')
@@ -434,6 +443,21 @@ class AdminDashboardController extends Controller
             ->with('success', WebMessages::RESERVATION_CANCELLED_SUCCESS);
     }
 
+    public function completeReservation(Request $request, Reservation $reservation): RedirectResponse
+    {
+        $this->ensureAdminAccess($request);
+
+        $result = $this->reservationService->complete($request->user(), $reservation);
+
+        if (!$result['success']) {
+            return back()->withErrors(['reservation' => $result['message']]);
+        }
+
+        return redirect()
+            ->route('admin.reservations')
+            ->with('success', WebMessages::RESERVATION_COMPLETED_SUCCESS);
+    }
+
     public function approvals(Request $request): View
     {
         $this->ensureAdminAccess($request);
@@ -514,18 +538,17 @@ class AdminDashboardController extends Controller
 
     private function buildReservationDateTimes(string $date, string $startClock, string $endClock): array
     {
-        $startTime = Carbon::parse($date . ' ' . $startClock . ':00');
-        $endTime = Carbon::parse($date . ' ' . $endClock . ':00');
-
-        return [$startTime, $endTime];
+        return TimezoneHelper::buildDateTimes($date, $startClock, $endClock);
     }
 
-    private function formatReservationServiceErrors(array $result): array
+    public function setUserTimezone(Request $request): JsonResponse
     {
-        if (empty($result['errors']['constraints']) || !is_array($result['errors']['constraints'])) {
-            return ['reservation' => $result['message'] ?? WebMessages::RESERVATION_INVALID_DATA];
-        }
+        $request->validate([
+            'timezone' => 'required|string|timezone',
+        ]);
 
-        return ['reservation' => implode(' ', array_unique($result['errors']['constraints']))];
+        session(['user_timezone' => $request->input('timezone')]);
+
+        return response()->json(['success' => true]);
     }
 }

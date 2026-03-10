@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\FacilityController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\RoomController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes (no authentication required)
@@ -32,12 +33,17 @@ Route::prefix('v1')->middleware('jwt')->group(function () {
     Route::put('/facilities/{id}', [FacilityController::class, 'update']);
     Route::delete('/facilities/{id}', [FacilityController::class, 'destroy']);
 
+    // User endpoints
+    Route::get('/users', [UserController::class, 'index']);
+
     // Reservation endpoints
     Route::get('/reservations', [ReservationController::class, 'index']);
+    Route::get('/reservations/calendar', [ReservationController::class, 'calendar']);
     Route::get('/reservations/{id}', [ReservationController::class, 'show']);
     Route::post('/reservations', [ReservationController::class, 'store']);
     Route::put('/reservations/{id}', [ReservationController::class, 'update']);
     Route::post('/reservations/{id}/cancel', [ReservationController::class, 'cancel']);
+    Route::post('/reservations/{id}/complete', [ReservationController::class, 'complete']);
     Route::post('/reservations/{id}/approve', [ReservationController::class, 'approve']);
     Route::post('/reservations/{id}/reject', [ReservationController::class, 'reject']);
 });
