@@ -62,8 +62,11 @@ final class ApiMessages
     public const RESERVATION_APPROVE_PENDING_ONLY = 'Hanya reservasi dengan status pending yang dapat disetujui';
     public const RESERVATION_REJECT_PENDING_ONLY = 'Hanya reservasi dengan status pending yang dapat ditolak';
     public const RESERVATION_END_TIME_AFTER_START = 'Waktu selesai harus setelah waktu mulai';
+    public const RESERVATION_CALENDAR_SUCCESS = 'Data kalender reservasi berhasil diambil';
 
     public const NO_UPDATE_PAYLOAD = 'Tidak ada data yang dikirim untuk diperbarui';
+
+    public const USER_LIST_SUCCESS = 'Data pengguna berhasil diambil';
 
     private function __construct()
     {
