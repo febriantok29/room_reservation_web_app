@@ -99,30 +99,34 @@
                             </td>
                             <td>
                                 <div class="table-action-group">
-                                    {{-- For final status (completed, rejected, cancelled), show detail only --}}
-                                    @if (in_array($reservation->status, ['completed', 'rejected', 'cancelled']))
-                                        <a href="{{ route('admin.reservations.edit', $reservation->id) }}"
-                                            class="btn btn-info btn-xs">
-                                            <i class="fas fa-eye"></i> Detail
-                                        </a>
-                                    @else
-                                        {{-- For pending/approved, show edit & action buttons --}}
+                                    {{-- Detail button (always available) --}}
+                                    <a href="{{ route('admin.reservations.edit', $reservation->id) }}"
+                                        class="btn btn-info btn-xs">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </a>
+
+                                    {{-- Edit button (only for pending/approved) --}}
+                                    @if (in_array($reservation->status, ['pending', 'approved']))
                                         <a href="{{ route('admin.reservations.edit', $reservation->id) }}"
                                             class="btn btn-warning btn-xs">
                                             <i class="fas fa-edit"></i> Ubah
                                         </a>
+                                    @endif
 
-                                        @if ($reservation->status === 'approved' && $reservation->end_time->lte(now()))
-                                            <form action="{{ route('admin.reservations.complete', $reservation->id) }}"
-                                                method="POST" class="d-inline"
-                                                onsubmit="return confirm('Tandai reservasi ini sebagai selesai?')">
-                                                @csrf
-                                                <button type="submit" class="btn btn-success btn-xs">
-                                                    <i class="fas fa-check"></i> Selesai
-                                                </button>
-                                            </form>
-                                        @endif
+                                    {{-- Complete button (for approved after end time) --}}
+                                    @if ($reservation->status === 'approved' && $reservation->end_time_local->lte(now()))
+                                        <form action="{{ route('admin.reservations.complete', $reservation->id) }}"
+                                            method="POST" class="d-inline"
+                                            onsubmit="return confirm('Tandai reservasi ini sebagai selesai?')">
+                                            @csrf
+                                            <button type="submit" class="btn btn-success btn-xs">
+                                                <i class="fas fa-check"></i> Selesai
+                                            </button>
+                                        </form>
+                                    @endif
 
+                                    {{-- Cancel button (only for pending/approved) --}}
+                                    @if (in_array($reservation->status, ['pending', 'approved']))
                                         <form action="{{ route('admin.reservations.destroy', $reservation->id) }}"
                                             method="POST" class="d-inline"
                                             onsubmit="return confirm('Yakin ingin membatalkan reservasi ini?')">
@@ -156,3 +160,5 @@
         </div>
     </div>
 @stop
+
+@include('admin.partials.timezone_detector')

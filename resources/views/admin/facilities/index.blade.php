@@ -62,6 +62,11 @@
                             <td>{{ $facility->slug }}</td>
                             <td>
                                 <div class="table-action-group">
+                                    <button type="button" class="btn btn-info btn-xs" data-toggle="modal"
+                                        data-target="#facilityDetailModal" data-facility-name="{{ $facility->name }}"
+                                        data-facility-slug="{{ $facility->slug }}">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
                                     <a href="{{ route('admin.facilities.edit', $facility->id) }}"
                                         class="btn btn-warning btn-xs">
                                         <i class="fas fa-edit"></i> Ubah
@@ -97,4 +102,51 @@
             {{ $facilities->links() }}
         </div>
     </div>
+
+    {{-- Facility Detail Modal --}}
+    <div class="modal fade" id="facilityDetailModal" tabindex="-1" role="dialog"
+        aria-labelledby="facilityDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title text-white" id="facilityDetailModalLabel">
+                        <i class="fas fa-plug"></i> Detail Fasilitas
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Nama</label>
+                        <div class="form-control-plaintext" id="facilityName">-</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Slug</label>
+                        <div class="form-control-plaintext" id="facilitySlug">-</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const facilityDetailModal = document.getElementById('facilityDetailModal');
+            if (facilityDetailModal) {
+                facilityDetailModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    document.getElementById('facilityName').textContent = button.getAttribute(
+                        'data-facility-name');
+                    document.getElementById('facilitySlug').textContent = button.getAttribute(
+                        'data-facility-slug');
+                });
+            }
+        });
+    </script>
 @stop
+
+@include('admin.partials.timezone_detector')

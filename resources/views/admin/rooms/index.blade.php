@@ -228,3 +228,5 @@
         });
     </script>
 @stop
+
+@include('admin.partials.timezone_detector')
