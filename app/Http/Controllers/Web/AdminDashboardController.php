@@ -461,6 +461,9 @@ class AdminDashboardController extends Controller
     public function approvals(Request $request): View
     {
         $this->ensureAdminAccess($request);
+        // Backstop: ensure pending reservations whose start_time has passed are cancelled
+        // before showing the approvals list, same as reservations() page.
+        $this->reservationService->autoTransition();
 
         $searchQuery = trim((string) $request->query('q', ''));
 
@@ -536,9 +539,31 @@ class AdminDashboardController extends Controller
         return WebMessages::RESERVATION_VALIDATION_ATTRIBUTES;
     }
 
+    /**
+     * Format errors from ReservationService result into a key=>message array
+     * suitable for withErrors().
+     */
+    private function formatReservationServiceErrors(array $result): array
+    {
+        $errors = [];
+
+        // Top-level message always shown under the generic 'reservation' key
+        $errors['reservation'] = $result['message'];
+
+        // If CSP returned a list of constraint violations, surface them individually
+        if (!empty($result['errors']['constraints'])) {
+            foreach ($result['errors']['constraints'] as $index => $constraintError) {
+                $errors["constraint_{$index}"] = $constraintError;
+            }
+        }
+
+        return $errors;
+    }
+
     private function buildReservationDateTimes(string $date, string $startClock, string $endClock): array
     {
-        return TimezoneHelper::buildDateTimes($date, $startClock, $endClock);
+        // Use the user's session timezone (or config default) for correct local→UTC conversion
+        return TimezoneHelper::buildDateTimes($date, $startClock, $endClock, TimezoneHelper::getLocalTimezone());
     }
 
     public function setUserTimezone(Request $request): JsonResponse
