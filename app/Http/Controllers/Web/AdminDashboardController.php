@@ -117,8 +117,7 @@ class AdminDashboardController extends Controller
             'description' => 'nullable|string',
             'capacity' => 'required|integer|min:1|max:1000',
             'facility_ids' => 'nullable|array',
-            'facility_ids.*' => 'nullable|string|max:50',
-            'facility_ids_input' => 'nullable|string|max:500',
+            'facility_ids.*' => 'nullable|string|exists:m_facilities,id',
             'is_maintenance' => 'nullable|boolean',
         ]);
 
@@ -134,8 +133,7 @@ class AdminDashboardController extends Controller
         $room->updated_by = $request->user()->id;
         $room->save();
 
-        $facilityInputs = $validated['facility_ids'] ?? Facility::parseInput($validated['facility_ids_input'] ?? null);
-        $facilityIds = Facility::resolveIds($facilityInputs);
+        $facilityIds = array_filter($validated['facility_ids'] ?? []);
         $room->facilities()->sync($facilityIds);
 
         return redirect()
@@ -170,8 +168,7 @@ class AdminDashboardController extends Controller
             'description' => 'nullable|string',
             'capacity' => 'required|integer|min:1|max:1000',
             'facility_ids' => 'nullable|array',
-            'facility_ids.*' => 'nullable|string|max:50',
-            'facility_ids_input' => 'nullable|string|max:500',
+            'facility_ids.*' => 'nullable|string|exists:m_facilities,id',
             'is_maintenance' => 'nullable|boolean',
         ]);
 
@@ -185,8 +182,7 @@ class AdminDashboardController extends Controller
         $room->updated_by = $request->user()->id;
         $room->save();
 
-        $facilityInputs = $validated['facility_ids'] ?? Facility::parseInput($validated['facility_ids_input'] ?? null);
-        $facilityIds = Facility::resolveIds($facilityInputs);
+        $facilityIds = array_filter($validated['facility_ids'] ?? []);
         $room->facilities()->sync($facilityIds);
 
         return redirect()

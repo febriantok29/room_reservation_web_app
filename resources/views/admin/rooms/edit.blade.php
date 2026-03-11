@@ -33,9 +33,7 @@
             <x-form.row>
                 <div class="col-lg-6">
                     @include('admin.rooms.partials.facility_chip_input_field', [
-                        'hiddenValue' => old(
-                            'facility_ids_input',
-                            $room->facilities->pluck('name')->implode(', ')),
+                        'selectedIds' => old('facility_ids', $room->facilities->pluck('id')->toArray()),
                     ])
                 </div>
             </x-form.row>
@@ -52,28 +50,10 @@
 @stop
 
 @section('css')
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css"
-        rel="stylesheet" />
 @stop
 
 @section('js')
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     @include('admin.partials.form_submit_guard_script')
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const allFacilities = @json($allFacilities);
-            const selectedFacilities = @json($room->facilities);
-
-            @include('admin.rooms.partials.facility_chip_input_script')
-
-            initializeRoomFacilitySelect({
-                allFacilities: allFacilities,
-                selectedFacilities: selectedFacilities
-            });
-        });
-    </script>
 @stop
 
 @include('admin.partials.timezone_detector')

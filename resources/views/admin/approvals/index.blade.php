@@ -64,6 +64,16 @@
                             <td>{{ $reservation->visitor_count }}</td>
                             <td>
                                 <div class="table-action-group">
+                                    <button type="button" class="btn btn-info btn-xs" data-toggle="modal"
+                                        data-target="#reservationDetailModal" data-id="{{ $reservation->id }}"
+                                        data-user="{{ $reservation->user?->full_name ?? '-' }}"
+                                        data-room="{{ $reservation->room?->name ?? '-' }}"
+                                        data-start="{{ $reservation->start_time_label }}"
+                                        data-end="{{ $reservation->end_time_label }}"
+                                        data-visitors="{{ $reservation->visitor_count }}"
+                                        data-purpose="{{ $reservation->purpose ?? '-' }}">
+                                        <i class="fas fa-eye"></i> Detail
+                                    </button>
                                     <form action="{{ route('admin.approvals.approve', $reservation->id) }}" method="POST"
                                         class="d-inline">
                                         @csrf
@@ -100,6 +110,72 @@
             {{ $pendingReservations->links() }}
         </div>
     </div>
+    {{-- Reservation Detail Modal --}}
+    <div class="modal fade" id="reservationDetailModal" tabindex="-1" role="dialog"
+        aria-labelledby="reservationDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reservationDetailModalLabel">Detail Reservasi</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-0">
+                    <table class="table table-sm table-bordered mb-0">
+                        <tbody>
+                            <tr>
+                                <th class="bg-light" style="width:38%">ID Reservasi</th>
+                                <td id="modal-detail-id"></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Pengguna</th>
+                                <td id="modal-detail-user"></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Ruangan</th>
+                                <td id="modal-detail-room"></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Waktu Mulai</th>
+                                <td id="modal-detail-start"></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Waktu Selesai</th>
+                                <td id="modal-detail-end"></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Jml. Pengunjung</th>
+                                <td id="modal-detail-visitors"></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Keperluan</th>
+                                <td id="modal-detail-purpose"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @stop
+
+@section('js')
+    <script>
+        $('#reservationDetailModal').on('show.bs.modal', function(event) {
+            var btn = $(event.relatedTarget);
+            $('#modal-detail-id').text(btn.data('id'));
+            $('#modal-detail-user').text(btn.data('user'));
+            $('#modal-detail-room').text(btn.data('room'));
+            $('#modal-detail-start').text(btn.data('start'));
+            $('#modal-detail-end').text(btn.data('end'));
+            $('#modal-detail-visitors').text(btn.data('visitors'));
+            $('#modal-detail-purpose').text(btn.data('purpose'));
+        });
+    </script>
+@endsection
 
 @include('admin.partials.timezone_detector')

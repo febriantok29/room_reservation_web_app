@@ -97,14 +97,10 @@
 
 @section('css')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css"
-        rel="stylesheet" />
 @stop
 
 @section('js')
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     @include('admin.partials.form_submit_guard_script')
 
     <script>
@@ -121,17 +117,9 @@
                 return (hour * 60) + minute;
             };
 
-            const allFacilities = @json(
-                $allFacilities->map(fn($facility) => [
-                            'slug' => $facility->slug,
-                            'name' => $facility->name,
-                        ])->values());
-
             @include('admin.reservations.partials.required_facility_filter_script')
 
-            initializeRequiredFacilityFilter({
-                allFacilities
-            });
+            initializeRequiredFacilityFilter();
 
             const pickerConfig = {
                 enableTime: true,

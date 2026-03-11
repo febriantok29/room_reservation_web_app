@@ -1,4 +1,6 @@
-const initializeRoomFacilitySelect = ({ allFacilities, selectedFacilities }) => {
+{{-- Script ini tidak lagi diperlukan.
+     Pill checkboxes menggunakan data-toggle="buttons" Bootstrap 4 (jQuery bawaan). --}}
+{{-- const initializeRoomFacilitySelect = ({ allFacilities, selectedFacilities }) => {
 const $select = $('#facility_ids');
 
 if (!$select.length) {
