@@ -105,8 +105,8 @@
                                         <i class="fas fa-eye"></i> Detail
                                     </a>
 
-                                    {{-- Edit button (only for pending/approved) --}}
-                                    @if (in_array($reservation->status, ['pending', 'approved']))
+                                    {{-- Edit button (only for pending) --}}
+                                    @if ($reservation->status === 'pending')
                                         <a href="{{ route('admin.reservations.edit', $reservation->id) }}"
                                             class="btn btn-warning btn-xs">
                                             <i class="fas fa-edit"></i> Ubah
@@ -125,8 +125,8 @@
                                         </form>
                                     @endif
 
-                                    {{-- Cancel button (only for pending/approved) --}}
-                                    @if (in_array($reservation->status, ['pending', 'approved']))
+                                    {{-- Cancel button (only for pending) --}}
+                                    @if ($reservation->status === 'pending')
                                         <form action="{{ route('admin.reservations.destroy', $reservation->id) }}"
                                             method="POST" class="d-inline"
                                             onsubmit="return confirm('Yakin ingin membatalkan reservasi ini?')">

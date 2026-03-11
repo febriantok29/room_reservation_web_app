@@ -1,76 +1,51 @@
-const initializeRequiredFacilityFilter = ({ allFacilities }) => {
-const $requiredFacilities = $('#required_facilities');
+const initializeRequiredFacilityFilter = () => {
+const filterGroup = document.getElementById('facility-filter-group');
 const roomSelectEl = document.getElementById('room_id');
+const countLabel = document.getElementById('room-count-label');
 
-if (!$requiredFacilities.length || !roomSelectEl) {
-console.error('Required elements not found:', {
-hasSelect: $requiredFacilities.length > 0,
-hasRoomSelect: !!roomSelectEl
-});
-return;
-}
+if (!filterGroup || !roomSelectEl) return;
 
-console.log('Initializing facility filter with:', {
-allFacilitiesCount: allFacilities?.length,
-allFacilities: allFacilities
-});
+const totalRooms = Array.from(roomSelectEl.options).filter(o => o.value !== '').length;
 
-// Prepare data for Select2
-const selectData = Array.isArray(allFacilities) && allFacilities.length > 0
-? allFacilities.map(facility => ({
-id: facility.slug,
-text: facility.name
-}))
-: [];
+const filterRooms = () => {
+const selected = Array.from(filterGroup.querySelectorAll('input[type="checkbox"]:checked'))
+.map(cb => cb.dataset.slug);
 
-console.log('Select2 data prepared:', selectData.length, 'items');
+let visibleCount = 0;
 
-// Initialize Select2
-$requiredFacilities.select2({
-theme: 'bootstrap4',
-placeholder: 'Klik untuk memilih fasilitas...',
-allowClear: true,
-closeOnSelect: false,
-width: '100%',
-data: selectData
-});
-
-// Filter rooms based on selected facilities
-const filterRoomsByFacilities = () => {
-const selectedFacilities = $requiredFacilities.val() || [];
-const roomOptions = Array.from(roomSelectEl.options).filter(option => option.value !== '');
-
-let visibleRoomCount = 0;
-
-roomOptions.forEach(option => {
+Array.from(roomSelectEl.options)
+.filter(o => o.value !== '')
+.forEach(option => {
 const roomFacilities = String(option.dataset.facilities || '')
-.split(',')
-.map(item => item.trim().toLowerCase())
-.filter(item => item !== '');
+.split(',').map(s => s.trim()).filter(Boolean);
 
-const matched = selectedFacilities.length === 0 ||
-selectedFacilities.every(slug => roomFacilities.includes(slug));
+const hidden = selected.length > 0 &&
+!selected.every(slug => roomFacilities.includes(slug));
 
-option.hidden = !matched;
-if (matched) visibleRoomCount++;
+option.hidden = hidden;
+if (!hidden) visibleCount++;
 });
 
-// Clear room selection if it's now hidden
-const selectedOption = roomSelectEl.selectedOptions[0];
-if (selectedOption && selectedOption.hidden) {
+// Hapus pilihan ruangan jika sekarang tersembunyi
+const current = roomSelectEl.options[roomSelectEl.selectedIndex];
+if (current && current.value && current.hidden) {
 roomSelectEl.value = '';
 }
 
-console.log('Room filtering:', {
-selectedFacilities,
-visibleRoomCount,
-totalRooms: roomOptions.length
-});
+// Update keterangan jumlah ruangan
+if (countLabel) {
+if (selected.length === 0) {
+countLabel.textContent = '';
+} else if (visibleCount === 0) {
+countLabel.textContent = '— Tidak ada ruangan yang sesuai.';
+countLabel.className = 'ml-1 font-weight-semibold text-danger';
+} else {
+countLabel.textContent = '— ' + visibleCount + ' ruangan tersedia.';
+countLabel.className = 'ml-1 font-weight-semibold text-success';
+}
+}
 };
 
-// Listen for changes and filter rooms
-$requiredFacilities.on('change', filterRoomsByFacilities);
-
-// Initial filter
-filterRoomsByFacilities();
+filterGroup.addEventListener('change', filterRooms);
+filterRooms(); // filter awal (kosong = tampilkan semua)
 };
