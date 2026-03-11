@@ -12,87 +12,159 @@
 @section('content')
     @include('admin.partials.flash_message')
 
-    <x-form.card action="{{ route('admin.reservations.store') }}" submit-guard loading-text="Menyimpan...">
-        <x-form.section title="Pemohon & Kebutuhan Ruangan" />
+    <div class="row">
 
-        <div class="row">
-            <x-form.field name="user_id" label="Pegawai/Pemohon" col-class="col-lg-6 col-md-6">
-                <select id="user_id" name="user_id" class="form-control">
-                    <option value="">-- Gunakan akun login (Admin) --</option>
-                    @foreach ($users as $user)
-                        <option value="{{ $user->id }}" @selected(old('user_id') === $user->id)>
-                            {{ $user->full_name }} - {{ $user->employee_id }}
-                        </option>
-                    @endforeach
-                </select>
-            </x-form.field>
+        {{-- Main Form (8 columns) --}}
+        <div class="col-lg-8">
+            <x-form.card action="{{ route('admin.reservations.store') }}" submit-guard loading-text="Menyimpan...">
+                <x-form.section title="Pemohon & Kebutuhan Ruangan" />
 
-            <div class="col-lg-6 col-md-6">
-                @include('admin.reservations.partials.required_facility_filter_field')
-            </div>
+                <div class="row">
+                    <x-form.field name="user_id" label="Pegawai/Pemohon" col-class="col-lg-6 col-md-6">
+                        <select id="user_id" name="user_id" class="form-control">
+                            <option value="">-- Gunakan akun login (Admin) --</option>
+                            @foreach ($users as $user)
+                                <option value="{{ $user->id }}" @selected(old('user_id') === $user->id)>
+                                    {{ $user->full_name }} - {{ $user->employee_id }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </x-form.field>
+
+                    <div class="col-lg-6 col-md-6">
+                        @include('admin.reservations.partials.required_facility_filter_field')
+                    </div>
+                </div>
+
+                <x-form.section title="Jadwal & Detail Reservasi" />
+
+                <x-form.field name="room_id" label="Ruangan" required col-class="col-md-12">
+                    <select id="room_id" name="room_id" class="form-control" required>
+                        <option value="">-- Pilih Ruangan --</option>
+                        @foreach ($rooms as $room)
+                            <option value="{{ $room->id }}"
+                                data-facilities="{{ $room->facilities->pluck('slug')->implode(',') }}"
+                                @selected(old('room_id') === $room->id)>
+                                {{ $room->name }} (Lantai {{ $room->floor }}) - Kapasitas: {{ $room->capacity }}
+                            </option>
+                        @endforeach
+                    </select>
+                </x-form.field>
+
+                <div class="row">
+                    <x-form.field name="reservation_date" label="Tanggal" type="date"
+                        value="{{ old('reservation_date') }}" required col-class="col-lg-4 col-md-6" />
+
+                    <x-form.field name="start_clock" label="Jam Mulai" required col-class="col-lg-4 col-md-6">
+                        <input type="text" id="start_clock" name="start_clock" class="form-control js-timepicker"
+                            value="{{ old('start_clock') }}" placeholder="Pilih jam" autocomplete="off" required>
+                    </x-form.field>
+
+                    <x-form.field name="end_clock" label="Jam Selesai" required col-class="col-lg-4 col-md-6">
+                        <input type="text" id="end_clock" name="end_clock" class="form-control js-timepicker"
+                            value="{{ old('end_clock') }}" placeholder="Pilih jam" autocomplete="off" required>
+                    </x-form.field>
+                </div>
+
+                <div class="row">
+                    <x-form.field name="visitor_count" label="Jumlah Pengunjung" type="number"
+                        value="{{ old('visitor_count', 1) }}" min="1" required col-class="col-lg-6 col-md-6" />
+                </div>
+
+                <x-form.field name="purpose" label="Tujuan" type="textarea" value="{{ old('purpose') }}" rows="3"
+                    hint="Opsional: Jelaskan keperluan reservasi ruangan ini." col-class="col-md-12" />
+
+                <x-form.actions back-url="{{ route('admin.reservations') }}" submit-text="Simpan" />
+            </x-form.card>
+
+            @if (config('app.debug'))
+                <div class="card card-outline card-warning mt-3">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-bug mr-1"></i> Mode Debug: cURL Uji CSP</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-2 text-muted">
+                            Isi form reservasi dulu, lalu klik tombol berikut untuk membuat cURL uji CSP berdasarkan data
+                            yang kamu input.
+                        </p>
+                        <button type="button" id="generate-csp-curl" class="btn btn-warning btn-sm mb-3">
+                            <i class="fas fa-terminal mr-1"></i> Generate cURL dari Input Form
+                        </button>
+                        <div id="csp-curl-wrapper" class="d-none">
+                            <textarea id="csp-curl-output" class="form-control" rows="16" readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
 
-        <x-form.section title="Jadwal & Detail Reservasi" />
-
-        <x-form.field name="room_id" label="Ruangan" required col-class="col-md-12">
-            <select id="room_id" name="room_id" class="form-control" required>
-                <option value="">-- Pilih Ruangan --</option>
-                @foreach ($rooms as $room)
-                    <option value="{{ $room->id }}"
-                        data-facilities="{{ $room->facilities->pluck('slug')->implode(',') }}" @selected(old('room_id') === $room->id)>
-                        {{ $room->name }} (Lantai {{ $room->floor }}) - Kapasitas: {{ $room->capacity }}
-                    </option>
-                @endforeach
-            </select>
-        </x-form.field>
-
-        <div class="row">
-            <x-form.field name="reservation_date" label="Tanggal" type="date" value="{{ old('reservation_date') }}"
-                required col-class="col-lg-4 col-md-6" />
-
-            <x-form.field name="start_clock" label="Jam Mulai" required col-class="col-lg-4 col-md-6">
-                <input type="text" id="start_clock" name="start_clock" class="form-control js-timepicker"
-                    value="{{ old('start_clock') }}" placeholder="Pilih jam" autocomplete="off" required>
-            </x-form.field>
-
-            <x-form.field name="end_clock" label="Jam Selesai" required col-class="col-lg-4 col-md-6">
-                <input type="text" id="end_clock" name="end_clock" class="form-control js-timepicker"
-                    value="{{ old('end_clock') }}" placeholder="Pilih jam" autocomplete="off" required>
-            </x-form.field>
-        </div>
-
-        <div class="row">
-            <x-form.field name="visitor_count" label="Jumlah Pengunjung" type="number"
-                value="{{ old('visitor_count', 1) }}" min="1" required col-class="col-lg-6 col-md-6" />
-        </div>
-
-        <x-form.field name="purpose" label="Tujuan" type="textarea" value="{{ old('purpose') }}" rows="3"
-            hint="Opsional: Jelaskan keperluan reservasi ruangan ini." col-class="col-md-12" />
-
-        <x-form.actions back-url="{{ route('admin.reservations') }}" submit-text="Simpan" />
-    </x-form.card>
-
-    @if (config('app.debug'))
-        <div class="card card-outline card-warning mt-3">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-bug mr-1"></i> Mode Debug: cURL Uji CSP</h3>
-            </div>
-            <div class="card-body">
-                <p class="mb-2 text-muted">
-                    Isi form reservasi dulu, lalu klik tombol berikut untuk membuat cURL uji CSP berdasarkan data yang kamu
-                    input.
-                </p>
-
-                <button type="button" id="generate-csp-curl" class="btn btn-warning btn-sm mb-3">
-                    <i class="fas fa-terminal mr-1"></i> Generate cURL dari Input Form
-                </button>
-
-                <div id="csp-curl-wrapper" class="d-none">
-                    <textarea id="csp-curl-output" class="form-control" rows="16" readonly></textarea>
+        {{-- Sidebar (4 columns) --}}
+        <div class="col-lg-4">
+            <div class="card card-admin sticky-top" style="top:70px;">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-info-circle mr-2 text-primary"></i> Panduan Reservasi</h3>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-3 py-2">
+                            <div class="d-flex align-items-start">
+                                <span class="badge badge-primary mr-2 mt-1" style="min-width:22px;">1</span>
+                                <div>
+                                    <div class="font-weight-bold small">Pemohon</div>
+                                    <div class="text-muted" style="font-size:.8rem;">Kosongkan jika reservasi untuk akun
+                                        admin. Pilih pegawai jika membuat atas nama orang lain.</div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item px-3 py-2">
+                            <div class="d-flex align-items-start">
+                                <span class="badge badge-primary mr-2 mt-1" style="min-width:22px;">2</span>
+                                <div>
+                                    <div class="font-weight-bold small">Fasilitas yang Dibutuhkan</div>
+                                    <div class="text-muted" style="font-size:.8rem;">Filter ruangan berdasarkan fasilitas
+                                        yang tersedia. Hanya ruangan yang memiliki semua fasilitas yang dipilih akan muncul.
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item px-3 py-2">
+                            <div class="d-flex align-items-start">
+                                <span class="badge badge-primary mr-2 mt-1" style="min-width:22px;">3</span>
+                                <div>
+                                    <div class="font-weight-bold small">Jadwal Reservasi</div>
+                                    <div class="text-muted" style="font-size:.8rem;">Pastikan jam mulai lebih awal dari
+                                        jam selesai. Sistem akan memverifikasi ketersediaan ruangan secara otomatis.</div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item px-3 py-2">
+                            <div class="d-flex align-items-start">
+                                <span class="badge badge-primary mr-2 mt-1" style="min-width:22px;">4</span>
+                                <div>
+                                    <div class="font-weight-bold small">Kapasitas</div>
+                                    <div class="text-muted" style="font-size:.8rem;">Jumlah pengunjung tidak boleh
+                                        melebihi kapasitas ruangan yang dipilih.</div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item px-3 py-2">
+                            <div class="d-flex align-items-start">
+                                <span class="badge badge-warning mr-2 mt-1" style="min-width:22px;"><i
+                                        class="fas fa-clock" style="font-size:.65rem;"></i></span>
+                                <div>
+                                    <div class="font-weight-bold small">Status Awal</div>
+                                    <div class="text-muted" style="font-size:.8rem;">Reservasi baru akan berstatus <span
+                                            class="badge badge-warning badge-sm">MENUNGGU</span> dan perlu disetujui oleh
+                                        admin.</div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
-    @endif
+
+    </div>
 @stop
 
 @section('css')
