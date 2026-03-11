@@ -1,0 +1,94 @@
+{
+    "name": "Login - Debug Mode (60s access, 1h refresh)",
+    "request": {
+        "method": "POST",
+        "header": [
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/auth/login",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+            ]
+        },
+        "body": {
+            "mode": "raw",
+            "raw": "{\n  \"login\": \"admin@roomreservation.com\",\n  \"password\": \"Admin@123\",\n  \"is_debug\": true,\n  \"access_token_ttl\": 60,\n  \"refresh_token_ttl\": 3600\n}"
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Debug mode",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/auth/login",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "login"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"login\": \"admin@roomreservation.com\",\n  \"password\": \"Admin@123\"\n}"
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Login berhasil",
+                "data": {
+                    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDEiLCJpc19hZG1pbiI6dHJ1ZSwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc0MTU4NjQwMCwiZXhwIjoxNzQxNjcyODAwfQ.demo_sig",
+                    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDEiLCJ0eXBlIjoicmVmcmVzaCIsImlhdCI6MTc0MTU4NjQwMCwiZXhwIjoxNzQyMTkxMjAwfQ.demo_sig",
+                    "token_type": "Bearer",
+                    "expires_in": 60,
+                    "is_debug": true
+                }
+            }
+        }
+    ],
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "exec": [
+                    "if (pm.response.code === 200) {",
+                    "    var d = pm.response.json();",
+                    "    pm.collectionVariables.set(\"access_token\", d.data.access_token);",
+                    "    pm.collectionVariables.set(\"refresh_token\", d.data.refresh_token);",
+                    "    console.log(\"✅ Debug login berhasil! TTL:\", d.data.expires_in, \"detik\");",
+                    "}"
+                ]
+            }
+        }
+    ]
+}

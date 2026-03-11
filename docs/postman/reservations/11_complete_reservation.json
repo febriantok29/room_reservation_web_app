@@ -1,0 +1,199 @@
+{
+    "name": "Complete Reservation",
+    "request": {
+        "method": "POST",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/complete",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "reservations",
+                "{{reservation_id}}",
+                "complete"
+            ]
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Selesai",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/complete",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reservations",
+                        "{{reservation_id}}",
+                        "complete"
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Reservasi berhasil selesai",
+                "data": {
+                    "id": "RES-20260310-002",
+                    "user_id": "550e8400-e29b-41d4-a716-446655440003",
+                    "room_id": "RM-F01-001",
+                    "start_time": "2026-03-16T01:00:00.000000Z",
+                    "end_time": "2026-03-16T03:00:00.000000Z",
+                    "purpose": "Rapat koordinasi tim",
+                    "visitor_count": 5,
+                    "status": "completed",
+                    "created_by": "550e8400-e29b-41d4-a716-446655440002",
+                    "updated_by": "550e8400-e29b-41d4-a716-446655440002",
+                    "created_at": "2026-03-10T07:00:00.000000Z",
+                    "updated_at": "2026-03-10T07:00:00.000000Z",
+                    "deleted_at": null,
+                    "room": {
+                        "id": "RM-F01-001",
+                        "name": "R. Rapat Utama",
+                        "floor": 1,
+                        "description": "Ruangan rapat utama",
+                        "capacity": 20,
+                        "is_maintenance": false,
+                        "created_by": "550e8400-e29b-41d4-a716-446655440001",
+                        "updated_by": "550e8400-e29b-41d4-a716-446655440001",
+                        "created_at": "2026-01-01T00:00:00.000000Z",
+                        "updated_at": "2026-01-01T00:00:00.000000Z",
+                        "deleted_at": null,
+                        "facilities": [
+                            {
+                                "id": "550e8400-e29b-41d4-a716-446655440100",
+                                "name": "Proyektor",
+                                "slug": "proyektor"
+                            },
+                            {
+                                "id": "550e8400-e29b-41d4-a716-446655440101",
+                                "name": "AC",
+                                "slug": "ac"
+                            }
+                        ]
+                    },
+                    "user": {
+                        "id": "550e8400-e29b-41d4-a716-446655440003",
+                        "employee_id": "EMP-2025-00005",
+                        "first_name": "Siti",
+                        "last_name": "Rahayu",
+                        "email": "siti.rahayu@example.com",
+                        "date_of_birth": "1992-08-20",
+                        "is_admin": false,
+                        "is_active": true,
+                        "created_at": "2025-01-01T00:00:00.000000Z",
+                        "updated_at": "2025-01-01T00:00:00.000000Z",
+                        "deleted_at": null
+                    }
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 422 - Status bukan approved",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/complete",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reservations",
+                        "{{reservation_id}}",
+                        "complete"
+                    ]
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "INVALID_RESERVATION_STATUS",
+                "message": "Reservasi tidak dapat ditandai selesai"
+            }
+        },
+        {
+            "name": "Example ❌ 422 - Belum berakhir",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/complete",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reservations",
+                        "{{reservation_id}}",
+                        "complete"
+                    ]
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "RESERVATION_NOT_FINISHED",
+                "message": "Reservasi belum berakhir"
+            }
+        }
+    ]
+}

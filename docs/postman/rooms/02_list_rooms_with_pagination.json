@@ -1,0 +1,135 @@
+{
+    "name": "List Rooms - With Pagination",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/rooms?per_page=10&page=1",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "rooms"
+            ],
+            "query": [
+                {
+                    "key": "per_page",
+                    "value": "10"
+                },
+                {
+                    "key": "page",
+                    "value": "1"
+                }
+            ]
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Paginated",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms?per_page=10&page=1",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms"
+                    ],
+                    "query": [
+                        {
+                            "key": "per_page",
+                            "value": "10"
+                        },
+                        {
+                            "key": "page",
+                            "value": "1"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Data ruangan berhasil diambil",
+                "data": [
+                    {
+                        "id": "RM-F01-001",
+                        "name": "R. Rapat Utama",
+                        "floor": 1,
+                        "description": "Ruangan rapat utama",
+                        "capacity": 20,
+                        "is_maintenance": false,
+                        "created_by": "550e8400-e29b-41d4-a716-446655440001",
+                        "updated_by": "550e8400-e29b-41d4-a716-446655440001",
+                        "created_at": "2026-01-01T00:00:00.000000Z",
+                        "updated_at": "2026-01-01T00:00:00.000000Z",
+                        "deleted_at": null,
+                        "image_id": "a3f9e2c1-7b4d-4e8a-9f2b-1c5d8e7a3f9e.jpg",
+                        "image_url": "http://127.0.0.1:8000/storage/rooms/a3f9e2c1-7b4d-4e8a-9f2b-1c5d8e7a3f9e.jpg",
+                        "facilities": [
+                            {
+                                "id": "550e8400-e29b-41d4-a716-446655440100",
+                                "name": "Proyektor",
+                                "slug": "proyektor"
+                            },
+                            {
+                                "id": "550e8400-e29b-41d4-a716-446655440101",
+                                "name": "AC",
+                                "slug": "ac"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "RM-F02-001",
+                        "name": "R. Diskusi A",
+                        "floor": 2,
+                        "description": "Ruangan diskusi kecil",
+                        "capacity": 8,
+                        "is_maintenance": false,
+                        "created_by": "550e8400-e29b-41d4-a716-446655440001",
+                        "updated_by": "550e8400-e29b-41d4-a716-446655440001",
+                        "created_at": "2026-01-01T00:00:00.000000Z",
+                        "updated_at": "2026-01-01T00:00:00.000000Z",
+                        "deleted_at": null,
+                        "image_id": null,
+                        "image_url": null,
+                        "facilities": []
+                    }
+                ],
+                "metadata": {
+                    "total": 5,
+                    "per_page": 10,
+                    "current_page": 1,
+                    "last_page": 1,
+                    "from": 1,
+                    "to": 5
+                }
+            }
+        }
+    ]
+}

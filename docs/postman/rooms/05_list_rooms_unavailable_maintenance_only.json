@@ -1,0 +1,103 @@
+{
+    "name": "List Rooms - Unavailable (Maintenance) Only",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/rooms?available_only=false",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "rooms"
+            ],
+            "query": [
+                {
+                    "key": "available_only",
+                    "value": "false"
+                }
+            ]
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Hanya maintenance",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms?available_only=false",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms"
+                    ],
+                    "query": [
+                        {
+                            "key": "available_only",
+                            "value": "false"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Data ruangan berhasil diambil",
+                "data": [
+                    {
+                        "id": "RM-F03-001",
+                        "name": "R. Besar VIP",
+                        "floor": 3,
+                        "description": "Ruangan rapat utama",
+                        "capacity": 20,
+                        "is_maintenance": true,
+                        "created_by": "550e8400-e29b-41d4-a716-446655440001",
+                        "updated_by": "550e8400-e29b-41d4-a716-446655440001",
+                        "created_at": "2026-01-01T00:00:00.000000Z",
+                        "updated_at": "2026-01-01T00:00:00.000000Z",
+                        "deleted_at": null,
+                        "image_id": null,
+                        "image_url": null,
+                        "facilities": [
+                            {
+                                "id": "550e8400-e29b-41d4-a716-446655440100",
+                                "name": "Proyektor",
+                                "slug": "proyektor"
+                            },
+                            {
+                                "id": "550e8400-e29b-41d4-a716-446655440101",
+                                "name": "AC",
+                                "slug": "ac"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

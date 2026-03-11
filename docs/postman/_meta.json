@@ -1,0 +1,94 @@
+{
+    "info": {
+        "name": "Room Reservation API - SKRIPSI",
+        "description": "API documentation untuk sistem reservasi ruang meeting dengan JWT authentication.\n\n## Cara Penggunaan\n1. Jalankan **Login - Valid Credentials (Admin)** untuk mendapatkan token\n2. Token otomatis tersimpan di `access_token` collection variable\n3. Semua request lain menggunakan `Bearer {{access_token}}`\n\n## Roles\n- **Admin**: akses penuh ke semua endpoint\n- **User**: bisa membuat/melihat reservasi milik sendiri, read-only untuk room & fasilitas\n\n## Timezone\n- Semua datetime dalam format UTC (ISO 8601)\n- Contoh: `2026-03-15T02:00:00Z` = 09:00 WIB",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "refresh_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "user_access_token",
+            "value": "",
+            "type": "string",
+            "description": "Token milik user non-admin (login pakai EMP-2025-00005)"
+        },
+        {
+            "key": "room_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "availability_date",
+            "value": "2026-03-15",
+            "type": "string"
+        },
+        {
+            "key": "availability_interval",
+            "value": "30",
+            "type": "string"
+        },
+        {
+            "key": "reservation_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "reservation_start_time",
+            "value": "2026-04-01T02:00:00Z",
+            "type": "string",
+            "description": "UTC time (02:00 UTC = 09:00 WIB)"
+        },
+        {
+            "key": "reservation_end_time",
+            "value": "2026-04-01T05:00:00Z",
+            "type": "string",
+            "description": "UTC time (05:00 UTC = 12:00 WIB)"
+        },
+        {
+            "key": "reservation_status_filter",
+            "value": "pending",
+            "type": "string"
+        },
+        {
+            "key": "reservation_date_from",
+            "value": "2026-03-01T00:00:00Z",
+            "type": "string"
+        },
+        {
+            "key": "reservation_date_to",
+            "value": "2026-03-31T23:59:59Z",
+            "type": "string"
+        },
+        {
+            "key": "facility_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "user_id",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "folder_order": [
+        "Authentication",
+        "Users",
+        "Rooms",
+        "Facilities",
+        "Reservations"
+    ]
+}

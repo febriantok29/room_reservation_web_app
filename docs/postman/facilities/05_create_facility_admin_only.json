@@ -1,0 +1,249 @@
+{
+    "name": "Create Facility (Admin Only)",
+    "request": {
+        "method": "POST",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            },
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/facilities",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "facilities"
+            ]
+        },
+        "body": {
+            "mode": "raw",
+            "raw": "{\n  \"name\": \"Proyektor\"\n}"
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 201 Created",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/facilities",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "facilities"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"Proyektor\"\n}"
+                }
+            },
+            "status": "Created",
+            "code": 201,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Fasilitas berhasil ditambahkan",
+                "data": {
+                    "id": "550e8400-e29b-41d4-a716-446655440100",
+                    "name": "Proyektor",
+                    "slug": "proyektor",
+                    "created_at": "2026-01-01T00:00:00.000000Z",
+                    "updated_at": "2026-01-01T00:00:00.000000Z",
+                    "deleted_at": null
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 403 Forbidden - Bukan admin",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{user_access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/facilities",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "facilities"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"Proyektor\"\n}"
+                }
+            },
+            "status": "Forbidden",
+            "code": 403,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "FORBIDDEN",
+                "message": "Anda tidak memiliki akses ke resource ini"
+            }
+        },
+        {
+            "name": "Example ✅ 422 - Nama duplikat (idempotent firstOrCreate)",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/facilities",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "facilities"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"Proyektor\"\n}"
+                }
+            },
+            "status": "Created",
+            "code": 201,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Fasilitas berhasil ditambahkan",
+                "data": {
+                    "id": "550e8400-e29b-41d4-a716-446655440100",
+                    "name": "Proyektor",
+                    "slug": "proyektor",
+                    "created_at": "2026-01-01T00:00:00.000000Z",
+                    "updated_at": "2026-01-01T00:00:00.000000Z",
+                    "deleted_at": null
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 422 Validation Error - Nama kosong",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/facilities",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "facilities"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"name\": \"\"}"
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "VALIDATION_ERROR",
+                "message": "Data yang dikirim tidak valid",
+                "errors": {
+                    "name": [
+                        "The name field is required."
+                    ]
+                }
+            }
+        }
+    ],
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "exec": [
+                    "if (pm.response.code === 201) {",
+                    "    pm.collectionVariables.set(\"facility_id\", pm.response.json().data.id);",
+                    "    console.log(\"✅ Facility dibuat:\", pm.response.json().data.id);",
+                    "} else { console.log(\"❌ Gagal:\", pm.response.json()); }"
+                ]
+            }
+        }
+    ]
+}

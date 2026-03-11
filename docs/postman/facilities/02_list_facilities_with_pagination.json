@@ -1,0 +1,100 @@
+{
+    "name": "List Facilities - With Pagination",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/facilities?per_page=10",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "facilities"
+            ],
+            "query": [
+                {
+                    "key": "per_page",
+                    "value": "10"
+                }
+            ]
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Paginated",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/facilities?per_page=10",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "facilities"
+                    ],
+                    "query": [
+                        {
+                            "key": "per_page",
+                            "value": "10"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Data fasilitas berhasil diambil",
+                "data": [
+                    {
+                        "id": "550e8400-e29b-41d4-a716-446655440100",
+                        "name": "Proyektor",
+                        "slug": "proyektor",
+                        "created_at": "2026-01-01T00:00:00.000000Z",
+                        "updated_at": "2026-01-01T00:00:00.000000Z",
+                        "deleted_at": null
+                    },
+                    {
+                        "id": "550e8400-e29b-41d4-a716-446655440101",
+                        "name": "AC",
+                        "slug": "ac",
+                        "created_at": "2026-01-01T00:00:00.000000Z",
+                        "updated_at": "2026-01-01T00:00:00.000000Z",
+                        "deleted_at": null
+                    }
+                ],
+                "metadata": {
+                    "total": 2,
+                    "per_page": 10,
+                    "current_page": 1,
+                    "last_page": 1,
+                    "from": 1,
+                    "to": 2
+                }
+            }
+        }
+    ]
+}

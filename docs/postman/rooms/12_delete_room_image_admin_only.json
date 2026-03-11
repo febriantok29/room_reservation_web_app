@@ -1,0 +1,188 @@
+{
+    "name": "Delete Room Image (Admin Only)",
+    "request": {
+        "method": "DELETE",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/rooms/{{room_id}}/image",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "rooms",
+                "{{room_id}}",
+                "image"
+            ]
+        },
+        "description": "Hapus foto ruangan yang sudah diunggah. Hanya admin yang bisa mengakses."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Foto berhasil dihapus",
+            "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/{{room_id}}/image",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "{{room_id}}",
+                        "image"
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Foto ruangan berhasil dihapus",
+                "data": null
+            }
+        },
+        {
+            "name": "Example ❌ 403 Forbidden - Bukan admin",
+            "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{user_access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/{{room_id}}/image",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "{{room_id}}",
+                        "image"
+                    ]
+                }
+            },
+            "status": "Forbidden",
+            "code": 403,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "FORBIDDEN",
+                "message": "Anda tidak memiliki akses ke resource ini"
+            }
+        },
+        {
+            "name": "Example ❌ 404 Not Found - Ruangan tidak ditemukan",
+            "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/INVALID-ID/image",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "INVALID-ID",
+                        "image"
+                    ]
+                }
+            },
+            "status": "Not Found",
+            "code": 404,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "NOT_FOUND",
+                "message": "Ruangan tidak ditemukan"
+            }
+        },
+        {
+            "name": "Example ❌ 404 Not Found - Ruangan belum punya foto",
+            "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/{{room_id}}/image",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "{{room_id}}",
+                        "image"
+                    ]
+                }
+            },
+            "status": "Not Found",
+            "code": 404,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "IMAGE_NOT_FOUND",
+                "message": "Ruangan ini belum memiliki foto"
+            }
+        }
+    ]
+}

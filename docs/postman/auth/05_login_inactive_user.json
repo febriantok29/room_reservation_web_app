@@ -1,0 +1,73 @@
+{
+    "name": "Login - Inactive User",
+    "request": {
+        "method": "POST",
+        "header": [
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/auth/login",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+            ]
+        },
+        "body": {
+            "mode": "raw",
+            "raw": "{\n  \"login\": \"EMP-2025-00010\",\n  \"password\": \"User@123\"\n}"
+        }
+    },
+    "response": [
+        {
+            "name": "Example ❌ 403 Forbidden - Akun dinonaktifkan",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/auth/login",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "login"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"login\": \"EMP-2025-00005\",\n  \"password\": \"User@123\"\n}"
+                }
+            },
+            "status": "Forbidden",
+            "code": 403,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "USER_INACTIVE",
+                "message": "Akun Anda telah dinonaktifkan"
+            }
+        }
+    ]
+}

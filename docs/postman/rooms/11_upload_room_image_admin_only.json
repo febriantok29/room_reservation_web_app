@@ -1,0 +1,460 @@
+{
+    "name": "Upload Room Image (Admin Only)",
+    "request": {
+        "method": "POST",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/rooms/{{room_id}}/image",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "rooms",
+                "{{room_id}}",
+                "image"
+            ]
+        },
+        "body": {
+            "mode": "formdata",
+            "formdata": [
+                {
+                    "key": "image",
+                    "type": "file",
+                    "src": "",
+                    "description": "File gambar (jpg/jpeg/png/webp). Maks 10 MB. File > 2 MB otomatis dikompres."
+                }
+            ]
+        },
+        "description": "Unggah atau ganti foto ruangan. Gunakan `multipart/form-data`.\n\n- Hanya admin yang bisa mengakses.\n- Format yang diterima: `jpg`, `jpeg`, `png`, `webp`.\n- Batas ukuran server: **10 MB**.\n- File lebih dari 2 MB dikompres otomatis ke JPEG."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Gambar berhasil diunggah",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/{{room_id}}/image",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "{{room_id}}",
+                        "image"
+                    ]
+                },
+                "body": {
+                    "mode": "formdata",
+                    "formdata": [
+                        {
+                            "key": "image",
+                            "type": "file",
+                            "src": ""
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Foto ruangan berhasil diunggah",
+                "data": {
+                    "image_id": "a3f9e2c1-7b4d-4e8a-9f2b-1c5d8e7a3f9e.jpg",
+                    "image_url": "http://127.0.0.1:8000/storage/rooms/a3f9e2c1-7b4d-4e8a-9f2b-1c5d8e7a3f9e.jpg",
+                    "size_bytes": 198432,
+                    "was_compressed": true
+                }
+            }
+        },
+        {
+            "name": "Example ✅ 200 OK - Gambar diunggah tanpa kompresi",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/{{room_id}}/image",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "{{room_id}}",
+                        "image"
+                    ]
+                },
+                "body": {
+                    "mode": "formdata",
+                    "formdata": [
+                        {
+                            "key": "image",
+                            "type": "file",
+                            "src": ""
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Foto ruangan berhasil diunggah",
+                "data": {
+                    "image_id": "b7c2d8f4-1a3e-5b9c-0d4f-2e6a8b1c3d5e.jpg",
+                    "image_url": "http://127.0.0.1:8000/storage/rooms/b7c2d8f4-1a3e-5b9c-0d4f-2e6a8b1c3d5e.jpg",
+                    "size_bytes": 854210,
+                    "was_compressed": false
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 403 Forbidden - Bukan admin",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{user_access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/{{room_id}}/image",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "{{room_id}}",
+                        "image"
+                    ]
+                },
+                "body": {
+                    "mode": "formdata",
+                    "formdata": [
+                        {
+                            "key": "image",
+                            "type": "file",
+                            "src": ""
+                        }
+                    ]
+                }
+            },
+            "status": "Forbidden",
+            "code": 403,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "FORBIDDEN",
+                "message": "Anda tidak memiliki akses ke resource ini"
+            }
+        },
+        {
+            "name": "Example ❌ 404 Not Found - Ruangan tidak ditemukan",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/INVALID-ID/image",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "INVALID-ID",
+                        "image"
+                    ]
+                },
+                "body": {
+                    "mode": "formdata",
+                    "formdata": [
+                        {
+                            "key": "image",
+                            "type": "file",
+                            "src": ""
+                        }
+                    ]
+                }
+            },
+            "status": "Not Found",
+            "code": 404,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "NOT_FOUND",
+                "message": "Ruangan tidak ditemukan"
+            }
+        },
+        {
+            "name": "Example ❌ 422 Validation Error - File gambar wajib / format salah",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/{{room_id}}/image",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "{{room_id}}",
+                        "image"
+                    ]
+                },
+                "body": {
+                    "mode": "formdata",
+                    "formdata": []
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "VALIDATION_ERROR",
+                "message": "Data yang dikirim tidak valid",
+                "errors": {
+                    "image": [
+                        "File gambar wajib diunggah."
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 422 Validation Error - Format tidak didukung",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/{{room_id}}/image",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "{{room_id}}",
+                        "image"
+                    ]
+                },
+                "body": {
+                    "mode": "formdata",
+                    "formdata": [
+                        {
+                            "key": "image",
+                            "type": "file",
+                            "src": "",
+                            "description": "Kirim file .gif atau .pdf untuk tes ini"
+                        }
+                    ]
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "VALIDATION_ERROR",
+                "message": "Data yang dikirim tidak valid",
+                "errors": {
+                    "image": [
+                        "Format gambar harus jpg, jpeg, png, atau webp."
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 422 Validation Error - Ukuran melebihi 10 MB",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/{{room_id}}/image",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "{{room_id}}",
+                        "image"
+                    ]
+                },
+                "body": {
+                    "mode": "formdata",
+                    "formdata": [
+                        {
+                            "key": "image",
+                            "type": "file",
+                            "src": "",
+                            "description": "Kirim file > 10 MB untuk tes ini"
+                        }
+                    ]
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "VALIDATION_ERROR",
+                "message": "Data yang dikirim tidak valid",
+                "errors": {
+                    "image": [
+                        "Ukuran file maksimal 10 MB."
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 500 - Upload gagal (server error)",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/{{room_id}}/image",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "{{room_id}}",
+                        "image"
+                    ]
+                },
+                "body": {
+                    "mode": "formdata",
+                    "formdata": [
+                        {
+                            "key": "image",
+                            "type": "file",
+                            "src": ""
+                        }
+                    ]
+                }
+            },
+            "status": "Internal Server Error",
+            "code": 500,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "IMAGE_UPLOAD_FAILED",
+                "message": "Gagal mengunggah gambar, coba lagi"
+            }
+        }
+    ]
+}

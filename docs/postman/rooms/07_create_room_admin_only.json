@@ -1,0 +1,204 @@
+{
+    "name": "Create Room (Admin Only)",
+    "request": {
+        "method": "POST",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            },
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/rooms",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "rooms"
+            ]
+        },
+        "body": {
+            "mode": "raw",
+            "raw": "{\n  \"name\": \"R. Uji API\",\n  \"floor\": 5,\n  \"description\": \"Ruangan untuk pengujian API\",\n  \"capacity\": 12,\n  \"is_maintenance\": false,\n  \"facility_ids\": []\n}"
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 201 Created",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"R. Uji API\",\n  \"floor\": 5,\n  \"description\": \"Ruangan untuk pengujian API\",\n  \"capacity\": 12,\n  \"is_maintenance\": false,\n  \"facility_ids\": []\n}"
+                }
+            },
+            "status": "Created",
+            "code": 201,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Ruangan berhasil ditambahkan",
+                "data": {
+                    "id": "RM-F05-001",
+                    "name": "R. Uji API",
+                    "floor": 5,
+                    "description": "Ruangan untuk pengujian API",
+                    "capacity": 12,
+                    "is_maintenance": false,
+                    "created_by": "550e8400-e29b-41d4-a716-446655440001",
+                    "updated_by": "550e8400-e29b-41d4-a716-446655440001",
+                    "created_at": "2026-03-10T07:00:00.000000Z",
+                    "updated_at": "2026-03-10T07:00:00.000000Z",
+                    "deleted_at": null,
+                    "image_id": null,
+                    "image_url": null,
+                    "facilities": []
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 403 Forbidden - Bukan admin",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{user_access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"R. Uji API\",\n  \"floor\": 5,\n  \"description\": \"Ruangan untuk pengujian API\",\n  \"capacity\": 12,\n  \"is_maintenance\": false,\n  \"facility_ids\": []\n}"
+                }
+            },
+            "status": "Forbidden",
+            "code": 403,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "FORBIDDEN",
+                "message": "Anda tidak memiliki akses ke resource ini"
+            }
+        },
+        {
+            "name": "Example ❌ 422 Validation Error - Nama sudah ada",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"R. Uji API\",\n  \"floor\": 5,\n  \"description\": \"Ruangan untuk pengujian API\",\n  \"capacity\": 12,\n  \"is_maintenance\": false,\n  \"facility_ids\": []\n}"
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "VALIDATION_ERROR",
+                "message": "Data yang dikirim tidak valid",
+                "errors": {
+                    "name": [
+                        "The name has already been taken."
+                    ]
+                }
+            }
+        }
+    ],
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "exec": [
+                    "if (pm.response.code === 201) {",
+                    "    pm.collectionVariables.set(\"room_id\", pm.response.json().data.id);",
+                    "    console.log(\"✅ Room dibuat:\", pm.response.json().data.id);",
+                    "} else { console.log(\"❌ Gagal:\", pm.response.json()); }"
+                ]
+            }
+        }
+    ]
+}
