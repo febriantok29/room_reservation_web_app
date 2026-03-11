@@ -305,34 +305,52 @@ class ReservationService
             ];
         }
 
-        $constraint = $this->cspService->validateReservation(
-            $reservation->room_id,
-            $reservation->start_time,
-            $reservation->end_time,
-            (int) $reservation->visitor_count,
-            $reservation->id
-        );
+        return DB::transaction(function () use ($actor, $reservation) {
+            // Lock the room row to prevent concurrent approvals of conflicting reservations
+            DB::table('m_rooms')->where('id', $reservation->room_id)->lockForUpdate()->first();
 
-        if (!$constraint['valid']) {
+            // Re-read reservation inside transaction to get the latest status
+            $reservation->refresh();
+
+            if (!$reservation->isPending()) {
+                return [
+                    'success' => false,
+                    'status_code' => 422,
+                    'error_code' => ApiErrorCodes::INVALID_RESERVATION_STATUS,
+                    'message' => ApiMessages::RESERVATION_APPROVE_PENDING_ONLY,
+                    'errors' => [],
+                ];
+            }
+
+            $constraint = $this->cspService->validateReservation(
+                $reservation->room_id,
+                $reservation->start_time,
+                $reservation->end_time,
+                (int) $reservation->visitor_count,
+                $reservation->id
+            );
+
+            if (!$constraint['valid']) {
+                return [
+                    'success' => false,
+                    'status_code' => 422,
+                    'error_code' => ApiErrorCodes::RESERVATION_CONSTRAINT_FAILED,
+                    'message' => ApiMessages::RESERVATION_CONSTRAINT_APPROVE_FAILED,
+                    'errors' => ['constraints' => $constraint['errors']],
+                ];
+            }
+
+            $reservation->status = 'approved';
+            $reservation->updated_by = $actor->id;
+            $reservation->save();
+            $reservation->load(['room', 'user']);
+
             return [
-                'success' => false,
-                'status_code' => 422,
-                'error_code' => ApiErrorCodes::RESERVATION_CONSTRAINT_FAILED,
-                'message' => ApiMessages::RESERVATION_CONSTRAINT_APPROVE_FAILED,
-                'errors' => ['constraints' => $constraint['errors']],
+                'success' => true,
+                'data' => $reservation,
+                'message' => ApiMessages::RESERVATION_APPROVED_SUCCESS,
             ];
-        }
-
-        $reservation->status = 'approved';
-        $reservation->updated_by = $actor->id;
-        $reservation->save();
-        $reservation->load(['room', 'user']);
-
-        return [
-            'success' => true,
-            'data' => $reservation,
-            'message' => ApiMessages::RESERVATION_APPROVED_SUCCESS,
-        ];
+        }, 3);
     }
 
     public function reject(User $actor, Reservation $reservation): array
