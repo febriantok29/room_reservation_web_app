@@ -12,21 +12,15 @@
 @section('content')
     @include('admin.partials.flash_message')
 
-    <div class="card card-admin">
-        <div class="card-header">
-            <h3 class="card-title">Reservasi Menunggu Persetujuan</h3>
-        </div>
-
-        {{-- Filter Section --}}
-        <div class="card-body border-bottom">
+    {{-- Filter Bar --}}
+    <div class="card card-admin mb-3">
+        <div class="card-body py-3">
             <form action="{{ route('admin.approvals') }}" method="GET">
-                <div class="row">
-                    <div class="col-lg-9 col-md-8">
-                        <div class="form-group mb-0">
-                            <input type="text" name="q" class="form-control form-control-sm"
-                                placeholder="Cari ID reservasi, nama pengguna, atau ruangan..."
-                                value="{{ $searchQuery ?? '' }}">
-                        </div>
+                <div class="row align-items-end">
+                    <div class="col-lg-9 col-md-8 mb-2 mb-lg-0">
+                        <input type="text" name="q" class="form-control form-control-sm"
+                            placeholder="Cari ID reservasi, nama pengguna, atau ruangan..."
+                            value="{{ $searchQuery ?? '' }}">
                     </div>
                     <div class="col-lg-3 col-md-4">
                         <button type="submit" class="btn btn-primary btn-sm btn-block">
@@ -36,80 +30,125 @@
                 </div>
             </form>
         </div>
-
-        <div class="card-body border-bottom py-2 text-sm text-muted">
+        <div class="card-footer py-2 text-sm text-muted">
             Menampilkan {{ $pendingReservations->count() }} dari {{ $pendingReservations->total() }} antrian.
         </div>
-        <div class="card-body table-responsive p-0">
-            <table class="table table-hover table-striped text-nowrap mb-0">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Pengguna</th>
-                        <th>Ruangan</th>
-                        <th>Mulai</th>
-                        <th>Selesai</th>
-                        <th>Jumlah Pengunjung</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($pendingReservations as $reservation)
-                        <tr>
-                            <td>{{ $reservation->id }}</td>
-                            <td>{{ $reservation->user?->full_name ?? '-' }}</td>
-                            <td>{{ $reservation->room?->name ?? '-' }}</td>
-                            <td>{{ $reservation->start_time_label }}</td>
-                            <td>{{ $reservation->end_time_label }}</td>
-                            <td>{{ $reservation->visitor_count }}</td>
-                            <td>
-                                <div class="table-action-group">
-                                    <button type="button" class="btn btn-info btn-xs" data-toggle="modal"
-                                        data-target="#reservationDetailModal" data-id="{{ $reservation->id }}"
-                                        data-user="{{ $reservation->user?->full_name ?? '-' }}"
-                                        data-room="{{ $reservation->room?->name ?? '-' }}"
-                                        data-start="{{ $reservation->start_time_label }}"
-                                        data-end="{{ $reservation->end_time_label }}"
-                                        data-visitors="{{ $reservation->visitor_count }}"
-                                        data-purpose="{{ $reservation->purpose ?? '-' }}">
-                                        <i class="fas fa-eye"></i> Detail
-                                    </button>
-                                    <form action="{{ route('admin.approvals.approve', $reservation->id) }}" method="POST"
-                                        class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-success btn-xs">
-                                            <i class="fas fa-check"></i> Setujui
-                                        </button>
-                                    </form>
-                                    <form action="{{ route('admin.approvals.reject', $reservation->id) }}" method="POST"
-                                        class="d-inline" onsubmit="return confirm('Yakin ingin menolak reservasi ini?')">
-                                        @csrf
-                                        <button type="submit" class="btn btn-danger btn-xs">
-                                            <i class="fas fa-times"></i> Tolak
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="empty-state-cell">
-                                <div class="empty-icon"><i class="fas fa-clipboard-check"></i></div>
-                                <div class="empty-title">Tidak ada antrian persetujuan</div>
-                                <div class="empty-desc">Semua reservasi sudah diproses atau belum ada permintaan baru.</div>
-                                <a href="{{ route('admin.reservations') }}" class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-list mr-1"></i> Lihat Semua Reservasi
-                                </a>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer clearfix">
+    </div>
+
+    {{-- Approval Cards --}}
+    <div class="row">
+        @forelse ($pendingReservations as $reservation)
+            <div class="col-xl-6 col-12 mb-3">
+                <div class="card card-admin h-100" style="border-left:4px solid #ffc107;">
+
+                    {{-- Card Header --}}
+                    <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
+                        <span class="text-muted small font-weight-bold">
+                            <i class="fas fa-hashtag mr-1" style="font-size:.7rem;"></i>{{ $reservation->id }}
+                        </span>
+                        <span class="badge badge-warning">
+                            <i class="fas fa-clock mr-1"></i>MENUNGGU
+                        </span>
+                    </div>
+
+                    {{-- Card Body --}}
+                    <div class="card-body py-3 px-3">
+
+                        {{-- Room --}}
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-door-open mr-2"
+                                style="color:#ffc107;width:16px;flex-shrink:0;font-size:.95rem;"></i>
+                            <span class="font-weight-bold"
+                                style="font-size:.95rem;">{{ $reservation->room?->name ?? '-' }}</span>
+                            @if ($reservation->room?->floor)
+                                <span class="text-muted small ml-2">· Lantai {{ $reservation->room->floor }}</span>
+                            @endif
+                        </div>
+
+                        {{-- Date / Time --}}
+                        <div class="d-flex align-items-center mb-2 text-sm">
+                            <i class="fas fa-calendar-alt text-muted mr-2" style="width:16px;flex-shrink:0;"></i>
+                            <span>{{ $reservation->start_time_label }}</span>
+                            <span class="mx-2 text-muted">&ndash;</span>
+                            <span>{{ $reservation->end_time_label }}</span>
+                        </div>
+
+                        {{-- User + Visitors --}}
+                        <div class="d-flex align-items-center text-sm">
+                            <i class="fas fa-user text-muted mr-2" style="width:16px;flex-shrink:0;"></i>
+                            <span>{{ $reservation->user?->full_name ?? '-' }}</span>
+                            <span class="mx-2 text-muted">·</span>
+                            <i class="fas fa-users text-muted mr-1"></i>
+                            <span>{{ $reservation->visitor_count }} orang</span>
+                        </div>
+
+                        {{-- Purpose --}}
+                        @if ($reservation->purpose)
+                            <div class="d-flex align-items-start text-sm text-muted mt-2">
+                                <i class="fas fa-clipboard-list mr-2 mt-1" style="width:16px;flex-shrink:0;"></i>
+                                <span>{{ Str::limit($reservation->purpose, 90) }}</span>
+                            </div>
+                        @endif
+
+                    </div>
+
+                    {{-- Card Footer: Actions --}}
+                    <div class="card-footer py-2 px-3 d-flex flex-wrap" style="gap:.3rem;">
+                        <button type="button" class="btn btn-info btn-xs" data-toggle="modal"
+                            data-target="#reservationDetailModal" data-id="{{ $reservation->id }}"
+                            data-user="{{ $reservation->user?->full_name ?? '-' }}"
+                            data-room="{{ $reservation->room?->name ?? '-' }}"
+                            data-start="{{ $reservation->start_time_label }}"
+                            data-end="{{ $reservation->end_time_label }}"
+                            data-visitors="{{ $reservation->visitor_count }}"
+                            data-purpose="{{ $reservation->purpose ?? '-' }}">
+                            <i class="fas fa-eye"></i> Detail
+                        </button>
+
+                        <form action="{{ route('admin.approvals.approve', $reservation->id) }}" method="POST"
+                            class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-success btn-xs">
+                                <i class="fas fa-check"></i> Setujui
+                            </button>
+                        </form>
+
+                        <form action="{{ route('admin.approvals.reject', $reservation->id) }}" method="POST"
+                            class="d-inline" onsubmit="return confirm('Yakin ingin menolak reservasi ini?')">
+                            @csrf
+                            <button type="submit" class="btn btn-danger btn-xs">
+                                <i class="fas fa-times"></i> Tolak
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        @empty
+            <div class="col-12">
+                <div class="card card-admin">
+                    <div class="card-body">
+                        <div class="empty-state-cell">
+                            <div class="empty-icon"><i class="fas fa-clipboard-check"></i></div>
+                            <div class="empty-title">Tidak ada antrian persetujuan</div>
+                            <div class="empty-desc">Semua reservasi sudah diproses atau belum ada permintaan baru.</div>
+                            <a href="{{ route('admin.reservations') }}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-list mr-1"></i> Lihat Semua Reservasi
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endforelse
+    </div>
+
+    {{-- Pagination --}}
+    @if ($pendingReservations->hasPages())
+        <div class="d-flex justify-content-center mt-1">
             {{ $pendingReservations->links() }}
         </div>
-    </div>
+    @endif
+
     {{-- Reservation Detail Modal --}}
     <div class="modal fade" id="reservationDetailModal" tabindex="-1" role="dialog"
         aria-labelledby="reservationDetailModalLabel" aria-hidden="true">
