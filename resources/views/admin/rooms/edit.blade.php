@@ -12,7 +12,8 @@
 @section('content')
     @include('admin.partials.flash_message')
 
-    <x-form.card action="{{ route('admin.rooms.update', $room->id) }}" method="PUT" loading-text="Memperbarui...">
+    <x-form.card action="{{ route('admin.rooms.update', $room->id) }}" method="PUT" :multipart="true"
+        loading-text="Memperbarui...">
         <x-form.section title="Informasi Dasar">
             <x-form.row>
                 <x-form.field name="name" label="Nama Ruangan" type="text" :value="old('name', $room->name)" col-class="col-lg-4 col-md-6"
@@ -27,6 +28,13 @@
 
             <x-form.field name="description" label="Deskripsi" type="textarea" :value="old('description', $room->description)" col-class=""
                 rows="3" hint="Opsional: Jelaskan kegunaan atau fitur khusus ruangan ini." />
+        </x-form.section>
+
+        <x-form.section title="Foto Ruangan">
+            @include('admin.rooms.partials.image_upload_field', [
+                'room' => $room,
+                'deleteRoute' => route('admin.rooms.destroy-image', $room->id),
+            ])
         </x-form.section>
 
         <x-form.section title="Fasilitas & Status">
