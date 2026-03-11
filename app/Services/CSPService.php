@@ -47,27 +47,11 @@ class CSPService
             ->whereNull('deleted_at')
             ->whereIn('status', ['pending', 'approved']) // Only check active reservations
             ->where(function ($q) use ($startTime, $endTime) {
-                // Check for time overlap
-                $q->where(function ($subQ) use ($startTime, $endTime) {
-                    // New reservation starts during existing reservation
-                    $subQ->where('start_time', '<=', $startTime)
-                        ->where('end_time', '>', $startTime);
-                })
-                ->orWhere(function ($subQ) use ($startTime, $endTime) {
-                    // New reservation ends during existing reservation
-                    $subQ->where('start_time', '<', $endTime)
-                        ->where('end_time', '>=', $endTime);
-                })
-                ->orWhere(function ($subQ) use ($startTime, $endTime) {
-                    // New reservation completely contains existing reservation
-                    $subQ->where('start_time', '>=', $startTime)
-                        ->where('end_time', '<=', $endTime);
-                })
-                ->orWhere(function ($subQ) use ($startTime, $endTime) {
-                    // Existing reservation completely contains new reservation
-                    $subQ->where('start_time', '<=', $startTime)
-                        ->where('end_time', '>=', $endTime);
-                });
+                // Standard half-open interval overlap: [existingStart, existingEnd) ∩ [newStart, newEnd) ≠ ∅
+                // Equivalent to: existingStart < newEnd AND existingEnd > newStart
+                // Back-to-back reservations (A ends at 10:00, B starts at 10:00) are NOT blocked.
+                $q->where('start_time', '<', $endTime)
+                  ->where('end_time', '>', $startTime);
             });
 
         // Exclude specific reservation ID if provided (for update operations)
@@ -118,22 +102,9 @@ class CSPService
             ->whereNull('deleted_at')
             ->whereIn('status', ['pending', 'approved'])
             ->where(function ($q) use ($startTime, $endTime) {
-                $q->where(function ($subQ) use ($startTime, $endTime) {
-                    $subQ->where('start_time', '<=', $startTime)
-                        ->where('end_time', '>', $startTime);
-                })
-                ->orWhere(function ($subQ) use ($startTime, $endTime) {
-                    $subQ->where('start_time', '<', $endTime)
-                        ->where('end_time', '>=', $endTime);
-                })
-                ->orWhere(function ($subQ) use ($startTime, $endTime) {
-                    $subQ->where('start_time', '>=', $startTime)
-                        ->where('end_time', '<=', $endTime);
-                })
-                ->orWhere(function ($subQ) use ($startTime, $endTime) {
-                    $subQ->where('start_time', '<=', $startTime)
-                        ->where('end_time', '>=', $endTime);
-                });
+                // Standard half-open interval overlap
+                $q->where('start_time', '<', $endTime)
+                  ->where('end_time', '>', $startTime);
             });
 
         if ($excludeReservationId) {
@@ -226,9 +197,16 @@ class CSPService
 
         $availableSlots = [];
         $current = $startOfDay->copy();
+        $now = now();
 
         while ($current->lt($endOfDay)) {
             $slotEnd = $current->copy()->addMinutes($intervalMinutes);
+
+            // Skip slots that have already passed — they cannot be booked
+            if ($slotEnd->lte($now)) {
+                $current->addMinutes($intervalMinutes);
+                continue;
+            }
 
             if ($this->isRoomAvailable($roomId, $current, $slotEnd)) {
                 $availableSlots[] = [
