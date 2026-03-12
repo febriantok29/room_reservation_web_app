@@ -325,7 +325,7 @@ return [
             'icon' => 'fas fa-fw fa-plug',
         ],
         [
-            'header' => 'TRANSAKSI',
+            'header' => 'RESERVASI & PENGADUAN',
         ],
         [
             'text' => 'Reservasi',
@@ -333,9 +333,14 @@ return [
             'icon' => 'fas fa-fw fa-calendar-check',
         ],
         [
-            'text' => 'Antrian Persetujuan',
+            'text' => 'Persetujuan Reservasi',
             'route' => 'admin.approvals',
             'icon' => 'fas fa-fw fa-clipboard-check',
+        ],
+        [
+            'text' => 'Komplain & Kerusakan',
+            'route' => 'admin.complaints',
+            'icon' => 'fas fa-fw fa-exclamation-circle',
         ],
         [
             'text' => 'Keluar',
