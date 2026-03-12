@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ComplaintController;
 use App\Http\Controllers\Api\FacilityController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\RoomController;
@@ -51,4 +52,10 @@ Route::prefix('v1')->middleware('jwt')->group(function () {
     Route::post('/reservations/{id}/complete', [ReservationController::class, 'complete']);
     Route::post('/reservations/{id}/approve', [ReservationController::class, 'approve']);
     Route::post('/reservations/{id}/reject', [ReservationController::class, 'reject']);
+
+    // Complaint endpoints
+    Route::get('/complaints', [ComplaintController::class, 'index']);
+    Route::post('/complaints', [ComplaintController::class, 'store']);
+    Route::get('/complaints/{id}', [ComplaintController::class, 'show']);
+    Route::patch('/complaints/{id}/status', [ComplaintController::class, 'updateStatus']);
 });
