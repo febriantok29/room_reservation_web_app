@@ -1,0 +1,78 @@
+{
+    "name": "Refresh Token - Debug Mode Override",
+    "request": {
+        "method": "POST",
+        "header": [
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/auth/refresh",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+            ]
+        },
+        "body": {
+            "mode": "raw",
+            "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\",\n  \"is_debug\": true,\n  \"access_token_ttl\": 120\n}"
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Debug refresh",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/auth/refresh",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "refresh"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"refresh_token\": \"{{refresh_token}}\", \"is_debug\": true, \"access_token_ttl\": 120}"
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Token refresh berhasil",
+                "data": {
+                    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTBlODQwMC1lMjliLTQxZDQtYTcxNi00NDY2NTU0NDAwMDEiLCJpc19hZG1pbiI6dHJ1ZSwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc0MTU4NjQwMCwiZXhwIjoxNzQxNjcyODAwfQ.demo_sig",
+                    "token_type": "Bearer",
+                    "expires_in": 120,
+                    "is_debug": true
+                }
+            }
+        }
+    ]
+}

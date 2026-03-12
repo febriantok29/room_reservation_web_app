@@ -1,0 +1,73 @@
+{
+    "name": "Refresh Token - Invalid / Expired",
+    "request": {
+        "method": "POST",
+        "header": [
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/auth/refresh",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+            ]
+        },
+        "body": {
+            "mode": "raw",
+            "raw": "{\n  \"refresh_token\": \"invalid.jwt.token.here\"\n}"
+        }
+    },
+    "response": [
+        {
+            "name": "Example ❌ 401 Unauthorized - Token tidak valid",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/auth/refresh",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "refresh"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"refresh_token\": \"invalid.jwt.token.here\"}"
+                }
+            },
+            "status": "Unauthorized",
+            "code": 401,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "UNAUTHORIZED",
+                "message": "Token tidak valid atau kadaluarsa"
+            }
+        }
+    ]
+}

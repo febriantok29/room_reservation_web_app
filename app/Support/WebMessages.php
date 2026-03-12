@@ -10,6 +10,7 @@ final class WebMessages
     public const ROOM_CREATED_SUCCESS = 'Data ruangan berhasil ditambahkan.';
     public const ROOM_UPDATED_SUCCESS = 'Data ruangan berhasil diperbarui.';
     public const ROOM_DELETED_SUCCESS = 'Data ruangan berhasil dihapus.';
+    public const ROOM_IMAGE_DELETED_SUCCESS = 'Foto ruangan berhasil dihapus.';
 
     public const FACILITY_CREATED_SUCCESS = 'Data fasilitas berhasil ditambahkan.';
     public const FACILITY_UPDATED_SUCCESS = 'Data fasilitas berhasil diperbarui.';

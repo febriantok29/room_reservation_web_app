@@ -1,0 +1,145 @@
+{
+    "name": "Get Current User (Me)",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/auth/me",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+            ]
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/auth/me",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "me"
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Data pengguna berhasil diambil",
+                "data": {
+                    "id": "550e8400-e29b-41d4-a716-446655440001",
+                    "name": "Admin User",
+                    "email": "admin@roomreservation.com",
+                    "employee_id": "EMP-2025-00001",
+                    "is_admin": true,
+                    "is_active": true
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 401 Unauthorized - Token tidak ada",
+            "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/auth/me",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "me"
+                    ]
+                }
+            },
+            "status": "Unauthorized",
+            "code": 401,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "UNAUTHORIZED",
+                "message": "Token tidak valid atau kadaluarsa"
+            }
+        },
+        {
+            "name": "Example ❌ 401 Unauthorized - Token kadaluarsa",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer invalid.token"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/auth/me",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "auth",
+                        "me"
+                    ]
+                }
+            },
+            "status": "Unauthorized",
+            "code": 401,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "UNAUTHORIZED",
+                "message": "Token tidak valid atau kadaluarsa"
+            }
+        }
+    ]
+}

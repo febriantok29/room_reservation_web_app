@@ -1,0 +1,198 @@
+{
+    "name": "Get Room Availability",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/rooms/{{room_id}}/availability?date={{availability_date}}&interval_minutes={{availability_interval}}",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "rooms",
+                "{{room_id}}",
+                "availability"
+            ],
+            "query": [
+                {
+                    "key": "date",
+                    "value": "{{availability_date}}"
+                },
+                {
+                    "key": "interval_minutes",
+                    "value": "{{availability_interval}}"
+                }
+            ]
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Slot tersedia",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/{{room_id}}/availability?date={{availability_date}}&interval_minutes={{availability_interval}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "{{room_id}}",
+                        "availability"
+                    ],
+                    "query": [
+                        {
+                            "key": "date",
+                            "value": "{{availability_date}}"
+                        },
+                        {
+                            "key": "interval_minutes",
+                            "value": "{{availability_interval}}"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Slot tersedia berhasil diambil",
+                "data": {
+                    "room_id": "RM-F01-001",
+                    "date": "2026-03-15",
+                    "interval_minutes": 30,
+                    "available_slots": [
+                        "08:00-08:30",
+                        "08:30-09:00",
+                        "09:00-09:30",
+                        "10:30-11:00",
+                        "11:00-11:30",
+                        "13:00-13:30",
+                        "14:00-14:30",
+                        "15:00-15:30",
+                        "16:00-16:30"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 400 - Ruangan sedang maintenance",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/RM-F03-001/availability?date=2026-03-15&interval_minutes=30",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "RM-F03-001",
+                        "availability"
+                    ],
+                    "query": [
+                        {
+                            "key": "date",
+                            "value": "2026-03-15"
+                        },
+                        {
+                            "key": "interval_minutes",
+                            "value": "30"
+                        }
+                    ]
+                }
+            },
+            "status": "Bad Request",
+            "code": 400,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "ROOM_UNDER_MAINTENANCE",
+                "message": "Ruangan sedang dalam perawatan"
+            }
+        },
+        {
+            "name": "Example ❌ 404 Not Found",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/rooms/INVALID-ID/availability?date=2026-03-15",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "rooms",
+                        "INVALID-ID",
+                        "availability"
+                    ],
+                    "query": [
+                        {
+                            "key": "date",
+                            "value": "2026-03-15"
+                        }
+                    ]
+                }
+            },
+            "status": "Not Found",
+            "code": 404,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "NOT_FOUND",
+                "message": "Ruangan tidak ditemukan"
+            }
+        }
+    ]
+}

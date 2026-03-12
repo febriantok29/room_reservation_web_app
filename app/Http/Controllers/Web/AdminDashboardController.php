@@ -7,6 +7,7 @@ use App\Models\Facility;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\User;
+use App\Services\ImageService;
 use App\Services\ReservationService;
 use App\Support\WebMessages;
 use App\Helpers\TimezoneHelper;
@@ -19,10 +20,12 @@ use Throwable;
 class AdminDashboardController extends Controller
 {
     private ReservationService $reservationService;
+    private ImageService $imageService;
 
-    public function __construct(ReservationService $reservationService)
+    public function __construct(ReservationService $reservationService, ImageService $imageService)
     {
         $this->reservationService = $reservationService;
+        $this->imageService = $imageService;
     }
 
     private function ensureAdminAccess(Request $request): void
@@ -119,6 +122,11 @@ class AdminDashboardController extends Controller
             'facility_ids' => 'nullable|array',
             'facility_ids.*' => 'nullable|string|exists:m_facilities,id',
             'is_maintenance' => 'nullable|boolean',
+            'image' => [
+                'nullable', 'file', 'image',
+                'mimes:' . implode(',', ImageService::ALLOWED_MIMES),
+                'max:' . (ImageService::SERVER_MAX_BYTES / 1024),
+            ],
         ]);
 
         $room = new Room();
@@ -132,6 +140,12 @@ class AdminDashboardController extends Controller
         $room->created_by = $request->user()->id;
         $room->updated_by = $request->user()->id;
         $room->save();
+
+        if ($request->hasFile('image')) {
+            $result = $this->imageService->upload($request->file('image'), 'rooms');
+            $room->image_path = $result['path'];
+            $room->save();
+        }
 
         $facilityIds = array_filter($validated['facility_ids'] ?? []);
         $room->facilities()->sync($facilityIds);
@@ -170,6 +184,11 @@ class AdminDashboardController extends Controller
             'facility_ids' => 'nullable|array',
             'facility_ids.*' => 'nullable|string|exists:m_facilities,id',
             'is_maintenance' => 'nullable|boolean',
+            'image' => [
+                'nullable', 'file', 'image',
+                'mimes:' . implode(',', ImageService::ALLOWED_MIMES),
+                'max:' . (ImageService::SERVER_MAX_BYTES / 1024),
+            ],
         ]);
 
         $room->fill([
@@ -180,6 +199,12 @@ class AdminDashboardController extends Controller
         ]);
         $room->is_maintenance = $request->boolean('is_maintenance', false);
         $room->updated_by = $request->user()->id;
+
+        if ($request->hasFile('image')) {
+            $result = $this->imageService->upload($request->file('image'), 'rooms', $room->image_path);
+            $room->image_path = $result['path'];
+        }
+
         $room->save();
 
         $facilityIds = array_filter($validated['facility_ids'] ?? []);
@@ -201,6 +226,22 @@ class AdminDashboardController extends Controller
         return redirect()
             ->route('admin.rooms')
             ->with('success', WebMessages::ROOM_DELETED_SUCCESS);
+    }
+
+    public function destroyRoomImage(Request $request, Room $room): RedirectResponse
+    {
+        $this->ensureAdminAccess($request);
+
+        if ($room->image_path) {
+            $this->imageService->delete($room->image_path);
+            $room->image_path = null;
+            $room->updated_by = $request->user()->id;
+            $room->save();
+        }
+
+        return redirect()
+            ->route('admin.rooms.edit', $room->id)
+            ->with('success', WebMessages::ROOM_IMAGE_DELETED_SUCCESS);
     }
 
     public function reservations(Request $request): View

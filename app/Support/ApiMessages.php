@@ -26,6 +26,10 @@ final class ApiMessages
     public const ROOM_DELETED_SUCCESS = 'Ruangan berhasil dihapus';
     public const ROOM_AVAILABILITY_SUCCESS = 'Slot tersedia berhasil diambil';
     public const ROOM_UNDER_MAINTENANCE = 'Ruangan sedang dalam perawatan';
+    public const ROOM_IMAGE_UPLOADED_SUCCESS = 'Foto ruangan berhasil diunggah';
+    public const ROOM_IMAGE_DELETED_SUCCESS = 'Foto ruangan berhasil dihapus';
+    public const ROOM_IMAGE_NOT_FOUND = 'Ruangan ini belum memiliki foto';
+    public const IMAGE_UPLOAD_FAILED = 'Gagal mengunggah gambar, coba lagi';
 
     public const FACILITY_NOT_FOUND = 'Fasilitas tidak ditemukan';
     public const FACILITY_LIST_SUCCESS = 'Data fasilitas berhasil diambil';

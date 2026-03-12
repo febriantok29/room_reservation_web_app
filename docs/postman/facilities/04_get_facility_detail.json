@@ -1,0 +1,111 @@
+{
+    "name": "Get Facility Detail",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/facilities/{{facility_id}}",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "facilities",
+                "{{facility_id}}"
+            ]
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/facilities/{{facility_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "facilities",
+                        "{{facility_id}}"
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Detail fasilitas berhasil diambil",
+                "data": {
+                    "id": "550e8400-e29b-41d4-a716-446655440100",
+                    "name": "Proyektor",
+                    "slug": "proyektor",
+                    "created_at": "2026-01-01T00:00:00.000000Z",
+                    "updated_at": "2026-01-01T00:00:00.000000Z",
+                    "deleted_at": null
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 404 Not Found",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/facilities/INVALID-ID",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "facilities",
+                        "INVALID-ID"
+                    ]
+                }
+            },
+            "status": "Not Found",
+            "code": 404,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "NOT_FOUND",
+                "message": "Fasilitas tidak ditemukan"
+            }
+        }
+    ]
+}

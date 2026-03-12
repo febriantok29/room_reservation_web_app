@@ -1,0 +1,199 @@
+{
+    "name": "Reject Reservation (Admin Only)",
+    "request": {
+        "method": "POST",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/reject",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "reservations",
+                "{{reservation_id}}",
+                "reject"
+            ]
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Ditolak",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/reject",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reservations",
+                        "{{reservation_id}}",
+                        "reject"
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Reservasi berhasil ditolak",
+                "data": {
+                    "id": "RES-20260310-001",
+                    "user_id": "550e8400-e29b-41d4-a716-446655440002",
+                    "room_id": "RM-F01-001",
+                    "start_time": "2026-03-15T02:00:00.000000Z",
+                    "end_time": "2026-03-15T05:00:00.000000Z",
+                    "purpose": "Rapat koordinasi tim",
+                    "visitor_count": 5,
+                    "status": "rejected",
+                    "created_by": "550e8400-e29b-41d4-a716-446655440002",
+                    "updated_by": "550e8400-e29b-41d4-a716-446655440002",
+                    "created_at": "2026-03-10T07:00:00.000000Z",
+                    "updated_at": "2026-03-10T07:00:00.000000Z",
+                    "deleted_at": null,
+                    "room": {
+                        "id": "RM-F01-001",
+                        "name": "R. Rapat Utama",
+                        "floor": 1,
+                        "description": "Ruangan rapat utama",
+                        "capacity": 20,
+                        "is_maintenance": false,
+                        "created_by": "550e8400-e29b-41d4-a716-446655440001",
+                        "updated_by": "550e8400-e29b-41d4-a716-446655440001",
+                        "created_at": "2026-01-01T00:00:00.000000Z",
+                        "updated_at": "2026-01-01T00:00:00.000000Z",
+                        "deleted_at": null,
+                        "facilities": [
+                            {
+                                "id": "550e8400-e29b-41d4-a716-446655440100",
+                                "name": "Proyektor",
+                                "slug": "proyektor"
+                            },
+                            {
+                                "id": "550e8400-e29b-41d4-a716-446655440101",
+                                "name": "AC",
+                                "slug": "ac"
+                            }
+                        ]
+                    },
+                    "user": {
+                        "id": "550e8400-e29b-41d4-a716-446655440002",
+                        "employee_id": "EMP-2025-00003",
+                        "first_name": "Budi",
+                        "last_name": "Santoso",
+                        "email": "budi.santoso@example.com",
+                        "date_of_birth": "1990-05-15",
+                        "is_admin": false,
+                        "is_active": true,
+                        "created_at": "2025-01-01T00:00:00.000000Z",
+                        "updated_at": "2025-01-01T00:00:00.000000Z",
+                        "deleted_at": null
+                    }
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 403 Forbidden - Bukan admin",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{user_access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/reject",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reservations",
+                        "{{reservation_id}}",
+                        "reject"
+                    ]
+                }
+            },
+            "status": "Forbidden",
+            "code": 403,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "FORBIDDEN",
+                "message": "Anda tidak memiliki akses ke resource ini"
+            }
+        },
+        {
+            "name": "Example ❌ 422 - Status bukan pending",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reservations/{{reservation_id}}/reject",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reservations",
+                        "{{reservation_id}}",
+                        "reject"
+                    ]
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "INVALID_RESERVATION_STATUS",
+                "message": "Hanya reservasi dengan status pending yang dapat ditolak"
+            }
+        }
+    ]
+}

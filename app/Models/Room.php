@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Services\RoomIdGenerator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Room extends Model
 {
@@ -40,9 +41,20 @@ class Room extends Model
         'name',
         'floor',
         'description',
+        'image_path',
         'capacity',
         'is_maintenance',
     ];
+
+    /**
+     * Attributes hidden from JSON serialization (internal storage paths).
+     */
+    protected $hidden = ['image_path'];
+
+    /**
+     * Accessors appended to every JSON output of this model.
+     */
+    protected $appends = ['image_id', 'image_url'];
 
     /**
      * The attributes that should be cast.
@@ -57,6 +69,22 @@ class Room extends Model
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
+
+    /**
+     * Get the image filename (UUID + extension), or null when no image is set.
+     */
+    public function getImageIdAttribute(): ?string
+    {
+        return $this->image_path ? basename($this->image_path) : null;
+    }
+
+    /**
+     * Get the publicly accessible full URL for the room image.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image_path ? Storage::disk('public')->url($this->image_path) : null;
+    }
 
     /**
      * Boot the model and register events.

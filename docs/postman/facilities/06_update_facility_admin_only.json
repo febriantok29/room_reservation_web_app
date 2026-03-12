@@ -1,0 +1,234 @@
+{
+    "name": "Update Facility (Admin Only)",
+    "request": {
+        "method": "PUT",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            },
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/facilities/{{facility_id}}",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "facilities",
+                "{{facility_id}}"
+            ]
+        },
+        "body": {
+            "mode": "raw",
+            "raw": "{\n  \"name\": \"Proyektor HD\"\n}"
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK",
+            "originalRequest": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/facilities/{{facility_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "facilities",
+                        "{{facility_id}}"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"Proyektor HD\"\n}"
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Fasilitas berhasil diperbarui",
+                "data": {
+                    "id": "550e8400-e29b-41d4-a716-446655440100",
+                    "name": "Proyektor HD",
+                    "slug": "proyektor_hd",
+                    "created_at": "2026-01-01T00:00:00.000000Z",
+                    "updated_at": "2026-01-01T00:00:00.000000Z",
+                    "deleted_at": null
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 403 Forbidden - Bukan admin",
+            "originalRequest": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{user_access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/facilities/{{facility_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "facilities",
+                        "{{facility_id}}"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"Proyektor HD\"\n}"
+                }
+            },
+            "status": "Forbidden",
+            "code": 403,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "FORBIDDEN",
+                "message": "Anda tidak memiliki akses ke resource ini"
+            }
+        },
+        {
+            "name": "Example ❌ 404 Not Found",
+            "originalRequest": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/facilities/INVALID-ID",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "facilities",
+                        "INVALID-ID"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"name\": \"Proyektor HD\"\n}"
+                }
+            },
+            "status": "Not Found",
+            "code": 404,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "NOT_FOUND",
+                "message": "Fasilitas tidak ditemukan"
+            }
+        },
+        {
+            "name": "Example ❌ 422 - Nama sudah digunakan",
+            "originalRequest": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/facilities/{{facility_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "facilities",
+                        "{{facility_id}}"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"name\": \"AC\"}"
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "VALIDATION_ERROR",
+                "message": "Data yang dikirim tidak valid",
+                "errors": {
+                    "name": [
+                        "Nama fasilitas sudah digunakan."
+                    ]
+                }
+            }
+        }
+    ]
+}

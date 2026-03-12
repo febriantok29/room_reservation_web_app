@@ -1,0 +1,348 @@
+{
+    "name": "Create Reservation (User)",
+    "request": {
+        "method": "POST",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            },
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/reservations",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "reservations"
+            ]
+        },
+        "body": {
+            "mode": "raw",
+            "raw": "{\n  \"room_id\": \"{{room_id}}\",\n  \"start_time\": \"{{reservation_start_time}}\",\n  \"end_time\": \"{{reservation_end_time}}\",\n  \"purpose\": \"Rapat koordinasi tim\",\n  \"visitor_count\": 5\n}"
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 201 Created",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reservations",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reservations"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"room_id\": \"{{room_id}}\",\n  \"start_time\": \"{{reservation_start_time}}\",\n  \"end_time\": \"{{reservation_end_time}}\",\n  \"purpose\": \"Rapat koordinasi tim\",\n  \"visitor_count\": 5\n}"
+                }
+            },
+            "status": "Created",
+            "code": 201,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Reservasi berhasil dibuat dan menunggu persetujuan",
+                "data": {
+                    "id": "RES-20260310-001",
+                    "user_id": "550e8400-e29b-41d4-a716-446655440002",
+                    "room_id": "RM-F01-001",
+                    "start_time": "2026-03-15T02:00:00.000000Z",
+                    "end_time": "2026-03-15T05:00:00.000000Z",
+                    "purpose": "Rapat koordinasi tim",
+                    "visitor_count": 5,
+                    "status": "pending",
+                    "created_by": "550e8400-e29b-41d4-a716-446655440002",
+                    "updated_by": "550e8400-e29b-41d4-a716-446655440002",
+                    "created_at": "2026-03-10T07:00:00.000000Z",
+                    "updated_at": "2026-03-10T07:00:00.000000Z",
+                    "deleted_at": null,
+                    "room": {
+                        "id": "RM-F01-001",
+                        "name": "R. Rapat Utama",
+                        "floor": 1,
+                        "description": "Ruangan rapat utama",
+                        "capacity": 20,
+                        "is_maintenance": false,
+                        "created_by": "550e8400-e29b-41d4-a716-446655440001",
+                        "updated_by": "550e8400-e29b-41d4-a716-446655440001",
+                        "created_at": "2026-01-01T00:00:00.000000Z",
+                        "updated_at": "2026-01-01T00:00:00.000000Z",
+                        "deleted_at": null,
+                        "facilities": [
+                            {
+                                "id": "550e8400-e29b-41d4-a716-446655440100",
+                                "name": "Proyektor",
+                                "slug": "proyektor"
+                            },
+                            {
+                                "id": "550e8400-e29b-41d4-a716-446655440101",
+                                "name": "AC",
+                                "slug": "ac"
+                            }
+                        ]
+                    },
+                    "user": {
+                        "id": "550e8400-e29b-41d4-a716-446655440002",
+                        "employee_id": "EMP-2025-00003",
+                        "first_name": "Budi",
+                        "last_name": "Santoso",
+                        "email": "budi.santoso@example.com",
+                        "date_of_birth": "1990-05-15",
+                        "is_admin": false,
+                        "is_active": true,
+                        "created_at": "2025-01-01T00:00:00.000000Z",
+                        "updated_at": "2025-01-01T00:00:00.000000Z",
+                        "deleted_at": null
+                    }
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 422 - Slot bentrok",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reservations",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reservations"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"room_id\": \"{{room_id}}\",\n  \"start_time\": \"{{reservation_start_time}}\",\n  \"end_time\": \"{{reservation_end_time}}\",\n  \"purpose\": \"Rapat koordinasi tim\",\n  \"visitor_count\": 5\n}"
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "RESERVATION_CONSTRAINT_FAILED",
+                "message": "Reservasi tidak memenuhi aturan penjadwalan",
+                "errors": {
+                    "constraints": [
+                        "Slot waktu tidak tersedia karena bentrok dengan reservasi lain."
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 422 - Kapasitas melebihi ruangan",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reservations",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reservations"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"room_id\": \"{{room_id}}\",\n  \"start_time\": \"{{reservation_start_time}}\",\n  \"end_time\": \"{{reservation_end_time}}\",\n  \"purpose\": \"Rapat koordinasi tim\",\n  \"visitor_count\": 5\n}"
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "RESERVATION_CONSTRAINT_FAILED",
+                "message": "Reservasi tidak memenuhi aturan penjadwalan",
+                "errors": {
+                    "constraints": [
+                        "Jumlah pengunjung melebihi kapasitas ruangan."
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 422 - Waktu sudah lewat",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reservations",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reservations"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"room_id\": \"{{room_id}}\",\n  \"start_time\": \"{{reservation_start_time}}\",\n  \"end_time\": \"{{reservation_end_time}}\",\n  \"purpose\": \"Rapat koordinasi tim\",\n  \"visitor_count\": 5\n}"
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "RESERVATION_CONSTRAINT_FAILED",
+                "message": "Reservasi tidak memenuhi aturan penjadwalan",
+                "errors": {
+                    "constraints": [
+                        "Tidak bisa membuat reservasi pada waktu yang sudah lewat."
+                    ]
+                }
+            }
+        },
+        {
+            "name": "Example ❌ 422 - Ruangan maintenance",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reservations",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reservations"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"room_id\": \"{{room_id}}\",\n  \"start_time\": \"{{reservation_start_time}}\",\n  \"end_time\": \"{{reservation_end_time}}\",\n  \"purpose\": \"Rapat koordinasi tim\",\n  \"visitor_count\": 5\n}"
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "RESERVATION_CONSTRAINT_FAILED",
+                "message": "Reservasi tidak memenuhi aturan penjadwalan",
+                "errors": {
+                    "constraints": [
+                        "Ruangan sedang dalam maintenance."
+                    ]
+                }
+            }
+        }
+    ],
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "exec": [
+                    "if (pm.response.code === 201) {",
+                    "    pm.collectionVariables.set(\"reservation_id\", pm.response.json().data.id);",
+                    "    console.log(\"✅ Reservasi dibuat:\", pm.response.json().data.id);",
+                    "} else { console.log(\"❌ Gagal:\", pm.response.json()); }"
+                ]
+            }
+        }
+    ]
+}

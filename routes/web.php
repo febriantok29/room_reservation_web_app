@@ -33,6 +33,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/rooms/{room}/edit', [AdminDashboardController::class, 'editRoom'])->name('admin.rooms.edit');
         Route::put('/rooms/{room}', [AdminDashboardController::class, 'updateRoom'])->name('admin.rooms.update');
         Route::delete('/rooms/{room}', [AdminDashboardController::class, 'destroyRoom'])->name('admin.rooms.destroy');
+        Route::delete('/rooms/{room}/image', [AdminDashboardController::class, 'destroyRoomImage'])->name('admin.rooms.destroy-image');
 
         // Facility master CRUD
         Route::get('/facilities', [AdminFacilityController::class, 'index'])->name('admin.facilities');

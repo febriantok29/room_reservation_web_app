@@ -1,0 +1,128 @@
+{
+    "name": "List Users - Default (Admin Only)",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/users",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "users"
+            ]
+        }
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Semua user non-admin aktif",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/users",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "users"
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": true,
+                "message": "Data pengguna berhasil diambil",
+                "data": [
+                    {
+                        "id": "550e8400-e29b-41d4-a716-446655440002",
+                        "employee_id": "EMP-2025-00003",
+                        "first_name": "Budi",
+                        "last_name": "Santoso",
+                        "email": "budi.santoso@example.com",
+                        "date_of_birth": "1990-05-15",
+                        "is_admin": false,
+                        "is_active": true,
+                        "created_at": "2025-01-01T00:00:00.000000Z",
+                        "updated_at": "2025-01-01T00:00:00.000000Z",
+                        "deleted_at": null
+                    },
+                    {
+                        "id": "550e8400-e29b-41d4-a716-446655440003",
+                        "employee_id": "EMP-2025-00005",
+                        "first_name": "Siti",
+                        "last_name": "Rahayu",
+                        "email": "siti.rahayu@example.com",
+                        "date_of_birth": "1992-08-20",
+                        "is_admin": false,
+                        "is_active": true,
+                        "created_at": "2025-01-01T00:00:00.000000Z",
+                        "updated_at": "2025-01-01T00:00:00.000000Z",
+                        "deleted_at": null
+                    }
+                ]
+            }
+        },
+        {
+            "name": "Example ❌ 403 Forbidden - Bukan admin",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{user_access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/users",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "users"
+                    ]
+                }
+            },
+            "status": "Forbidden",
+            "code": 403,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": {
+                "success": false,
+                "error_code": "FORBIDDEN",
+                "message": "Anda tidak memiliki akses ke resource ini"
+            }
+        }
+    ]
+}
