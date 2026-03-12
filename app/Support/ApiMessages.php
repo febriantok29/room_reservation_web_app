@@ -72,6 +72,16 @@ final class ApiMessages
 
     public const USER_LIST_SUCCESS = 'Data pengguna berhasil diambil';
 
+    public const COMPLAINT_NOT_FOUND = 'Komplain tidak ditemukan';
+    public const COMPLAINT_LIST_SUCCESS = 'Data komplain berhasil diambil';
+    public const COMPLAINT_DETAIL_SUCCESS = 'Detail komplain berhasil diambil';
+    public const COMPLAINT_CREATED_SUCCESS = 'Komplain berhasil dikirim';
+    public const COMPLAINT_STATUS_IN_PROGRESS = 'Komplain sedang dalam proses penanganan';
+    public const COMPLAINT_STATUS_RESOLVED = 'Komplain berhasil diselesaikan';
+    public const COMPLAINT_STATUS_REJECTED = 'Komplain telah ditolak';
+    public const COMPLAINT_INVALID_RESERVATION_STATUS = 'Komplain hanya dapat diajukan untuk reservasi yang disetujui atau sudah selesai';
+    public const COMPLAINT_ALREADY_CLOSED = 'Komplain ini sudah ditutup dan tidak dapat diubah lagi';
+
     private function __construct()
     {
     }
