@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             FacilitiesTableSeeder::class,
             RoomsTableSeeder::class,
             ReservationsTableSeeder::class,
+            RoomComplaintsTableSeeder::class,
         ]);
     }
 }
