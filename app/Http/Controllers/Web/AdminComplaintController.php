@@ -79,7 +79,7 @@ class AdminComplaintController extends Controller
 
         $reservations = Reservation::query()
             ->with(['room', 'user'])
-            ->whereIn('status', ['approved', 'completed'])
+            ->where('status', 'completed')
             ->whereNull('deleted_at')
             ->orderByDesc('start_time')
             ->get();
@@ -126,8 +126,15 @@ class AdminComplaintController extends Controller
 
         $reservation = Reservation::query()
             ->where('id', $validated['reservation_id'])
+            ->where('status', 'completed')
             ->whereNull('deleted_at')
             ->first();
+
+        if (!$reservation) {
+            return back()
+                ->withInput()
+                ->withErrors(['reservation_id' => 'Hanya reservasi yang sudah selesai yang dapat dikomplain.']);
+        }
 
         $photoPath = null;
         if ($request->hasFile('photo')) {
@@ -189,6 +196,7 @@ class AdminComplaintController extends Controller
         $validated = $request->validate([
             'status'           => 'required|in:in_progress,resolved,rejected',
             'resolution_notes' => 'nullable|string|max:2000',
+            'set_maintenance'  => 'nullable|boolean',
         ], [
             'status.required' => 'Status wajib dipilih.',
             'status.in'       => 'Status tidak valid.',
@@ -206,6 +214,10 @@ class AdminComplaintController extends Controller
         }
 
         $complaint->update($updates);
+
+        if ($request->boolean('set_maintenance') && $complaint->room) {
+            $complaint->room->update(['is_maintenance' => true]);
+        }
 
         $message = match ($validated['status']) {
             'in_progress' => WebMessages::COMPLAINT_STATUS_IN_PROGRESS,
