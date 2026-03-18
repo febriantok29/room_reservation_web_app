@@ -45,6 +45,8 @@ class Reservation extends Model
         'end_time',
         'purpose',
         'visitor_count',
+        'with_snack',
+        'with_lunch',
         'status',
     ];
 
@@ -57,6 +59,8 @@ class Reservation extends Model
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'visitor_count' => 'integer',
+        'with_snack' => 'boolean',
+        'with_lunch' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
