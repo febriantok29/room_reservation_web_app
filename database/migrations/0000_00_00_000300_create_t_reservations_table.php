@@ -22,6 +22,8 @@ return new class extends Migration
             $table->timestamp('end_time')->comment('Reservation end time (UTC)');
             $table->text('purpose')->nullable()->comment('Purpose of reservation');
             $table->unsignedSmallInteger('visitor_count')->default(1)->comment('Number of visitors');
+            $table->boolean('with_snack')->default(false)->comment('Snack/refreshments requested');
+            $table->boolean('with_lunch')->default(false)->comment('Lunch/meal requested');
             $table->enum('status', ['pending', 'approved', 'rejected', 'completed', 'cancelled'])
                 ->default('pending')
                 ->comment('Reservation status');
