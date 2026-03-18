@@ -95,6 +95,8 @@ class ReservationController extends Controller
             'end_time' => 'required|date|after:start_time',
             'purpose' => 'nullable|string|max:1000',
             'visitor_count' => 'required|integer|min:1|max:1000',
+            'with_snack' => 'nullable|boolean',
+            'with_lunch' => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -134,6 +136,8 @@ class ReservationController extends Controller
             'end_time' => 'sometimes|required|date|after:start_time',
             'purpose' => 'sometimes|nullable|string|max:1000',
             'visitor_count' => 'sometimes|required|integer|min:1|max:1000',
+            'with_snack' => 'sometimes|nullable|boolean',
+            'with_lunch' => 'sometimes|nullable|boolean',
         ]);
 
         if ($validator->fails()) {

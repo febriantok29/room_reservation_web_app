@@ -112,7 +112,7 @@ class ComplaintController extends Controller
      * POST /v1/complaints
      *
      * Accepts multipart/form-data. Photo is optional (max 10 MB, auto-compressed above 2 MB).
-     * The referenced reservation must be in status "approved" or "completed".
+     * The referenced reservation must be in status "completed".
      * Users may only reference their own reservations; admins may reference any.
      */
     public function store(Request $request): JsonResponse
@@ -163,8 +163,8 @@ class ComplaintController extends Controller
             return ApiResponse::forbidden();
         }
 
-        // Complaints are only allowed for approved or completed reservations
-        if (!in_array($reservation->status, ['approved', 'completed'])) {
+        // Complaints are only allowed for completed reservations
+        if ($reservation->status !== 'completed') {
             return ApiResponse::error(
                 ApiErrorCodes::COMPLAINT_INVALID_RESERVATION_STATUS,
                 ApiMessages::COMPLAINT_INVALID_RESERVATION_STATUS,
