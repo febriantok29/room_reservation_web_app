@@ -34,8 +34,8 @@
                             </option>
                         @endforeach
                     </select>
-                    <small class="text-muted">Hanya reservasi dengan status <strong>Disetujui</strong> atau
-                        <strong>Selesai</strong> yang dapat dikomplain.</small>
+                    <small class="text-muted">Hanya reservasi berstatus <strong>Selesai</strong> yang dapat dikomplain —
+                        komplain dilaporkan setelah ruangan selesai digunakan.</small>
                 </x-form.field>
 
                 <x-form.field name="facility_id" label="Fasilitas Terkait" col-class="col-md-12">

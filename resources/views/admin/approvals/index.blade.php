@@ -105,13 +105,12 @@
                             <i class="fas fa-eye"></i> Detail
                         </button>
 
-                        <form action="{{ route('admin.approvals.approve', $reservation->id) }}" method="POST"
-                            class="d-inline">
-                            @csrf
-                            <button type="submit" class="btn btn-success btn-xs">
-                                <i class="fas fa-check"></i> Setujui
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-success btn-xs" data-toggle="modal"
+                            data-target="#approveModal" data-id="{{ $reservation->id }}"
+                            data-room-id="{{ $reservation->room_id }}"
+                            data-approve-url="{{ route('admin.approvals.approve', $reservation->id) }}">
+                            <i class="fas fa-check"></i> Setujui
+                        </button>
 
                         <form action="{{ route('admin.approvals.reject', $reservation->id) }}" method="POST"
                             class="d-inline" onsubmit="return confirm('Yakin ingin menolak reservasi ini?')">
@@ -148,6 +147,58 @@
             {{ $pendingReservations->links() }}
         </div>
     @endif
+
+    {{-- Approve with Room Reassignment Modal --}}
+    <div class="modal fade" id="approveModal" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="background:#28a745;color:white;">
+                    <h5 class="modal-title" id="approveModalLabel">
+                        <i class="fas fa-check-circle mr-2"></i>Setujui Reservasi
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color:white;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="approve-modal-form" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <p class="mb-3 text-sm">
+                            Menyetujui reservasi <strong id="approve-modal-id"></strong>.
+                        </p>
+                        <div class="form-group mb-0">
+                            <label for="approve-room-select" class="font-weight-semibold">
+                                Ruangan
+                                <span class="text-muted font-weight-normal small">(opsional: pindahkan ke ruangan
+                                    lain)</span>
+                            </label>
+                            <select name="room_id" id="approve-room-select" class="form-control">
+                                @foreach ($rooms as $room)
+                                    <option value="{{ $room->id }}" data-capacity="{{ $room->capacity }}"
+                                        {{ $room->is_maintenance ? 'disabled' : '' }}>
+                                        {{ $room->name }} — Lantai {{ $room->floor }} · Kap. {{ $room->capacity }}
+                                        orang
+                                        {{ $room->is_maintenance ? '(Maintenance)' : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted">
+                                Pilih ruangan lain jika perlu dipindah. CSP akan divalidasi ulang.
+                                Ruangan bertanda <em>Maintenance</em> tidak dapat dipilih.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="fas fa-check mr-1"></i> Konfirmasi Setujui
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     {{-- Reservation Detail Modal --}}
     <div class="modal fade" id="reservationDetailModal" tabindex="-1" role="dialog"
@@ -213,6 +264,13 @@
             $('#modal-detail-end').text(btn.data('end'));
             $('#modal-detail-visitors').text(btn.data('visitors'));
             $('#modal-detail-purpose').text(btn.data('purpose'));
+        });
+
+        $('#approveModal').on('show.bs.modal', function(event) {
+            var btn = $(event.relatedTarget);
+            $('#approve-modal-id').text(btn.data('id'));
+            $('#approve-modal-form').attr('action', btn.data('approve-url'));
+            $('#approve-room-select').val(btn.data('room-id'));
         });
     </script>
 @endsection

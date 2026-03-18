@@ -196,6 +196,18 @@
                                 <small class="text-muted">Wajib diisi jika status Diselesaikan atau Ditolak.</small>
                             </div>
 
+                            <div class="form-group mb-2">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="set_maintenance"
+                                        name="set_maintenance" value="1" {{ old('set_maintenance') ? 'checked' : '' }}>
+                                    <label class="custom-control-label" for="set_maintenance">
+                                        Tandai ruangan sebagai <strong>Maintenance</strong>
+                                    </label>
+                                </div>
+                                <small class="text-muted ml-4">Aktifkan jika ruangan perlu dihentikan sementara dari pemesanan
+                                    untuk perbaikan.</small>
+                            </div>
+
                             <button type="submit" class="btn btn-warning btn-block btn-sm">
                                 <i class="fas fa-save mr-1"></i> Simpan Status
                             </button>
