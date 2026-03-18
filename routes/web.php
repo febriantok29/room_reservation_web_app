@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\AdminAuthController;
+use App\Http\Controllers\Web\AdminComplaintController;
 use App\Http\Controllers\Web\AdminDashboardController;
 use App\Http\Controllers\Web\AdminFacilityController;
 use Illuminate\Support\Facades\Route;
@@ -59,6 +60,13 @@ Route::prefix('admin')->group(function () {
         Route::get('/approvals', [AdminDashboardController::class, 'approvals'])->name('admin.approvals');
         Route::post('/approvals/{reservation}/approve', [AdminDashboardController::class, 'approveReservation'])->name('admin.approvals.approve');
         Route::post('/approvals/{reservation}/reject', [AdminDashboardController::class, 'rejectReservation'])->name('admin.approvals.reject');
+
+        // Complaints
+        Route::get('/complaints', [AdminComplaintController::class, 'index'])->name('admin.complaints');
+        Route::get('/complaints/create', [AdminComplaintController::class, 'create'])->name('admin.complaints.create');
+        Route::post('/complaints', [AdminComplaintController::class, 'store'])->name('admin.complaints.store');
+        Route::get('/complaints/{complaint}', [AdminComplaintController::class, 'show'])->name('admin.complaints.show');
+        Route::patch('/complaints/{complaint}/status', [AdminComplaintController::class, 'updateStatus'])->name('admin.complaints.update-status');
 
         Route::match(['get', 'post'], '/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
     });

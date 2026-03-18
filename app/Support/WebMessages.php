@@ -32,6 +32,12 @@ final class WebMessages
     public const RESERVATION_UPDATE_FAILED = 'Terjadi kesalahan saat memperbarui reservasi.';
     public const RESERVATION_INVALID_DATA = 'Terjadi kesalahan pada data reservasi.';
 
+    public const COMPLAINT_STATUS_IN_PROGRESS = 'Status komplain diperbarui: sedang dalam proses penanganan.';
+    public const COMPLAINT_STATUS_RESOLVED = 'Komplain berhasil diselesaikan.';
+    public const COMPLAINT_STATUS_REJECTED = 'Komplain telah ditolak.';
+    public const COMPLAINT_ALREADY_CLOSED = 'Komplain ini sudah ditutup dan tidak dapat diubah.';
+    public const COMPLAINT_DELETED_SUCCESS = 'Data komplain berhasil dihapus.';
+
     public const RESERVATION_VALIDATION_MESSAGES = [
         'required' => ':attribute wajib diisi.',
         'exists' => ':attribute tidak ditemukan.',

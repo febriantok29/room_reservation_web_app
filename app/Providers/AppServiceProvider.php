@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Models\RoomComplaint;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +22,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Paginator::useBootstrap(); // Or Paginator::useBootstrapFive(); for BS5
+        Paginator::useBootstrap();
+
+        // Explicit route model binding so {complaint} resolves to RoomComplaint
+        Route::model('complaint', RoomComplaint::class);
     }
 }

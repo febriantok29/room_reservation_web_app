@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('name', 100)->comment('Room name');
             $table->unsignedTinyInteger('floor')->comment('Floor number (1-99)');
             $table->text('description')->nullable()->comment('Room description');
+            $table->string('image_path', 500)->nullable()->comment('Storage path of room image');
             $table->unsignedSmallInteger('capacity')->default(0)->comment('Room capacity (max people)');
             $table->boolean('is_maintenance')->default(false)->comment('Maintenance status');
 

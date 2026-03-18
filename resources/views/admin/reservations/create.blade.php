@@ -71,6 +71,20 @@
                         value="{{ old('visitor_count', 1) }}" min="1" required col-class="col-lg-6 col-md-6" />
                 </div>
 
+                <div class="form-group">
+                    <label class="font-weight-semibold">Permintaan Konsumsi</label>
+                    <div class="custom-control custom-checkbox mb-1">
+                        <input type="checkbox" class="custom-control-input" id="with_snack" name="with_snack" value="1"
+                            {{ old('with_snack') ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="with_snack">Snack / Kudapan</label>
+                    </div>
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="with_lunch" name="with_lunch" value="1"
+                            {{ old('with_lunch') ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="with_lunch">Makan Siang</label>
+                    </div>
+                </div>
+
                 <x-form.field name="purpose" label="Tujuan" type="textarea" value="{{ old('purpose') }}" rows="3"
                     hint="Opsional: Jelaskan keperluan reservasi ruangan ini." col-class="col-md-12" />
 

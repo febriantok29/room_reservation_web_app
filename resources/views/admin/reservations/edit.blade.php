@@ -1,6 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', in_array($reservation->status, ['completed', 'rejected', 'cancelled']) ? 'Detail Reservasi' : 'Ubah
+@section('title',
+    in_array($reservation->status, ['completed', 'rejected', 'cancelled'])
+    ? 'Detail Reservasi'
+    : 'Ubah
     Reservasi')
 
 @section('content_header')
@@ -194,6 +197,20 @@
                         <x-form.field name="visitor_count" label="Jumlah Pengunjung" type="number"
                             value="{{ old('visitor_count', $reservation->visitor_count) }}" min="1" required
                             col-class="col-lg-6 col-md-6" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-semibold">Permintaan Konsumsi</label>
+                        <div class="custom-control custom-checkbox mb-1">
+                            <input type="checkbox" class="custom-control-input" id="with_snack" name="with_snack"
+                                value="1" {{ old('with_snack', $reservation->with_snack) ? 'checked' : '' }}>
+                            <label class="custom-control-label" for="with_snack">Snack / Kudapan</label>
+                        </div>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="with_lunch" name="with_lunch"
+                                value="1" {{ old('with_lunch', $reservation->with_lunch) ? 'checked' : '' }}>
+                            <label class="custom-control-label" for="with_lunch">Makan Siang</label>
+                        </div>
                     </div>
 
                     <x-form.field name="purpose" label="Tujuan" type="textarea"

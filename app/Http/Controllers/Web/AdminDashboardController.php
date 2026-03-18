@@ -530,9 +530,16 @@ class AdminDashboardController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $rooms = Room::query()
+            ->whereNull('deleted_at')
+            ->orderBy('floor')
+            ->orderBy('name')
+            ->get();
+
         return view('admin.approvals.index', [
             'pendingReservations' => $pendingReservations,
-            'searchQuery' => $searchQuery,
+            'searchQuery'         => $searchQuery,
+            'rooms'               => $rooms,
         ]);
     }
 
@@ -540,7 +547,13 @@ class AdminDashboardController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $result = $this->reservationService->approve($request->user(), $reservation);
+        $validated = $request->validate([
+            'room_id' => 'nullable|string|exists:m_rooms,id',
+        ]);
+
+        $targetRoomId = $validated['room_id'] ?? null;
+
+        $result = $this->reservationService->approve($request->user(), $reservation, $targetRoomId);
 
         if (!$result['success']) {
             return back()->withErrors(['approval' => $result['message']]);

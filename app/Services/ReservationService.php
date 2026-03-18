@@ -289,7 +289,7 @@ class ReservationService
         return ['expired' => $expired, 'completed' => $completed];
     }
 
-    public function approve(User $actor, Reservation $reservation): array
+    public function approve(User $actor, Reservation $reservation, ?string $targetRoomId = null): array
     {
         if (!$actor->canApprove()) {
             return $this->forbidden();
@@ -305,9 +305,14 @@ class ReservationService
             ];
         }
 
-        return DB::transaction(function () use ($actor, $reservation) {
-            // Lock the room row to prevent concurrent approvals of conflicting reservations
-            DB::table('m_rooms')->where('id', $reservation->room_id)->lockForUpdate()->first();
+        // Use requested room if admin specified one, otherwise keep original
+        $roomId = ($targetRoomId && $targetRoomId !== $reservation->room_id)
+            ? $targetRoomId
+            : $reservation->room_id;
+
+        return DB::transaction(function () use ($actor, $reservation, $roomId) {
+            // Lock the target room row to prevent concurrent approvals of conflicting reservations
+            DB::table('m_rooms')->where('id', $roomId)->lockForUpdate()->first();
 
             // Re-read reservation inside transaction to get the latest status
             $reservation->refresh();
@@ -322,12 +327,16 @@ class ReservationService
                 ];
             }
 
+            // When the room is being reassigned, don't exclude the old reservation ID
+            // (it sits on a different room so can't conflict with itself anyway)
+            $excludeId = ($roomId === $reservation->room_id) ? $reservation->id : null;
+
             $constraint = $this->cspService->validateReservation(
-                $reservation->room_id,
+                $roomId,
                 $reservation->start_time,
                 $reservation->end_time,
                 (int) $reservation->visitor_count,
-                $reservation->id
+                $excludeId
             );
 
             if (!$constraint['valid']) {
@@ -340,7 +349,8 @@ class ReservationService
                 ];
             }
 
-            $reservation->status = 'approved';
+            $reservation->room_id   = $roomId;
+            $reservation->status    = 'approved';
             $reservation->updated_by = $actor->id;
             $reservation->save();
             $reservation->load(['room', 'user']);
