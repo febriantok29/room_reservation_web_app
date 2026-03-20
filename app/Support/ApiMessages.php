@@ -82,6 +82,14 @@ final class ApiMessages
     public const COMPLAINT_INVALID_RESERVATION_STATUS = 'Komplain hanya dapat diajukan untuk reservasi yang sudah selesai (completed)';
     public const COMPLAINT_ALREADY_CLOSED = 'Komplain ini sudah ditutup dan tidak dapat diubah lagi';
 
+    public const ROOM_AVAILABLE_LIST_SUCCESS = 'Daftar ruangan tersedia berhasil diambil';
+
+    public const REPORT_COMPLAINT_SUCCESS = 'Laporan komplain berhasil diambil';
+    public const REPORT_USAGE_SUCCESS = 'Laporan rekapitulasi penggunaan berhasil diambil';
+    public const REPORT_USER_ACTIVITY_SUCCESS = 'Laporan aktivitas per pengguna berhasil diambil';
+    public const REPORT_SCHEDULE_HISTORY_SUCCESS = 'Laporan jadwal & histori reservasi berhasil diambil';
+    public const REPORT_PERIODIC_SUCCESS = 'Laporan ringkasan periodik berhasil diambil';
+
     private function __construct()
     {
     }
