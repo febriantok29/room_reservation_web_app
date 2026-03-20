@@ -343,6 +343,34 @@ return [
             'icon' => 'fas fa-fw fa-exclamation-circle',
         ],
         [
+            'header' => 'LAPORAN',
+        ],
+        [
+            'text' => 'Laporan Komplain',
+            'route' => 'admin.reports.complaints',
+            'icon' => 'fas fa-fw fa-file-alt',
+        ],
+        [
+            'text' => 'Penggunaan Ruangan',
+            'route' => 'admin.reports.usage',
+            'icon' => 'fas fa-fw fa-chart-bar',
+        ],
+        [
+            'text' => 'Aktivitas Pengguna',
+            'route' => 'admin.reports.user-activity',
+            'icon' => 'fas fa-fw fa-user-chart',
+        ],
+        [
+            'text' => 'Jadwal & Histori',
+            'route' => 'admin.reports.schedule-history',
+            'icon' => 'fas fa-fw fa-history',
+        ],
+        [
+            'text' => 'Ringkasan Periodik',
+            'route' => 'admin.reports.periodic',
+            'icon' => 'fas fa-fw fa-calendar-alt',
+        ],
+        [
             'text' => 'Keluar',
             'route' => 'admin.logout',
             'icon' => 'fas fa-fw fa-sign-out-alt',
