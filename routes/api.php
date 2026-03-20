@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ComplaintController;
 use App\Http\Controllers\Api\FacilityController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\RoomImageController;
@@ -21,6 +22,7 @@ Route::prefix('v1')->middleware('jwt')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
 
     // Room endpoints
+    Route::get('/rooms/available', [RoomController::class, 'available']); // MUST be before /rooms/{id}
     Route::get('/rooms', [RoomController::class, 'index']);
     Route::post('/rooms', [RoomController::class, 'store']);
     Route::get('/rooms/{id}', [RoomController::class, 'show']);
@@ -58,4 +60,13 @@ Route::prefix('v1')->middleware('jwt')->group(function () {
     Route::post('/complaints', [ComplaintController::class, 'store']);
     Route::get('/complaints/{id}', [ComplaintController::class, 'show']);
     Route::patch('/complaints/{id}/status', [ComplaintController::class, 'updateStatus']);
+
+    // Report endpoints (Outputs 3, 5, 6, 7, 8)
+    Route::prefix('reports')->group(function () {
+        Route::get('/complaints',       [ReportController::class, 'complaints']);
+        Route::get('/usage',            [ReportController::class, 'usage']);
+        Route::get('/user-activity',    [ReportController::class, 'userActivity']);
+        Route::get('/schedule-history', [ReportController::class, 'scheduleHistory']);
+        Route::get('/periodic',         [ReportController::class, 'periodic']);
+    });
 });

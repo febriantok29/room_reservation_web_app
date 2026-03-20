@@ -4,6 +4,7 @@ use App\Http\Controllers\Web\AdminAuthController;
 use App\Http\Controllers\Web\AdminComplaintController;
 use App\Http\Controllers\Web\AdminDashboardController;
 use App\Http\Controllers\Web\AdminFacilityController;
+use App\Http\Controllers\Web\AdminReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -67,6 +68,15 @@ Route::prefix('admin')->group(function () {
         Route::post('/complaints', [AdminComplaintController::class, 'store'])->name('admin.complaints.store');
         Route::get('/complaints/{complaint}', [AdminComplaintController::class, 'show'])->name('admin.complaints.show');
         Route::patch('/complaints/{complaint}/status', [AdminComplaintController::class, 'updateStatus'])->name('admin.complaints.update-status');
+
+        // Reports (Outputs 3, 5, 6, 7, 8)
+        Route::prefix('reports')->name('admin.reports.')->group(function () {
+            Route::get('/complaints',       [AdminReportController::class, 'complaints'])->name('complaints');
+            Route::get('/usage',            [AdminReportController::class, 'usage'])->name('usage');
+            Route::get('/user-activity',    [AdminReportController::class, 'userActivity'])->name('user-activity');
+            Route::get('/schedule-history', [AdminReportController::class, 'scheduleHistory'])->name('schedule-history');
+            Route::get('/periodic',         [AdminReportController::class, 'periodic'])->name('periodic');
+        });
 
         Route::match(['get', 'post'], '/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
     });
