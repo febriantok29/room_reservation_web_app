@@ -287,6 +287,50 @@ class RoomController extends Controller
     }
 
     /**
+     * List all rooms available for a specific time window.
+     *
+     * GET /v1/rooms/available?start_time=...&end_time=...&visitor_count=1
+     */
+    public function available(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'start_time'    => 'required|date',
+            'end_time'      => 'required|date|after:start_time',
+            'visitor_count' => 'nullable|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator->errors()->toArray());
+        }
+
+        $start        = Carbon::parse($request->input('start_time'))->utc();
+        $end          = Carbon::parse($request->input('end_time'))->utc();
+        $visitorCount = (int) $request->input('visitor_count', 1);
+
+        $rooms = Room::query()
+            ->with('facilities')
+            ->whereNull('deleted_at')
+            ->where('is_maintenance', false)
+            ->where('capacity', '>=', $visitorCount)
+            ->orderBy('floor')
+            ->orderBy('name')
+            ->get();
+
+        // Filter out rooms that have an overlapping approved/pending reservation
+        $available = $rooms->filter(function (Room $room) use ($start, $end) {
+            return $this->cspService->isRoomAvailable($room->id, $start, $end);
+        })->values();
+
+        return ApiResponse::success([
+            'start_time'    => $start->toIso8601String(),
+            'end_time'      => $end->toIso8601String(),
+            'visitor_count' => $visitorCount,
+            'total'         => $available->count(),
+            'rooms'         => $available,
+        ], ApiMessages::ROOM_AVAILABLE_LIST_SUCCESS);
+    }
+
+    /**
      * Get available time slots for a room.
      */
     public function availability(Request $request, string $id): JsonResponse

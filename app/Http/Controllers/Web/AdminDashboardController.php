@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Facility;
 use App\Models\Reservation;
 use App\Models\Room;
+use App\Models\RoomComplaint;
 use App\Models\User;
 use App\Services\ImageService;
 use App\Services\ReservationService;
 use App\Support\WebMessages;
 use App\Helpers\TimezoneHelper;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -37,11 +39,27 @@ class AdminDashboardController extends Controller
     {
         $this->ensureAdminAccess($request);
 
+        $today = Carbon::today();
+        $allRooms = Room::query()->whereNull('deleted_at')->get(['id', 'name', 'floor', 'is_maintenance']);
+
         $summary = [
-            'total_rooms' => Room::query()->whereNull('deleted_at')->count(),
-            'total_users' => User::query()->whereNull('deleted_at')->count(),
-            'pending_reservations' => Reservation::query()->pending()->count(),
+            'total_rooms'           => $allRooms->count(),
+            'maintenance_rooms'     => $allRooms->where('is_maintenance', true)->count(),
+            'total_users'           => User::query()->whereNull('deleted_at')->count(),
+            'pending_reservations'  => Reservation::query()->pending()->count(),
             'approved_reservations' => Reservation::query()->approved()->count(),
+            'today_reservations'    => Reservation::query()
+                ->whereDate('start_time', $today)
+                ->whereIn('status', ['approved', 'pending'])
+                ->count(),
+            'open_complaints'       => RoomComplaint::query()
+                ->whereNull('deleted_at')
+                ->where('status', 'open')
+                ->count(),
+            'in_progress_complaints' => RoomComplaint::query()
+                ->whereNull('deleted_at')
+                ->where('status', 'in_progress')
+                ->count(),
         ];
 
         $latestReservations = Reservation::query()
@@ -50,9 +68,27 @@ class AdminDashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Room status grid: show maintenance state + whether booked today
+        $bookedRoomIds = Reservation::query()
+            ->whereDate('start_time', $today)
+            ->whereIn('status', ['approved', 'pending'])
+            ->pluck('room_id')
+            ->unique();
+
+        $roomStatuses = $allRooms->map(function ($room) use ($bookedRoomIds) {
+            return [
+                'id'           => $room->id,
+                'name'         => $room->name,
+                'floor'        => $room->floor,
+                'maintenance'  => (bool) $room->is_maintenance,
+                'booked_today' => $bookedRoomIds->contains($room->id),
+            ];
+        })->sortBy('floor')->values();
+
         return view('admin.dashboard', [
-            'summary' => $summary,
+            'summary'            => $summary,
             'latestReservations' => $latestReservations,
+            'roomStatuses'       => $roomStatuses,
         ]);
     }
 
