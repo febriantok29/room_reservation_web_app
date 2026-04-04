@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ComplaintController;
+use App\Http\Controllers\Api\DivisionController;
 use App\Http\Controllers\Api\FacilityController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\RoomController;
@@ -20,6 +22,7 @@ Route::prefix('v1')->group(function () {
 Route::prefix('v1')->middleware('jwt')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::post('/auth/fcm-token', [AuthController::class, 'updateFcmToken']);
 
     // Room endpoints
     Route::get('/rooms/available', [RoomController::class, 'available']); // MUST be before /rooms/{id}
@@ -44,6 +47,13 @@ Route::prefix('v1')->middleware('jwt')->group(function () {
     // User endpoints
     Route::get('/users', [UserController::class, 'index']);
 
+    // Division master endpoints
+    Route::get('/divisions', [DivisionController::class, 'index']);
+    Route::post('/divisions', [DivisionController::class, 'store']);
+    Route::get('/divisions/{id}', [DivisionController::class, 'show']);
+    Route::put('/divisions/{id}', [DivisionController::class, 'update']);
+    Route::delete('/divisions/{id}', [DivisionController::class, 'destroy']);
+
     // Reservation endpoints
     Route::get('/reservations', [ReservationController::class, 'index']);
     Route::get('/reservations/calendar', [ReservationController::class, 'calendar']);
@@ -61,12 +71,24 @@ Route::prefix('v1')->middleware('jwt')->group(function () {
     Route::get('/complaints/{id}', [ComplaintController::class, 'show']);
     Route::patch('/complaints/{id}/status', [ComplaintController::class, 'updateStatus']);
 
-    // Report endpoints (Outputs 3, 5, 6, 7, 8)
+    // Report endpoints (Outputs 3, 5, 6, 7, 8, 9, 10)
     Route::prefix('reports')->group(function () {
-        Route::get('/complaints',       [ReportController::class, 'complaints']);
-        Route::get('/usage',            [ReportController::class, 'usage']);
-        Route::get('/user-activity',    [ReportController::class, 'userActivity']);
-        Route::get('/schedule-history', [ReportController::class, 'scheduleHistory']);
-        Route::get('/periodic',         [ReportController::class, 'periodic']);
+        Route::get('/complaints',        [ReportController::class, 'complaints']);
+        Route::get('/usage',             [ReportController::class, 'usage']);
+        Route::get('/user-activity',     [ReportController::class, 'userActivity']);
+        Route::get('/schedule-history',  [ReportController::class, 'scheduleHistory']);
+        Route::get('/periodic',          [ReportController::class, 'periodic']);
+        Route::get('/division-activity', [ReportController::class, 'divisionActivity']);
+        Route::get('/maintenance',       [ReportController::class, 'maintenance']);
+        Route::get('/division-usage',    [ReportController::class, 'divisionUsage']);
+    });
+
+    // Notification history endpoints
+    Route::prefix('notifications')->group(function () {
+        Route::get('/',                            [NotificationController::class, 'index']);
+        Route::get('/unread-count',                [NotificationController::class, 'unreadCount']);
+        Route::post('/read-all',                   [NotificationController::class, 'markAllRead']);
+        Route::post('/{id}/read',                  [NotificationController::class, 'markRead']);
+        Route::delete('/{id}',                     [NotificationController::class, 'destroy']);
     });
 });
