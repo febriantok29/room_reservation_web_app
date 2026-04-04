@@ -40,6 +40,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'employee_id',
+        'division_id',
         'email',
         'password',
         'first_name',
@@ -75,6 +76,14 @@ class User extends Authenticatable
     ];
 
     /**
+     * Get the division this user belongs to.
+     */
+    public function division()
+    {
+        return $this->belongsTo(Division::class, 'division_id');
+    }
+
+    /**
      * Get the reservations made by the user.
      */
     public function reservations()
@@ -88,6 +97,14 @@ class User extends Authenticatable
     public function createdRooms()
     {
         return $this->hasMany(Room::class, 'created_by');
+    }
+
+    /**
+     * Get all registered FCM device tokens for this user.
+     */
+    public function fcmTokens()
+    {
+        return $this->hasMany(FcmToken::class, 'user_id');
     }
 
     /**
@@ -120,6 +137,18 @@ class User extends Authenticatable
     public function canApprove(): bool
     {
         return $this->isAdmin();
+    }
+
+    /**
+     * Specifies the FCM token for push notifications.
+     * Returns all device tokens so every logged-in device receives the notification.
+     *
+     * @return string|array<string>|null
+     */
+    public function routeNotificationForFcm(): array|string|null
+    {
+        $tokens = $this->fcmTokens()->pluck('token')->all();
+        return empty($tokens) ? null : $tokens;
     }
 
     /**
