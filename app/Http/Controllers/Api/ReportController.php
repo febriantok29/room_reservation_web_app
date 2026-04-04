@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
+use App\Models\Division;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\RoomComplaint;
@@ -17,6 +18,9 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ComplaintReportExport;
+use App\Exports\DivisionActivityReportExport;
+use App\Exports\DivisionUsageReportExport;
+use App\Exports\MaintenanceReportExport;
 use App\Exports\UsageReportExport;
 use App\Exports\UserActivityReportExport;
 use App\Exports\ScheduleHistoryReportExport;
@@ -426,5 +430,271 @@ class ReportController extends Controller
             'summary' => $summary,
             'data'    => $grouped,
         ], ApiMessages::REPORT_PERIODIC_SUCCESS);
+    }
+
+    /**
+     * Output 9 — Laporan Aktivitas Reservasi per Divisi
+     * GET /v1/reports/division-activity?format=json|pdf|excel&date_from=&date_to=
+     */
+    public function divisionActivity(Request $request): mixed
+    {
+        $validator = Validator::make($request->all(), [
+            'format'    => 'nullable|in:json,pdf,excel',
+            'date_from' => 'nullable|date',
+            'date_to'   => 'nullable|date|after_or_equal:date_from',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator->errors()->toArray());
+        }
+
+        $from = $request->filled('date_from')
+            ? Carbon::parse($request->input('date_from'))->startOfDay()
+            : Carbon::now()->startOfMonth();
+        $to = $request->filled('date_to')
+            ? Carbon::parse($request->input('date_to'))->endOfDay()
+            : Carbon::now()->endOfDay();
+
+        $reservations = Reservation::query()
+            ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
+            ->whereNull('deleted_at')
+            ->where('start_time', '>=', $from)
+            ->where('start_time', '<=', $to)
+            ->orderBy('start_time')
+            ->get();
+
+        $byDivision = $reservations->groupBy(fn($r) => $r->user?->division_id ?? '__no_division__')
+            ->map(function ($items) {
+                $first    = $items->first();
+                $division = $first->user?->division;
+                return [
+                    'division_id'   => $division?->id ?? null,
+                    'division_name' => $division?->name ?? 'Admin / Tanpa Divisi',
+                    'division_code' => $division?->code ?? '-',
+                    'total'         => $items->count(),
+                    'approved'      => $items->where('status', 'approved')->count(),
+                    'completed'     => $items->where('status', 'completed')->count(),
+                    'rejected'      => $items->where('status', 'rejected')->count(),
+                    'cancelled'     => $items->where('status', 'cancelled')->count(),
+                    'pending'       => $items->where('status', 'pending')->count(),
+                    'visitors'      => $items->sum('visitor_count'),
+                ];
+            })->values()->sortByDesc('total')->values();
+
+        $summary = [
+            'date_from'          => $from->toDateString(),
+            'date_to'            => $to->toDateString(),
+            'total_reservations' => $reservations->count(),
+            'total_visitors'     => $reservations->sum('visitor_count'),
+        ];
+
+        $format = $request->input('format', 'json');
+
+        if ($format === 'pdf') {
+            $pdf = Pdf::loadView('reports.pdf.division-activity', compact('reservations', 'byDivision', 'summary'))
+                ->setPaper('a4', 'landscape');
+            return $pdf->download('laporan-aktivitas-divisi-' . now()->format('Ymd') . '.pdf');
+        }
+
+        if ($format === 'excel') {
+            return Excel::download(
+                new DivisionActivityReportExport($reservations, $byDivision, $summary),
+                'laporan-aktivitas-divisi-' . now()->format('Ymd') . '.xlsx'
+            );
+        }
+
+        return ApiResponse::success([
+            'summary'      => $summary,
+            'by_division'  => $byDivision,
+            'reservations' => $reservations,
+        ], ApiMessages::REPORT_DIVISION_ACTIVITY_SUCCESS);
+    }
+
+    /**
+     * Output 10 — Laporan Maintenance & Kerusakan Ruangan
+     * GET /v1/reports/maintenance?format=json|pdf|excel&date_from=&date_to=&room_id=
+     */
+    public function maintenance(Request $request): mixed
+    {
+        $validator = Validator::make($request->all(), [
+            'format'    => 'nullable|in:json,pdf,excel',
+            'date_from' => 'nullable|date',
+            'date_to'   => 'nullable|date|after_or_equal:date_from',
+            'room_id'   => 'nullable|string|exists:m_rooms,id',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator->errors()->toArray());
+        }
+
+        $from = $request->filled('date_from')
+            ? Carbon::parse($request->input('date_from'))->startOfDay()
+            : Carbon::now()->startOfMonth();
+        $to = $request->filled('date_to')
+            ? Carbon::parse($request->input('date_to'))->endOfDay()
+            : Carbon::now()->endOfDay();
+
+        $roomQuery = Room::query()
+            ->whereNull('deleted_at')
+            ->orderBy('floor')
+            ->orderBy('name');
+
+        if ($request->filled('room_id')) {
+            $roomQuery->where('id', $request->input('room_id'));
+        }
+
+        $allRooms = $roomQuery->get();
+
+        $complaints = RoomComplaint::query()
+            ->whereNull('deleted_at')
+            ->where('created_at', '>=', $from)
+            ->where('created_at', '<=', $to)
+            ->when($request->filled('room_id'), fn($q) => $q->where('room_id', $request->input('room_id')))
+            ->get()
+            ->groupBy('room_id');
+
+        $rooms = $allRooms->map(function ($room) use ($complaints) {
+            $roomComplaints = $complaints->get($room->id, collect());
+            return [
+                'id'               => $room->id,
+                'name'             => $room->name,
+                'floor'            => $room->floor,
+                'capacity'         => $room->capacity,
+                'is_maintenance'   => (bool) $room->is_maintenance,
+                'total_complaints' => $roomComplaints->count(),
+                'open'             => $roomComplaints->where('status', 'open')->count(),
+                'in_progress'      => $roomComplaints->where('status', 'in_progress')->count(),
+                'resolved'         => $roomComplaints->where('status', 'resolved')->count(),
+                'rejected'         => $roomComplaints->where('status', 'rejected')->count(),
+            ];
+        });
+
+        $allComplaints = $complaints->flatten(1);
+
+        $summary = [
+            'date_from'           => $from->toDateString(),
+            'date_to'             => $to->toDateString(),
+            'total_rooms'         => $allRooms->count(),
+            'under_maintenance'   => $allRooms->where('is_maintenance', true)->count(),
+            'total_complaints'    => $allComplaints->count(),
+            'open_complaints'     => $allComplaints->where('status', 'open')->count(),
+            'resolved_complaints' => $allComplaints->where('status', 'resolved')->count(),
+        ];
+
+        $format = $request->input('format', 'json');
+
+        if ($format === 'pdf') {
+            $pdf = Pdf::loadView('reports.pdf.maintenance', compact('rooms', 'summary'))
+                ->setPaper('a4', 'landscape');
+            return $pdf->download('laporan-maintenance-' . now()->format('Ymd') . '.pdf');
+        }
+
+        if ($format === 'excel') {
+            return Excel::download(
+                new MaintenanceReportExport($rooms, $summary),
+                'laporan-maintenance-' . now()->format('Ymd') . '.xlsx'
+            );
+        }
+
+        return ApiResponse::success([
+            'summary' => $summary,
+            'rooms'   => $rooms,
+        ], ApiMessages::REPORT_MAINTENANCE_SUCCESS);
+    }
+
+    /**
+     * Output 11 — Rekapitulasi Pemakaian Ruangan per Divisi
+     * GET /v1/reports/division-usage?format=json|pdf|excel&date_from=&date_to=
+     */
+    public function divisionUsage(Request $request): mixed
+    {
+        $validator = Validator::make($request->all(), [
+            'format'    => 'nullable|in:json,pdf,excel',
+            'date_from' => 'nullable|date',
+            'date_to'   => 'nullable|date|after_or_equal:date_from',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator->errors()->toArray());
+        }
+
+        $from = $request->filled('date_from')
+            ? Carbon::parse($request->input('date_from'))->startOfDay()
+            : Carbon::now()->startOfMonth()->startOfDay();
+
+        $to = $request->filled('date_to')
+            ? Carbon::parse($request->input('date_to'))->endOfDay()
+            : Carbon::now()->endOfDay();
+
+        $reservations = Reservation::query()
+            ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
+            ->whereNull('deleted_at')
+            ->whereIn('status', ['approved', 'completed'])
+            ->where('start_time', '>=', $from)
+            ->where('start_time', '<=', $to)
+            ->orderBy('start_time')
+            ->get();
+
+        $byDivision = $reservations->groupBy(fn($r) => $r->user?->division_id ?? '__no_division__')
+            ->map(function ($items) {
+                $first    = $items->first();
+                $division = $first->user?->division;
+
+                $totalMinutes = $items->sum(fn($r) => $r->start_time->diffInMinutes($r->end_time));
+                $totalHours   = round($totalMinutes / 60, 1);
+                $count        = $items->count();
+
+                $roomBreakdown = $items->groupBy('room_id')->map(function ($ri) {
+                    $r    = $ri->first();
+                    $mins = $ri->sum(fn($rv) => $rv->start_time->diffInMinutes($rv->end_time));
+                    return [
+                        'room_name' => $r->room?->name ?? '-',
+                        'floor'     => $r->room?->floor ?? '-',
+                        'count'     => $ri->count(),
+                        'hours'     => round($mins / 60, 1),
+                        'visitors'  => $ri->sum('visitor_count'),
+                    ];
+                })->values()->sortByDesc('hours')->values()->toArray();
+
+                return [
+                    'division_id'       => $division?->id ?? null,
+                    'division_name'     => $division?->name ?? 'Admin / Tanpa Divisi',
+                    'division_code'     => $division?->code ?? '-',
+                    'reservation_count' => $count,
+                    'total_hours'       => $totalHours,
+                    'avg_hours'         => $count > 0 ? round($totalHours / $count, 1) : 0,
+                    'total_visitors'    => $items->sum('visitor_count'),
+                    'rooms_used'        => collect($roomBreakdown)->pluck('room_name')->unique()->values()->toArray(),
+                    'room_breakdown'    => $roomBreakdown,
+                ];
+            })->values()->sortByDesc('total_hours')->values();
+
+        $summary = [
+            'date_from'          => $from->toDateString(),
+            'date_to'            => $to->toDateString(),
+            'total_reservations' => $reservations->count(),
+            'total_hours'        => round($reservations->sum(fn($r) => $r->start_time->diffInMinutes($r->end_time)) / 60, 1),
+            'total_visitors'     => $reservations->sum('visitor_count'),
+        ];
+
+        $format = $request->input('format', 'json');
+
+        if ($format === 'pdf') {
+            $pdf = Pdf::loadView('reports.pdf.division-usage', compact('byDivision', 'summary'))
+                ->setPaper('a4', 'landscape');
+            return $pdf->download('laporan-pemakaian-divisi-' . now()->format('Ymd') . '.pdf');
+        }
+
+        if ($format === 'excel') {
+            return Excel::download(
+                new DivisionUsageReportExport($byDivision, $summary),
+                'laporan-pemakaian-divisi-' . now()->format('Ymd') . '.xlsx'
+            );
+        }
+
+        return ApiResponse::success([
+            'summary'    => $summary,
+            'by_division' => $byDivision,
+        ], ApiMessages::REPORT_DIVISION_USAGE_SUCCESS);
     }
 }
