@@ -325,6 +325,11 @@ return [
             'icon' => 'fas fa-fw fa-plug',
         ],
         [
+            'text' => 'Divisi',
+            'route' => 'admin.divisions',
+            'icon' => 'fas fa-fw fa-building',
+        ],
+        [
             'header' => 'RESERVASI & PENGADUAN',
         ],
         [
@@ -346,29 +351,44 @@ return [
             'header' => 'LAPORAN',
         ],
         [
-            'text' => 'Laporan Komplain',
-            'route' => 'admin.reports.complaints',
-            'icon' => 'fas fa-fw fa-file-alt',
+            'text' => 'Komplain Ruangan',
+            'route' => 'admin.reports.maintenance',
+            'icon' => 'fas fa-fw fa-tools',
         ],
         [
-            'text' => 'Penggunaan Ruangan',
-            'route' => 'admin.reports.usage',
-            'icon' => 'fas fa-fw fa-chart-bar',
-        ],
-        [
-            'text' => 'Aktivitas Pengguna',
+            'text' => 'Pemesanan Karyawan',
             'route' => 'admin.reports.user-activity',
-            'icon' => 'fas fa-fw fa-user-chart',
+            'icon' => 'fas fa-fw fa-user-tie',
         ],
         [
-            'text' => 'Jadwal & Histori',
+            'text' => 'Pemesanan Divisi',
+            'route' => 'admin.reports.division-activity',
+            'icon' => 'fas fa-fw fa-sitemap',
+        ],
+        [
+            'text' => 'Pemakaian Per-Ruangan',
+            'route' => 'admin.reports.usage',
+            'icon' => 'fas fa-fw fa-door-open',
+        ],
+        [
+            'text' => 'Riwayat Pemesanan',
             'route' => 'admin.reports.schedule-history',
             'icon' => 'fas fa-fw fa-history',
         ],
         [
-            'text' => 'Ringkasan Periodik',
+            'text' => 'Rekap Periodik',
             'route' => 'admin.reports.periodic',
-            'icon' => 'fas fa-fw fa-calendar-alt',
+            'icon' => 'fas fa-fw fa-chart-line',
+        ],
+        [
+            'text' => 'Pemakaian Per-Divisi',
+            'route' => 'admin.reports.division-usage',
+            'icon' => 'fas fa-fw fa-clock',
+        ],
+        [
+            'text' => 'Daftar Komplain',
+            'route' => 'admin.reports.complaints',
+            'icon' => 'fas fa-fw fa-exclamation-triangle',
         ],
         [
             'text' => 'Keluar',
