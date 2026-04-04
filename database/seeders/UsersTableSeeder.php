@@ -15,10 +15,11 @@ class UsersTableSeeder extends Seeder
     public function run(): void
     {
         $users = [
-            // Admin Users
+            // Admin Users (no division, ADM-YYYY-NN format)
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'ADMIN01',
+                'employee_id' => 'admin01',
+                'division_id' => null,
                 'email' => 'admin@roomreservation.com',
                 'password' => Hash::make('Admin@123'),
                 'first_name' => 'System',
@@ -29,7 +30,8 @@ class UsersTableSeeder extends Seeder
             ],
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00002',
+                'employee_id' => 'ADM-2026-02',
+                'division_id' => null,
                 'email' => 'john.admin@roomreservation.com',
                 'password' => Hash::make('Admin@123'),
                 'first_name' => 'John',
@@ -39,10 +41,11 @@ class UsersTableSeeder extends Seeder
                 'is_active' => true,
             ],
 
-            // Staff Users (non-admin)
+            // Divisi Operasi (OPS)
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00003',
+                'employee_id' => 'OPS-2026-00001',
+                'division_id' => 'DIV-01',
                 'email' => 'staff1@roomreservation.com',
                 'password' => Hash::make('Staff@123'),
                 'first_name' => 'Maria',
@@ -53,7 +56,8 @@ class UsersTableSeeder extends Seeder
             ],
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00004',
+                'employee_id' => 'OPS-2026-00002',
+                'division_id' => 'DIV-01',
                 'email' => 'staff2@roomreservation.com',
                 'password' => Hash::make('Staff@123'),
                 'first_name' => 'David',
@@ -62,11 +66,10 @@ class UsersTableSeeder extends Seeder
                 'is_admin' => false,
                 'is_active' => true,
             ],
-
-            // Additional Staff Users (non-admin)
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00005',
+                'employee_id' => 'OPS-2026-00003',
+                'division_id' => 'DIV-01',
                 'email' => 'sarah.brown@example.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'Sarah',
@@ -75,9 +78,12 @@ class UsersTableSeeder extends Seeder
                 'is_admin' => false,
                 'is_active' => true,
             ],
+
+            // Divisi Keuangan dan Pajak (KNP)
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00006',
+                'employee_id' => 'KNP-2026-00001',
+                'division_id' => 'DIV-02',
                 'email' => 'michael.wilson@example.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'Michael',
@@ -88,7 +94,8 @@ class UsersTableSeeder extends Seeder
             ],
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00007',
+                'employee_id' => 'KNP-2026-00002',
+                'division_id' => 'DIV-02',
                 'email' => 'jennifer.davis@example.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'Jennifer',
@@ -97,9 +104,12 @@ class UsersTableSeeder extends Seeder
                 'is_admin' => false,
                 'is_active' => true,
             ],
+
+            // Divisi Human Resource (HRD)
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00008',
+                'employee_id' => 'HRD-2026-00001',
+                'division_id' => 'DIV-03',
                 'email' => 'robert.miller@example.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'Robert',
@@ -110,7 +120,8 @@ class UsersTableSeeder extends Seeder
             ],
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00009',
+                'employee_id' => 'HRD-2026-00002',
+                'division_id' => 'DIV-03',
                 'email' => 'lisa.anderson@example.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'Lisa',
@@ -121,7 +132,8 @@ class UsersTableSeeder extends Seeder
             ],
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00010',
+                'employee_id' => 'HRD-2026-00003',
+                'division_id' => 'DIV-03',
                 'email' => 'william.taylor@example.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'William',
@@ -146,17 +158,22 @@ Login Credentials:
 ========================================
 Admin:
   Email: admin@roomreservation.com
-    Employee ID: ADMIN01
+    Employee ID: ADM-2026-01
   Password: Admin@123
 
-Staff:
+Staff (Operasi):
   Email: staff1@roomreservation.com
-    Employee ID: EMP-2025-00003
+    Employee ID: OPS-2026-00001
   Password: Staff@123
 
-Staff (contoh non-admin):
-  Email: sarah.brown@example.com
-    Employee ID: EMP-2025-00005
+Staff (Keuangan):
+  Email: michael.wilson@example.com
+    Employee ID: KNP-2026-00001
+  Password: User@123
+
+Staff (HRD):
+  Email: robert.miller@example.com
+    Employee ID: HRD-2026-00001
   Password: User@123
 ========================================
         ');
