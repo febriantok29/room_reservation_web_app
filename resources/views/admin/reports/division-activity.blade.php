@@ -1,12 +1,12 @@
 @extends('adminlte::page')
 
-@section('title', 'Laporan Pemesanan Per-Karyawan')
+@section('title', 'Laporan Pemesanan Per-Divisi')
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap:.75rem;">
         <div>
-            <h1 class="m-0">Laporan Pemesanan Per-Karyawan</h1>
-            <div class="page-subtitle">Rekapitulasi jumlah dan status pemesanan ruangan per karyawan.</div>
+            <h1 class="m-0">Laporan Pemesanan Per-Divisi</h1>
+            <div class="page-subtitle">Rekapitulasi jumlah dan status pemesanan ruangan berdasarkan divisi.</div>
         </div>
         <div class="d-flex" style="gap:.5rem;">
             <a href="{{ request()->fullUrlWithQuery(['format' => 'excel']) }}" class="btn btn-success btn-sm">
@@ -25,35 +25,24 @@
     {{-- Filter --}}
     <div class="card card-admin mb-3">
         <div class="card-body py-3">
-            <form method="GET" action="{{ route('admin.reports.user-activity') }}">
+            <form method="GET" action="{{ route('admin.reports.division-activity') }}">
                 <div class="row align-items-end">
-                    <div class="col-lg-2 col-md-4 mb-2 mb-lg-0">
+                    <div class="col-lg-3 col-md-4 mb-2 mb-lg-0">
                         <label class="small mb-1">Dari Tanggal</label>
                         <input type="date" name="date_from" class="form-control form-control-sm"
                             value="{{ $dateFrom ?? '' }}">
                     </div>
-                    <div class="col-lg-2 col-md-4 mb-2 mb-lg-0">
+                    <div class="col-lg-3 col-md-4 mb-2 mb-lg-0">
                         <label class="small mb-1">Sampai Tanggal</label>
                         <input type="date" name="date_to" class="form-control form-control-sm"
                             value="{{ $dateTo ?? '' }}">
                     </div>
-                    <div class="col-lg-4 col-md-4 mb-2 mb-lg-0">
-                        <label class="small mb-1">Karyawan</label>
-                        <select name="user_id" class="form-control form-control-sm">
-                            <option value="">Semua Karyawan</option>
-                            @foreach ($users as $user)
-                                <option value="{{ $user->id }}" @selected(($userFilter ?? '') == $user->id)>
-                                    {{ $user->full_name }} ({{ $user->employee_id }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-lg-4 col-md-12">
+                    <div class="col-lg-6 col-md-12">
                         <div class="d-flex" style="gap:.5rem;">
                             <button type="submit" class="btn btn-primary btn-sm flex-fill">
                                 <i class="fas fa-search"></i> Filter
                             </button>
-                            <a href="{{ route('admin.reports.user-activity') }}" class="btn btn-secondary btn-sm">
+                            <a href="{{ route('admin.reports.division-activity') }}" class="btn btn-secondary btn-sm">
                                 <i class="fas fa-undo"></i>
                             </a>
                         </div>
@@ -63,54 +52,48 @@
         </div>
     </div>
 
-    {{-- Single Table: Per-Karyawan --}}
+    {{-- Single Table: Per-Divisi --}}
     <div class="card card-admin">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-sm table-hover mb-0">
                     <thead class="thead-light">
                         <tr>
-                            <th>Nama Karyawan</th>
-                            <th>No. Karyawan</th>
                             <th>Divisi</th>
+                            <th>Kode</th>
                             <th class="text-center">Total Pesanan</th>
                             <th class="text-center">Disetujui</th>
                             <th class="text-center">Selesai</th>
                             <th class="text-center">Ditolak</th>
                             <th class="text-center">Dibatalkan</th>
                             <th class="text-center">Menunggu</th>
-                            <th class="text-center">Total Jam</th>
-                            <th class="text-center">Pengunjung</th>
+                            <th class="text-center">Total Pengunjung</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($byUser as $row)
+                        @forelse ($byDivision as $row)
                             <tr>
-                                <td class="font-weight-bold">{{ $row['full_name'] }}</td>
-                                <td><code>{{ $row['employee_id'] }}</code></td>
+                                <td class="font-weight-bold">{{ $row['division_name'] }}</td>
                                 <td>
                                     @if ($row['division_code'] !== '-')
                                         <span class="badge badge-info">{{ $row['division_code'] }}</span>
-                                        {{ $row['division_name'] }}
                                     @else
-                                        <span class="text-muted small">{{ $row['division_name'] }}</span>
+                                        <span class="text-muted">-</span>
                                     @endif
                                 </td>
                                 <td class="text-center font-weight-bold">{{ $row['total'] }}</td>
-                                <td class="text-center"><span class="badge badge-success">{{ $row['approved'] }}</span>
-                                </td>
+                                <td class="text-center"><span class="badge badge-success">{{ $row['approved'] }}</span></td>
                                 <td class="text-center"><span class="badge badge-primary">{{ $row['completed'] }}</span>
                                 </td>
                                 <td class="text-center"><span class="badge badge-danger">{{ $row['rejected'] }}</span></td>
                                 <td class="text-center"><span class="badge badge-secondary">{{ $row['cancelled'] }}</span>
                                 </td>
                                 <td class="text-center"><span class="badge badge-warning">{{ $row['pending'] }}</span></td>
-                                <td class="text-center text-warning font-weight-bold">{{ $row['total_hours'] }} jam</td>
-                                <td class="text-center">{{ $row['total_visitors'] }}</td>
+                                <td class="text-center">{{ $row['visitors'] }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="11" class="text-center text-muted py-4">
+                                <td colspan="9" class="text-center text-muted py-4">
                                     <i class="fas fa-inbox fa-2x d-block mb-2"></i>
                                     Tidak ada data pemesanan pada periode ini.
                                 </td>
@@ -127,8 +110,8 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap:.75rem;">
         <div>
-            <h1 class="m-0">Laporan Aktivitas Pengguna</h1>
-            <div class="page-subtitle">Rekap aktivitas reservasi per pengguna dalam periode tertentu.</div>
+            <h1 class="m-0">Laporan Aktivitas per Divisi</h1>
+            <div class="page-subtitle">Rekap reservasi ruangan berdasarkan divisi pemohon.</div>
         </div>
         <div class="d-flex" style="gap:.5rem;">
             <a href="{{ request()->fullUrlWithQuery(['format' => 'excel']) }}" class="btn btn-success btn-sm">
@@ -148,7 +131,7 @@
     <div class="row mb-3">
         <div class="col-lg-3 col-md-4 col-sm-6 mb-2">
             <div class="info-box shadow-none mb-0" style="border-left:4px solid #007bff;">
-                <span class="info-box-icon bg-primary"><i class="fas fa-calendar-check"></i></span>
+                <span class="info-box-icon bg-primary"><i class="fas fa-list-alt"></i></span>
                 <div class="info-box-content">
                     <span class="info-box-text">Total Reservasi</span>
                     <span class="info-box-number">{{ $summary['total_reservations'] }}</span>
@@ -156,17 +139,26 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-4 col-sm-6 mb-2">
-            <div class="info-box shadow-none mb-0" style="border-left:4px solid #17a2b8;">
-                <span class="info-box-icon bg-info"><i class="fas fa-users"></i></span>
+            <div class="info-box shadow-none mb-0" style="border-left:4px solid #28a745;">
+                <span class="info-box-icon bg-success"><i class="fas fa-building"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Pengguna Aktif</span>
-                    <span class="info-box-number">{{ $summary['total_users'] }}</span>
+                    <span class="info-box-text">Divisi Aktif</span>
+                    <span class="info-box-number">{{ $byDivision->count() }}</span>
                 </div>
             </div>
         </div>
-        <div class="col-lg-6 col-md-4 col-sm-6 mb-2">
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-2">
+            <div class="info-box shadow-none mb-0" style="border-left:4px solid #17a2b8;">
+                <span class="info-box-icon bg-info"><i class="fas fa-users"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Total Pengunjung</span>
+                    <span class="info-box-number">{{ $summary['total_visitors'] }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-2">
             <div class="info-box shadow-none mb-0" style="border-left:4px solid #6c757d;">
-                <span class="info-box-icon bg-secondary"><i class="fas fa-calendar-alt"></i></span>
+                <span class="info-box-icon bg-secondary"><i class="fas fa-calendar-range"></i></span>
                 <div class="info-box-content">
                     <span class="info-box-text">Periode</span>
                     <span class="info-box-number" style="font-size:.95rem;">
@@ -181,35 +173,24 @@
     {{-- Filter --}}
     <div class="card card-admin mb-3">
         <div class="card-body py-3">
-            <form method="GET" action="{{ route('admin.reports.user-activity') }}">
+            <form method="GET" action="{{ route('admin.reports.division-activity') }}">
                 <div class="row align-items-end">
-                    <div class="col-lg-2 col-md-4 mb-2 mb-lg-0">
+                    <div class="col-lg-3 col-md-4 mb-2 mb-lg-0">
                         <label class="small mb-1">Dari Tanggal</label>
                         <input type="date" name="date_from" class="form-control form-control-sm"
                             value="{{ $dateFrom ?? '' }}">
                     </div>
-                    <div class="col-lg-2 col-md-4 mb-2 mb-lg-0">
+                    <div class="col-lg-3 col-md-4 mb-2 mb-lg-0">
                         <label class="small mb-1">Sampai Tanggal</label>
                         <input type="date" name="date_to" class="form-control form-control-sm"
                             value="{{ $dateTo ?? '' }}">
                     </div>
-                    <div class="col-lg-4 col-md-4 mb-2 mb-lg-0">
-                        <label class="small mb-1">Pengguna</label>
-                        <select name="user_id" class="form-control form-control-sm">
-                            <option value="">Semua Pengguna</option>
-                            @foreach ($users as $user)
-                                <option value="{{ $user->id }}" @selected(($userFilter ?? '') == $user->id)>
-                                    {{ $user->full_name }} ({{ $user->employee_id }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-lg-4 col-md-12">
+                    <div class="col-lg-6 col-md-12">
                         <div class="d-flex" style="gap:.5rem;">
                             <button type="submit" class="btn btn-primary btn-sm flex-fill">
                                 <i class="fas fa-search"></i> Filter
                             </button>
-                            <a href="{{ route('admin.reports.user-activity') }}" class="btn btn-secondary btn-sm">
+                            <a href="{{ route('admin.reports.division-activity') }}" class="btn btn-secondary btn-sm">
                                 <i class="fas fa-undo"></i>
                             </a>
                         </div>
@@ -219,38 +200,54 @@
         </div>
     </div>
 
-    {{-- Per-User Summary --}}
-    @if ($byUser->isNotEmpty())
+    {{-- Per-Division Summary Table --}}
+    @if ($byDivision->isNotEmpty())
         <div class="card card-admin mb-3">
             <div class="card-header py-2">
-                <h3 class="card-title"><i class="fas fa-user-chart mr-1"></i> Ringkasan per Pengguna</h3>
+                <h3 class="card-title"><i class="fas fa-chart-pie mr-1"></i> Ringkasan per Divisi</h3>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-sm table-hover mb-0">
                         <thead class="thead-light">
                             <tr>
-                                <th>Nama</th>
-                                <th>No. Karyawan</th>
+                                <th>Divisi</th>
+                                <th>Kode</th>
                                 <th class="text-center">Total</th>
                                 <th class="text-center">Disetujui</th>
                                 <th class="text-center">Selesai</th>
                                 <th class="text-center">Ditolak</th>
                                 <th class="text-center">Dibatalkan</th>
                                 <th class="text-center">Menunggu</th>
+                                <th class="text-center">Pengunjung</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($byUser as $row)
+                            @foreach ($byDivision as $row)
                                 <tr>
-                                    <td>{{ $row['full_name'] }}</td>
-                                    <td>{{ $row['employee_id'] }}</td>
+                                    <td>{{ $row['division_name'] }}</td>
+                                    <td>
+                                        @if ($row['division_code'] !== '-')
+                                            <span class="badge badge-info">{{ $row['division_code'] }}</span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
                                     <td class="text-center font-weight-bold">{{ $row['total'] }}</td>
-                                    <td class="text-center">{{ $row['approved'] }}</td>
-                                    <td class="text-center">{{ $row['completed'] }}</td>
-                                    <td class="text-center">{{ $row['rejected'] }}</td>
-                                    <td class="text-center">{{ $row['cancelled'] }}</td>
-                                    <td class="text-center">{{ $row['pending'] }}</td>
+                                    <td class="text-center"><span
+                                            class="badge badge-success">{{ $row['approved'] }}</span>
+                                    </td>
+                                    <td class="text-center"><span
+                                            class="badge badge-primary">{{ $row['completed'] }}</span></td>
+                                    <td class="text-center"><span
+                                            class="badge badge-danger">{{ $row['rejected'] }}</span>
+                                    </td>
+                                    <td class="text-center"><span
+                                            class="badge badge-secondary">{{ $row['cancelled'] }}</span></td>
+                                    <td class="text-center"><span
+                                            class="badge badge-warning">{{ $row['pending'] }}</span>
+                                    </td>
+                                    <td class="text-center">{{ $row['visitors'] }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -260,75 +257,66 @@
         </div>
     @endif
 
-    {{-- Detail Table --}}
+    {{-- Detail Reservations --}}
     <div class="card card-admin">
         <div class="card-header py-2">
             <h3 class="card-title"><i class="fas fa-list mr-1"></i> Detail Reservasi</h3>
+            <div class="card-tools">
+                <span class="badge badge-primary">{{ $reservations->count() }} data</span>
+            </div>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover table-sm mb-0">
+                <table class="table table-sm table-hover mb-0">
                     <thead class="thead-light">
                         <tr>
-                            <th style="min-width:140px;">ID Reservasi</th>
-                            <th>Pengguna</th>
+                            <th>ID Reservasi</th>
+                            <th>Pemohon</th>
                             <th>No. Karyawan</th>
+                            <th>Divisi</th>
                             <th>Ruangan</th>
-                            <th>Mulai</th>
-                            <th>Selesai</th>
+                            <th>Tgl Mulai</th>
+                            <th>Tgl Selesai</th>
                             <th>Status</th>
-                            <th class="text-center">Snack</th>
-                            <th class="text-center">Makan Siang</th>
+                            <th class="text-center">Pengunjung</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($reservations as $r)
-                            @php
-                                $badge = match ($r->status) {
-                                    'pending' => 'warning',
-                                    'approved' => 'success',
-                                    'completed' => 'primary',
-                                    'rejected' => 'danger',
-                                    default => 'secondary',
-                                };
-                                $label = match ($r->status) {
-                                    'pending' => 'Menunggu',
-                                    'approved' => 'Disetujui',
-                                    'completed' => 'Selesai',
-                                    'rejected' => 'Ditolak',
-                                    'cancelled' => 'Dibatalkan',
-                                    default => $r->status,
-                                };
-                            @endphp
+                        @forelse ($reservations as $r)
                             <tr>
-                                <td class="text-monospace small">{{ $r->id }}</td>
+                                <td><code>{{ $r->id }}</code></td>
                                 <td>{{ $r->user?->full_name ?? '-' }}</td>
-                                <td>{{ $r->user?->employee_id ?? '-' }}</td>
+                                <td><code>{{ $r->user?->employee_id ?? '-' }}</code></td>
+                                <td>
+                                    @if ($r->user?->division)
+                                        <span class="badge badge-info">{{ $r->user->division->code }}</span>
+                                        {{ $r->user->division->name }}
+                                    @else
+                                        <span class="text-muted">Admin / Tanpa Divisi</span>
+                                    @endif
+                                </td>
                                 <td>{{ $r->room?->name ?? '-' }}</td>
-                                <td class="text-nowrap">{{ $r->start_time->format('d/m/Y H:i') }}</td>
-                                <td class="text-nowrap">{{ $r->end_time->format('d/m/Y H:i') }}</td>
-                                <td><span class="badge badge-{{ $badge }}">{{ $label }}</span></td>
-                                <td class="text-center">
-                                    @if ($r->with_snack)
-                                        <i class="fas fa-check text-success"></i>
-                                    @else
-                                        <i class="fas fa-times text-muted"></i>
-                                    @endif
+                                <td>{{ $r->start_time?->format('d/m/Y H:i') }}</td>
+                                <td>{{ $r->end_time?->format('d/m/Y H:i') }}</td>
+                                <td>
+                                    @php
+                                        $badgeMap = [
+                                            'pending' => 'warning',
+                                            'approved' => 'success',
+                                            'completed' => 'primary',
+                                            'rejected' => 'danger',
+                                            'cancelled' => 'secondary',
+                                        ];
+                                    @endphp
+                                    <span class="badge badge-{{ $badgeMap[$r->status] ?? 'light' }}">
+                                        {{ ucfirst($r->status) }}
+                                    </span>
                                 </td>
-                                <td class="text-center">
-                                    @if ($r->with_lunch)
-                                        <i class="fas fa-check text-success"></i>
-                                    @else
-                                        <i class="fas fa-times text-muted"></i>
-                                    @endif
-                                </td>
+                                <td class="text-center">{{ $r->visitor_count }}</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center text-muted py-4">
-                                    <i class="fas fa-inbox fa-2x d-block mb-2"></i>
-                                    Tidak ada data aktivitas pengguna.
-                                </td>
+                                <td colspan="9" class="text-center text-muted py-3">Tidak ada data reservasi.</td>
                             </tr>
                         @endforelse
                     </tbody>

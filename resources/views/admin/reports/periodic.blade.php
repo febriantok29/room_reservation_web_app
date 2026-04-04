@@ -1,11 +1,11 @@
 @extends('adminlte::page')
 
-@section('title', 'Laporan Ringkasan Periodik')
+@section('title', 'Rekap Periodik')
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap:.75rem;">
         <div>
-            <h1 class="m-0">Laporan Ringkasan Periodik</h1>
+            <h1 class="m-0">Rekap Periodik</h1>
             <div class="page-subtitle">Tren reservasi harian, mingguan, atau bulanan.</div>
         </div>
         <div class="d-flex" style="gap:.5rem;">
@@ -21,55 +21,6 @@
 
 @section('content')
     @include('admin.partials.flash_message')
-
-    {{-- Summary --}}
-    <div class="row mb-3">
-        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
-            <div class="info-box shadow-none mb-0" style="border-left:4px solid #6c757d;">
-                <span class="info-box-icon bg-secondary"><i class="fas fa-list"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Total</span>
-                    <span class="info-box-number">{{ $summary['total'] }}</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
-            <div class="info-box shadow-none mb-0" style="border-left:4px solid #28a745;">
-                <span class="info-box-icon bg-success"><i class="fas fa-check-circle"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Disetujui</span>
-                    <span class="info-box-number">{{ $summary['approved'] }}</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
-            <div class="info-box shadow-none mb-0" style="border-left:4px solid #007bff;">
-                <span class="info-box-icon bg-primary"><i class="fas fa-flag-checkered"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Selesai</span>
-                    <span class="info-box-number">{{ $summary['completed'] }}</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
-            <div class="info-box shadow-none mb-0" style="border-left:4px solid #dc3545;">
-                <span class="info-box-icon bg-danger"><i class="fas fa-times-circle"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Ditolak</span>
-                    <span class="info-box-number">{{ $summary['rejected'] }}</span>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
-            <div class="info-box shadow-none mb-0" style="border-left:4px solid #fd7e14;">
-                <span class="info-box-icon bg-warning"><i class="fas fa-ban"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">Dibatalkan</span>
-                    <span class="info-box-number">{{ $summary['cancelled'] }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
 
     {{-- Filter --}}
     <div class="card card-admin mb-3">

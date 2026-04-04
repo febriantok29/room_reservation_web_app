@@ -1,11 +1,11 @@
 @extends('adminlte::page')
 
-@section('title', 'Laporan Jadwal & Histori Reservasi')
+@section('title', 'Riwayat Pemesanan Ruangan')
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap:.75rem;">
         <div>
-            <h1 class="m-0">Laporan Jadwal &amp; Histori Reservasi</h1>
+            <h1 class="m-0">Riwayat Pemesanan Ruangan</h1>
             <div class="page-subtitle">Seluruh riwayat reservasi ruangan berdasarkan filter periode dan status.</div>
         </div>
         <div class="d-flex" style="gap:.5rem;">
@@ -21,21 +21,6 @@
 
 @section('content')
     @include('admin.partials.flash_message')
-
-    {{-- Summary Cards --}}
-    <div class="row mb-3">
-        @foreach ([['label' => 'Total', 'key' => 'total', 'color' => '#6c757d', 'bg' => 'secondary', 'icon' => 'list'], ['label' => 'Menunggu', 'key' => 'pending', 'color' => '#ffc107', 'bg' => 'warning', 'icon' => 'clock'], ['label' => 'Disetujui', 'key' => 'approved', 'color' => '#28a745', 'bg' => 'success', 'icon' => 'check-circle'], ['label' => 'Selesai', 'key' => 'completed', 'color' => '#007bff', 'bg' => 'primary', 'icon' => 'flag-checkered'], ['label' => 'Ditolak', 'key' => 'rejected', 'color' => '#dc3545', 'bg' => 'danger', 'icon' => 'times-circle'], ['label' => 'Dibatalkan', 'key' => 'cancelled', 'color' => '#fd7e14', 'bg' => 'warning', 'icon' => 'ban']] as $card)
-            <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
-                <div class="info-box shadow-none mb-0" style="border-left:4px solid {{ $card['color'] }};">
-                    <span class="info-box-icon bg-{{ $card['bg'] }}"><i class="fas fa-{{ $card['icon'] }}"></i></span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">{{ $card['label'] }}</span>
-                        <span class="info-box-number">{{ $summary[$card['key']] }}</span>
-                    </div>
-                </div>
-            </div>
-        @endforeach
-    </div>
 
     {{-- Filter --}}
     <div class="card card-admin mb-3">
@@ -90,7 +75,7 @@
         <div class="card-footer py-2 text-sm text-muted">
             Periode: {{ \Carbon\Carbon::parse($summary['date_from'])->format('d/m/Y') }}
             – {{ \Carbon\Carbon::parse($summary['date_to'])->format('d/m/Y') }}
-            &bull; Menampilkan {{ $reservations->count() }} reservasi.
+            &bull; {{ $summary['total_rooms'] }} ruangan &bull; {{ $summary['total'] }} total reservasi.
         </div>
     </div>
 
@@ -101,50 +86,56 @@
                 <table class="table table-hover table-sm mb-0">
                     <thead class="thead-light">
                         <tr>
-                            <th style="min-width:140px;">ID Reservasi</th>
-                            <th>Pemohon</th>
-                            <th>No. Karyawan</th>
                             <th>Ruangan</th>
-                            <th>Lantai</th>
-                            <th>Mulai</th>
-                            <th>Selesai</th>
-                            <th class="text-center">Pengunjung</th>
-                            <th>Status</th>
-                            <th>Tujuan</th>
+                            <th class="text-center">Lantai</th>
+                            <th class="text-center">Total</th>
+                            <th class="text-center">Menunggu</th>
+                            <th class="text-center">Disetujui</th>
+                            <th class="text-center">Selesai</th>
+                            <th class="text-center">Ditolak</th>
+                            <th class="text-center">Dibatalkan</th>
+                            <th class="text-center">Total Jam</th>
+                            <th class="text-center">Total Pengunjung</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($reservations as $r)
-                            @php
-                                $badge = match ($r->status) {
-                                    'pending' => 'warning',
-                                    'approved' => 'success',
-                                    'completed' => 'primary',
-                                    'rejected' => 'danger',
-                                    default => 'secondary',
-                                };
-                                $label = match ($r->status) {
-                                    'pending' => 'Menunggu',
-                                    'approved' => 'Disetujui',
-                                    'completed' => 'Selesai',
-                                    'rejected' => 'Ditolak',
-                                    'cancelled' => 'Dibatalkan',
-                                    default => $r->status,
-                                };
-                            @endphp
+                        @forelse($byRoom as $r)
                             <tr>
-                                <td class="text-monospace small">{{ $r->id }}</td>
-                                <td>{{ $r->user?->full_name ?? '-' }}</td>
-                                <td>{{ $r->user?->employee_id ?? '-' }}</td>
-                                <td>{{ $r->room?->name ?? '-' }}</td>
-                                <td>{{ $r->room?->floor ? 'Lt. ' . $r->room->floor : '-' }}</td>
-                                <td class="text-nowrap">{{ $r->start_time->format('d/m/Y H:i') }}</td>
-                                <td class="text-nowrap">{{ $r->end_time->format('d/m/Y H:i') }}</td>
-                                <td class="text-center">{{ $r->visitor_count }}</td>
-                                <td><span class="badge badge-{{ $badge }}">{{ $label }}</span></td>
-                                <td style="max-width:200px; white-space:normal; word-break:break-word;">
-                                    {{ $r->purpose ?? '-' }}
+                                <td>{{ $r['room_name'] }}</td>
+                                <td class="text-center">{{ $r['floor'] ? 'Lt. ' . $r['floor'] : '-' }}</td>
+                                <td class="text-center font-weight-bold">{{ $r['total'] }}</td>
+                                <td class="text-center">
+                                    @if ($r['pending'] > 0)
+                                    <span class="badge badge-warning">{{ $r['pending'] }}</span>@else<span
+                                            class="text-muted">0</span>
+                                    @endif
                                 </td>
+                                <td class="text-center">
+                                    @if ($r['approved'] > 0)
+                                    <span class="badge badge-success">{{ $r['approved'] }}</span>@else<span
+                                            class="text-muted">0</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if ($r['completed'] > 0)
+                                    <span class="badge badge-primary">{{ $r['completed'] }}</span>@else<span
+                                            class="text-muted">0</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if ($r['rejected'] > 0)
+                                    <span class="badge badge-danger">{{ $r['rejected'] }}</span>@else<span
+                                            class="text-muted">0</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if ($r['cancelled'] > 0)
+                                    <span class="badge badge-secondary">{{ $r['cancelled'] }}</span>@else<span
+                                            class="text-muted">0</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">{{ $r['total_hours'] }} j</td>
+                                <td class="text-center">{{ $r['total_visitors'] }}</td>
                             </tr>
                         @empty
                             <tr>
