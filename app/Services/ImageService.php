@@ -31,6 +31,40 @@ class ImageService
     public const ALLOWED_MIMES = ['jpg', 'jpeg', 'png', 'webp'];
 
     /**
+     * Get standard image validation rules.
+     *
+     * @param  bool  $required  Whether the image field is required
+     * @return array<int, string>
+     */
+    public static function validationRules(bool $required = false): array
+    {
+        return [
+            $required ? 'required' : 'nullable',
+            'file',
+            'image',
+            'mimes:' . implode(',', self::ALLOWED_MIMES),
+            'max:' . (self::SERVER_MAX_BYTES / 1024), // Laravel validates in KB
+        ];
+    }
+
+    /**
+     * Get custom error messages for image validation (Indonesian).
+     *
+     * @param  string  $field  The field name (e.g., 'image', 'photo')
+     * @return array<string, string>
+     */
+    public static function validationMessages(string $field = 'image'): array
+    {
+        return [
+            "{$field}.required" => 'File gambar wajib diunggah.',
+            "{$field}.file"     => 'Upload harus berupa file.',
+            "{$field}.image"    => 'File harus berupa gambar.',
+            "{$field}.mimes"    => 'Format gambar harus jpg, jpeg, png, atau webp.',
+            "{$field}.max"      => 'Ukuran file maksimal 10 MB.',
+        ];
+    }
+
+    /**
      * Upload an image file to the given folder on the public disk.
      *
      * If the file exceeds MAX_SIZE_BYTES, it is auto-compressed to JPEG.
