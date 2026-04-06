@@ -73,9 +73,12 @@
             </form>
         </div>
         <div class="card-footer py-2 text-sm text-muted">
-            Periode: {{ \Carbon\Carbon::parse($summary['date_from'])->format('d/m/Y') }}
-            – {{ \Carbon\Carbon::parse($summary['date_to'])->format('d/m/Y') }}
-            &bull; {{ $summary['total_rooms'] }} ruangan &bull; {{ $summary['total'] }} total reservasi.
+            @if ($summary['date_from'] && $summary['date_to'])
+                Periode: {{ \Carbon\Carbon::parse($summary['date_from'])->format('d/m/Y') }}
+                – {{ \Carbon\Carbon::parse($summary['date_to'])->format('d/m/Y') }}
+                &bull;
+            @endif
+            {{ $summary['total_rooms'] }} ruangan &bull; {{ $summary['total'] }} total reservasi.
         </div>
     </div>
 

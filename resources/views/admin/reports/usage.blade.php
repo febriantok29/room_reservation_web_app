@@ -161,8 +161,12 @@
                 <div class="info-box-content">
                     <span class="info-box-text">Periode</span>
                     <span class="info-box-number" style="font-size:.95rem;">
-                        {{ \Carbon\Carbon::parse($summary['date_from'])->format('d/m/Y') }}
-                        – {{ \Carbon\Carbon::parse($summary['date_to'])->format('d/m/Y') }}
+                        @if ($summary['date_from'] && $summary['date_to'])
+                            {{ \Carbon\Carbon::parse($summary['date_from'])->format('d/m/Y') }}
+                            – {{ \Carbon\Carbon::parse($summary['date_to'])->format('d/m/Y') }}
+                        @else
+                            Semua data
+                        @endif
                     </span>
                 </div>
             </div>

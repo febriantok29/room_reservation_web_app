@@ -22,14 +22,15 @@ class ReservationsTableSeeder extends Seeder
             return;
         }
 
-        // Use current time as baseline so data is always fresh relative to seeding time
-        $now = now();
-
+        // Today: April 6, 2026
+        // Date range: Jan 1, 2025 - Apr 30, 2026
+        $now = now(); // April 6, 2026
+        $startDate = Carbon::create(2025, 1, 1);
         $reservations = [];
         $userIndex = 0;
         $roomIndex = 0;
 
-        // Helper lambda untuk rotate users dan rooms
+        // Helper functions to rotate users and rooms
         $nextUser = function () use (&$userIndex, $users) {
             $user = $users[$userIndex % count($users)];
             $userIndex++;
@@ -42,340 +43,285 @@ class ReservationsTableSeeder extends Seeder
             return $room->id;
         };
 
-        // ====== [1] COMPLETED — Sudah selesai, status benar (4 data) ======
-        // Reservasi di masa lalu yang memang sudah `completed` dengan benar.
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subDays(30)->setTime(9, 0, 0),
-            'end_time' => $now->copy()->subDays(30)->setTime(11, 0, 0),
-            'purpose' => 'Rapat tim marketing strategi Q1',
-            'visitor_count' => 8,
-            'status' => 'completed',
+        $purposes = [
+            'Rapat koordinasi tim Marketing strategi Q1',
+            'Workshop pelatihan software development',
+            'Presentasi proposal klien baru',
+            'Training internal tim HRD',
+            'Rapat evaluasi kinerja bulanan',
+            'Diskusi roadmap produk 2025',
+            'Client meeting with potential investors',
+            'Brainstorming session fitur aplikasi',
+            'Town hall meeting seluruh karyawan',
+            'Sprint planning meeting tim IT',
+            'Budget review dengan divisi Finance',
+            'Onboarding training karyawan baru',
+            'Quarterly business review',
+            'Product demo untuk stakeholders',
+            'Leadership team strategy session',
+            'Customer feedback review meeting',
+            'Technical workshop CI/CD pipeline',
+            'Annual performance review discussion',
+            'Vendor negotiation meeting',
+            'Crisis management simulation training',
+            'Team building activities',
+            'Product roadmap planning',
+            'Client presentation deck review',
+            'Monthly sales performance review',
+            'Strategic planning session',
+            'Innovation brainstorming session',
+            'Vendor selection committee meeting',
+            'Performance appraisal discussion',
+            'Client onboarding session',
+            'Project kickoff meeting',
         ];
 
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subDays(20)->setTime(13, 0, 0),
-            'end_time' => $now->copy()->subDays(20)->setTime(15, 0, 0),
-            'purpose' => 'Workshop pelatihan software tim IT',
-            'visitor_count' => 12,
-            'status' => 'completed',
-        ];
+        // ========================================
+        // [1] COMPLETED — Historical data (100 reservations)
+        // Spread from Jan 1, 2025 to March 31, 2026
+        // ========================================
+        $completedStartDate = Carbon::create(2025, 1, 1);
+        $completedEndDate = Carbon::create(2026, 3, 31);
+        $totalDaysCompleted = $completedStartDate->diffInDays($completedEndDate);
 
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subDays(14)->setTime(10, 0, 0),
-            'end_time' => $now->copy()->subDays(14)->setTime(12, 0, 0),
-            'purpose' => 'Presentasi proposal klien baru',
-            'visitor_count' => 6,
-            'status' => 'completed',
-        ];
+        for ($i = 0; $i < 100; $i++) {
+            $randomDays = rand(0, $totalDaysCompleted);
+            $date = $completedStartDate->copy()->addDays($randomDays);
 
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subDays(7)->setTime(9, 30, 0),
-            'end_time' => $now->copy()->subDays(7)->setTime(11, 30, 0),
-            'purpose' => 'Sesi training internal tim HRD',
-            'visitor_count' => 10,
-            'status' => 'completed',
-        ];
+            // Skip weekends
+            while ($date->isWeekend()) {
+                $date->addDay();
+            }
 
-        // ====== [2] CANCELLED — Dibatalkan manual (3 data) ======
-        // Reservasi yang dibatalkan oleh pengguna sebelum atau saat pelaksanaan.
+            $startHour = rand(8, 15);
+            $duration = rand(2, 4);
+            $visitorCount = rand(4, 15);
 
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subDays(10)->setTime(14, 0, 0),
-            'end_time' => $now->copy()->subDays(10)->setTime(16, 0, 0),
-            'purpose' => 'Diskusi mendadak dibatalkan karena prioritas berubah',
-            'visitor_count' => 5,
-            'status' => 'cancelled',
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subDays(6)->setTime(10, 0, 0),
-            'end_time' => $now->copy()->subDays(6)->setTime(12, 0, 0),
-            'purpose' => 'Acara dibatalkan karena peserta tidak memenuhi kuota',
-            'visitor_count' => 3,
-            'status' => 'cancelled',
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subDays(3)->setTime(15, 0, 0),
-            'end_time' => $now->copy()->subDays(3)->setTime(17, 0, 0),
-            'purpose' => 'Rapat direschedule ke minggu depan',
-            'visitor_count' => 7,
-            'status' => 'cancelled',
-        ];
-
-        // ====== [3] REJECTED — Ditolak admin (3 data) ======
-        // Reservasi yang ditolak admin karena alasan tertentu.
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subDays(18)->setTime(11, 0, 0),
-            'end_time' => $now->copy()->subDays(18)->setTime(13, 0, 0),
-            'purpose' => 'Pengajuan ditolak - kapasitas ruangan kurang dari jumlah peserta',
-            'visitor_count' => 35,
-            'status' => 'rejected',
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subDays(9)->setTime(14, 0, 0),
-            'end_time' => $now->copy()->subDays(9)->setTime(16, 0, 0),
-            'purpose' => 'Ditolak - bersamaan dengan reservasi lain yang sudah disetujui',
-            'visitor_count' => 4,
-            'status' => 'rejected',
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subDays(4)->setTime(8, 0, 0),
-            'end_time' => $now->copy()->subDays(4)->setTime(10, 0, 0),
-            'purpose' => 'Ditolak - ruangan sedang dalam pemeliharaan',
-            'visitor_count' => 6,
-            'status' => 'rejected',
-        ];
-
-        // ====== [4] APPROVED (PAST) — 🔴 TARGET CRON JOB: harus jadi `completed` ======
-        // Status `approved`, tapi end_time sudah LEWAT → cron/autoTransition()
-        // harus mengubahnya menjadi `completed` secara otomatis.
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subHours(8)->setMinutes(0)->setSeconds(0),
-            'end_time' => $now->copy()->subHours(6)->setMinutes(0)->setSeconds(0),
-            'purpose' => '[CRON TEST] Seminar product update — sudah berakhir 6 jam lalu',
-            'visitor_count' => 15,
-            'status' => 'approved', // → harusnya jadi `completed` setelah cron
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subDays(2)->setTime(9, 0, 0),
-            'end_time' => $now->copy()->subDays(2)->setTime(11, 0, 0),
-            'purpose' => '[CRON TEST] Rapat evaluasi kinerja Q4 — berakhir 2 hari lalu',
-            'visitor_count' => 9,
-            'status' => 'approved', // → harusnya jadi `completed` setelah cron
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subDays(5)->setTime(13, 0, 0),
-            'end_time' => $now->copy()->subDays(5)->setTime(15, 0, 0),
-            'purpose' => '[CRON TEST] Diskusi strategi bisnis 2026 — berakhir 5 hari lalu',
-            'visitor_count' => 11,
-            'status' => 'approved', // → harusnya jadi `completed` setelah cron
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subHours(3)->setMinutes(0)->setSeconds(0),
-            'end_time' => $now->copy()->subHours(1)->setMinutes(0)->setSeconds(0),
-            'purpose' => '[CRON TEST] Briefing tim sales — berakhir 1 jam lalu',
-            'visitor_count' => 7,
-            'status' => 'approved', // → harusnya jadi `completed` setelah cron
-        ];
-
-        // ====== [5] PENDING (PAST) — 🔴 TARGET CRON JOB: harus jadi `cancelled` ======
-        // Status `pending` (belum disetujui), tapi start_time sudah LEWAT →
-        // cron/autoTransition() harus mengubahnya menjadi `cancelled` secara otomatis.
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subHours(4)->setMinutes(0)->setSeconds(0),
-            'end_time' => $now->copy()->subHours(2)->setMinutes(0)->setSeconds(0),
-            'purpose' => '[CRON TEST] Rapat divisi keuangan — start sudah lewat, belum disetujui',
-            'visitor_count' => 8,
-            'status' => 'pending', // → harusnya jadi `cancelled` setelah cron
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subDays(1)->setTime(10, 0, 0),
-            'end_time' => $now->copy()->subDays(1)->setTime(12, 0, 0),
-            'purpose' => '[CRON TEST] Sesi orientasi karyawan baru — kemarin, belum diapprove',
-            'visitor_count' => 5,
-            'status' => 'pending', // → harusnya jadi `cancelled` setelah cron
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subDays(3)->setTime(14, 0, 0),
-            'end_time' => $now->copy()->subDays(3)->setTime(16, 0, 0),
-            'purpose' => '[CRON TEST] Workshop design thinking — 3 hari lalu, pending terus',
-            'visitor_count' => 12,
-            'status' => 'pending', // → harusnya jadi `cancelled` setelah cron
-        ];
-
-        // ====== [6] APPROVED (ONGOING) — Sedang berlangsung saat ini (2 data) ======
-        // Reservasi yang start_time sudah lewat namun end_time belum,
-        // artinya sedang berjalan sekarang dan status `approved` adalah benar.
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subHours(1)->setMinutes(0)->setSeconds(0),
-            'end_time' => $now->copy()->addHours(1)->setMinutes(0)->setSeconds(0),
-            'purpose' => 'Rapat koordinasi proyek berjalan — sedang berlangsung',
-            'visitor_count' => 9,
-            'status' => 'approved', // valid: end_time belum lewat
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->subMinutes(30)->setSeconds(0),
-            'end_time' => $now->copy()->addMinutes(90)->setSeconds(0),
-            'purpose' => 'Presentasi progress Q1 kepada direksi — sedang berlangsung',
-            'visitor_count' => 14,
-            'status' => 'approved', // valid: end_time belum lewat
-        ];
-
-        // ====== [7] PENDING (FUTURE) — Menunggu persetujuan admin (3 data) ======
-        // Reservasi di masa depan yang belum disetujui, status `pending` adalah benar.
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->addDays(1)->setTime(10, 0, 0),
-            'end_time' => $now->copy()->addDays(1)->setTime(12, 0, 0),
-            'purpose' => 'Review anggaran bulanan — menunggu persetujuan',
-            'visitor_count' => 5,
-            'status' => 'pending',
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->addDays(3)->setTime(14, 0, 0),
-            'end_time' => $now->copy()->addDays(3)->setTime(16, 0, 0),
-            'purpose' => 'Kickoff proyek sistem ERP baru — pending konfirmasi',
-            'visitor_count' => 11,
-            'status' => 'pending',
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->addDays(5)->setTime(9, 0, 0),
-            'end_time' => $now->copy()->addDays(5)->setTime(11, 0, 0),
-            'purpose' => 'Presentasi vendor solusi cloud — menunggu review',
-            'visitor_count' => 8,
-            'status' => 'pending',
-        ];
-
-        // ====== [8] APPROVED (FUTURE) — Sudah disetujui, belum dilaksanakan (5 data) ======
-        // Reservasi masa depan yang sudah di-approve oleh admin.
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->addDays(2)->setTime(15, 0, 0),
-            'end_time' => $now->copy()->addDays(2)->setTime(17, 0, 0),
-            'purpose' => 'Review anggaran Q2 divisi keuangan — sudah disetujui',
-            'visitor_count' => 5,
-            'status' => 'approved',
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->addDays(4)->setTime(13, 0, 0),
-            'end_time' => $now->copy()->addDays(4)->setTime(15, 30, 0),
-            'purpose' => 'Survey kepuasan pelanggan — presentasi hasil',
-            'visitor_count' => 20,
-            'status' => 'approved',
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->addDays(6)->setTime(10, 0, 0),
-            'end_time' => $now->copy()->addDays(6)->setTime(12, 0, 0),
-            'purpose' => 'Pelatihan penggunaan ERP untuk user baru',
-            'visitor_count' => 16,
-            'status' => 'approved',
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->addDays(8)->setTime(14, 0, 0),
-            'end_time' => $now->copy()->addDays(8)->setTime(16, 0, 0),
-            'purpose' => 'Perencanaan roadmap produk 2027',
-            'visitor_count' => 12,
-            'status' => 'approved',
-        ];
-
-        $reservations[] = [
-            'user_id' => $nextUser(),
-            'room_id' => $nextRoom(),
-            'start_time' => $now->copy()->addDays(10)->setTime(9, 0, 0),
-            'end_time' => $now->copy()->addDays(10)->setTime(12, 0, 0),
-            'purpose' => 'Town hall bulanan seluruh karyawan',
-            'visitor_count' => 45,
-            'status' => 'approved',
-        ];
-
-        // ====== Insert all reservations ======
-        $reservationCount = 1;
-        foreach ($reservations as $reservation) {
-            $date = Carbon::parse($reservation['start_time'])->format('Ymd');
-            $id = sprintf('RSV-%s-%02d', $date, $reservationCount);
-
-            DB::table('t_reservations')->insert([
-                'id' => $id,
-                'user_id' => $reservation['user_id'],
-                'room_id' => $reservation['room_id'],
-                'start_time' => $reservation['start_time']->setTimezone('UTC'),
-                'end_time' => $reservation['end_time']->setTimezone('UTC'),
-                'purpose' => $reservation['purpose'],
-                'visitor_count' => $reservation['visitor_count'],
-                'status' => $reservation['status'],
-                'created_at' => $reservation['start_time']->copy()->subDays(rand(1, 7))->setTimezone('UTC'),
-                'created_by' => $reservation['user_id'],
-                'updated_by' => $reservation['user_id'],
-            ]);
-
-            $reservationCount++;
+            $reservations[] = [
+                'user_id' => $nextUser(),
+                'room_id' => $nextRoom(),
+                'start_time' => $date->copy()->setTime($startHour, 0, 0),
+                'end_time' => $date->copy()->setTime($startHour + $duration, 0, 0),
+                'purpose' => $purposes[$i % count($purposes)],
+                'visitor_count' => $visitorCount,
+                'status' => 'completed',
+            ];
         }
 
-        $this->command->info('Reservations seeded successfully!');
-        $this->command->info(count($reservations) . ' reservations created');
+        // ========================================
+        // [2] CANCELLED — Mixed throughout the year (20 reservations)
+        // ========================================
+        $cancelReasons = [
+            'Rapat dibatalkan karena perubahan prioritas bisnis',
+            'Peserta utama berhalangan hadir, reschedule diperlukan',
+            'Kegiatan dialihkan ke format online via Zoom',
+            'Pembatalan mendadak karena emergency meeting',
+            'Rapat ditunda menunggu laporan keuangan final',
+            'Tim tidak cukup siap untuk presentasi',
+            'Klien membatalkan janji temu secara mendadak',
+            'Konflik jadwal dengan rapat direksi',
+        ];
+
+        for ($i = 0; $i < 20; $i++) {
+            // Spread across the entire period
+            $randomDays = rand(10, 450); // Jan 2025 to Mar 2026
+            $date = Carbon::create(2025, 1, 1)->addDays($randomDays);
+
+            while ($date->isWeekend()) {
+                $date->addDay();
+            }
+
+            $startHour = rand(9, 15);
+
+            $reservations[] = [
+                'user_id' => $nextUser(),
+                'room_id' => $nextRoom(),
+                'start_time' => $date->copy()->setTime($startHour, 0, 0),
+                'end_time' => $date->copy()->setTime($startHour + 2, 0, 0),
+                'purpose' => $cancelReasons[$i % count($cancelReasons)],
+                'visitor_count' => rand(4, 10),
+                'status' => 'cancelled',
+            ];
+        }
+
+        // ========================================
+        // [3] REJECTED — Mixed throughout the year (15 reservations)
+        // ========================================
+        $rejectReasons = [
+            'Rapat ditolak: ruangan sudah dibooking untuk acara prioritas lebih tinggi',
+            'Permintaan ditolak: informasi tidak lengkap dan pemohon tidak responsif',
+            'Ditolak: jumlah peserta melebihi kapasitas ruangan yang diminta',
+            'Pengajuan ditolak karena bentrok dengan maintenance ruangan',
+            'Ditolak: waktu reservasi di luar jam operasional',
+            'Permintaan tidak disetujui karena tujuan tidak jelas',
+            'Ditolak: ruangan tidak sesuai dengan kebutuhan acara',
+        ];
+
+        for ($i = 0; $i < 15; $i++) {
+            $randomDays = rand(15, 440);
+            $date = Carbon::create(2025, 1, 1)->addDays($randomDays);
+
+            while ($date->isWeekend()) {
+                $date->addDay();
+            }
+
+            $startHour = rand(10, 16);
+
+            $reservations[] = [
+                'user_id' => $nextUser(),
+                'room_id' => $nextRoom(),
+                'start_time' => $date->copy()->setTime($startHour, 0, 0),
+                'end_time' => $date->copy()->setTime($startHour + 3, 0, 0),
+                'purpose' => $rejectReasons[$i % count($rejectReasons)],
+                'visitor_count' => rand(5, 20),
+                'status' => 'rejected',
+            ];
+        }
+
+        // ========================================
+        // [4] APPROVED (PAST) — For cron auto-complete testing (10 reservations)
+        // ========================================
+        for ($i = 0; $i < 10; $i++) {
+            $daysAgo = rand(1, 5);
+            $startHour = rand(9, 14);
+
+            $reservations[] = [
+                'user_id' => $nextUser(),
+                'room_id' => $nextRoom(),
+                'start_time' => $now->copy()->subDays($daysAgo)->setTime($startHour, 0, 0),
+                'end_time' => $now->copy()->subDays($daysAgo)->setTime($startHour + 2, 0, 0),
+                'purpose' => '[CRON TEST] Rapat divisi yang sudah disetujui (target auto-complete)',
+                'visitor_count' => rand(5, 10),
+                'status' => 'approved',
+            ];
+        }
+
+        // ========================================
+        // [5] PENDING (PAST) — For cron auto-cancel testing (10 reservations)
+        // ========================================
+        for ($i = 0; $i < 10; $i++) {
+            $daysAgo = rand(1, 5);
+            $startHour = rand(10, 15);
+
+            $reservations[] = [
+                'user_id' => $nextUser(),
+                'room_id' => $nextRoom(),
+                'start_time' => $now->copy()->subDays($daysAgo)->setTime($startHour, 0, 0),
+                'end_time' => $now->copy()->subDays($daysAgo)->setTime($startHour + 2, 0, 0),
+                'purpose' => '[CRON TEST] Rapat pending yang terlewat (target auto-cancel)',
+                'visitor_count' => rand(3, 8),
+                'status' => 'pending',
+            ];
+        }
+
+        // ========================================
+        // [6] TODAY — Ongoing/upcoming meetings (3 reservations at 13:00, 15:00, 17:00)
+        // ========================================
+        // 13:00 - approved, currently running
+        $reservations[] = [
+            'user_id' => $nextUser(),
+            'room_id' => $nextRoom(),
+            'start_time' => $now->copy()->setTime(13, 0, 0),
+            'end_time' => $now->copy()->setTime(15, 0, 0),
+            'purpose' => 'Rapat koordinasi mingguan tim IT',
+            'visitor_count' => 8,
+            'status' => 'approved',
+        ];
+
+        // 15:00 - pending approval
+        $reservations[] = [
+            'user_id' => $nextUser(),
+            'room_id' => $nextRoom(),
+            'start_time' => $now->copy()->setTime(15, 0, 0),
+            'end_time' => $now->copy()->setTime(17, 0, 0),
+            'purpose' => 'Review budget Q2 divisi keuangan',
+            'visitor_count' => 6,
+            'status' => 'pending',
+        ];
+
+        // 17:00 - approved
+        $reservations[] = [
+            'user_id' => $nextUser(),
+            'room_id' => $nextRoom(),
+            'start_time' => $now->copy()->setTime(17, 0, 0),
+            'end_time' => $now->copy()->setTime(19, 0, 0),
+            'purpose' => 'Presentasi hasil survey kepuasan pelanggan',
+            'visitor_count' => 12,
+            'status' => 'approved',
+        ];
+
+        // ========================================
+        // [7] APPROVED (FUTURE) — Upcoming confirmed meetings (12 reservations)
+        // ========================================
+        for ($i = 0; $i < 12; $i++) {
+            $daysAhead = rand(3, 24);
+            $startHour = rand(9, 15);
+
+            $reservations[] = [
+                'user_id' => $nextUser(),
+                'room_id' => $nextRoom(),
+                'start_time' => $now->copy()->addDays($daysAhead)->setTime($startHour, 0, 0),
+                'end_time' => $now->copy()->addDays($daysAhead)->setTime($startHour + 3, 0, 0),
+                'purpose' => $purposes[rand(0, count($purposes) - 1)],
+                'visitor_count' => rand(6, 12),
+                'status' => 'approved',
+            ];
+        }
+
+        // ========================================
+        // [8] PENDING (FUTURE) — Awaiting approval (10 reservations)
+        // ========================================
+        for ($i = 0; $i < 10; $i++) {
+            $daysAhead = rand(2, 20);
+            $startHour = rand(10, 16);
+
+            $reservations[] = [
+                'user_id' => $nextUser(),
+                'room_id' => $nextRoom(),
+                'start_time' => $now->copy()->addDays($daysAhead)->setTime($startHour, 0, 0),
+                'end_time' => $now->copy()->addDays($daysAhead)->setTime($startHour + 2, 0, 0),
+                'purpose' => 'Rapat koordinasi menunggu persetujuan admin',
+                'visitor_count' => rand(4, 10),
+                'status' => 'pending',
+            ];
+        }
+
+        // ========================================
+        // INSERT ALL RESERVATIONS
+        // ========================================
+        foreach ($reservations as $data) {
+            $idGenerator = new \App\Services\ReservationIdGenerator();
+            $id = $idGenerator->generate($data['start_time']);
+
+            DB::table('t_reservations')->insertOrIgnore([
+                'id' => $id,
+                'user_id' => $data['user_id'],
+                'room_id' => $data['room_id'],
+                'start_time' => $data['start_time'],
+                'end_time' => $data['end_time'],
+                'purpose' => $data['purpose'],
+                'visitor_count' => $data['visitor_count'],
+                'status' => $data['status'],
+                'created_at' => $data['start_time']->copy()->subDays(rand(1, 7)),
+                'created_by' => $data['user_id'],
+                'updated_at' => $data['start_time']->copy()->subDays(rand(1, 7)),
+                'updated_by' => $data['user_id'],
+                'deleted_at' => null,
+                'deleted_by' => null,
+            ]);
+        }
+
+        $this->command->info('Reservations seeded: ' . count($reservations) . ' total');
+        $this->command->info('  - 100 completed (historical data Jan 2025 - Mar 2026)');
+        $this->command->info('  - 20 cancelled (distributed throughout year)');
+        $this->command->info('  - 15 rejected (distributed throughout year)');
+        $this->command->info('  - 10 approved (past - cron test targets)');
+        $this->command->info('  - 10 pending (past - cron test targets)');
+        $this->command->info('  - 3 TODAY at 13:00, 15:00, 17:00');
+        $this->command->info('  - 12 approved (future)');
+        $this->command->info('  - 10 pending (future)');
         $this->command->info('');
-        $this->command->info('Status breakdown:');
-        $this->command->info('  [1] completed      : 4 data (historis, status benar)');
-        $this->command->info('  [2] cancelled      : 3 data (dibatalkan manual)');
-        $this->command->info('  [3] rejected       : 3 data (ditolak admin)');
-        $this->command->info('  [4] approved (past): 4 data 🔴 TARGET CRON → harus jadi completed');
-        $this->command->info('  [5] pending (past) : 3 data 🔴 TARGET CRON → harus jadi cancelled');
-        $this->command->info('  [6] approved (now) : 2 data (sedang berlangsung, valid)');
-        $this->command->info('  [7] pending (future): 3 data (menunggu approval, valid)');
-        $this->command->info('  [8] approved (future): 5 data (sudah disetujui, valid)');
-        $this->command->info('');
-        $this->command->warn('Jalankan: php artisan schedule:work  untuk tes cron job otomatis.');
+        $this->command->warn('Run: php artisan schedule:work to test cron job automation.');
     }
 }
 

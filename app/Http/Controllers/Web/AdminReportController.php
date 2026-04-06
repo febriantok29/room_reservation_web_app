@@ -118,20 +118,22 @@ class AdminReportController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $dateFrom = $request->input('date_from', Carbon::now()->startOfMonth()->toDateString());
-        $dateTo   = $request->input('date_to', Carbon::now()->toDateString());
+        $dateFrom = $request->input('date_from');
+        $dateTo   = $request->input('date_to');
         $roomFilter = $request->input('room_id', '');
         $format   = $request->input('format', '');
-
-        $from = Carbon::parse($dateFrom)->startOfDay();
-        $to   = Carbon::parse($dateTo)->endOfDay();
 
         $query = Reservation::query()
             ->with(['room:id,name,floor,capacity', 'user:id,first_name,last_name,employee_id'])
             ->whereNull('deleted_at')
-            ->whereIn('status', ['approved', 'completed'])
-            ->where('start_time', '>=', $from)
-            ->where('start_time', '<=', $to);
+            ->whereIn('status', ['approved', 'completed']);
+
+        if ($dateFrom) {
+            $query->where('start_time', '>=', Carbon::parse($dateFrom)->startOfDay());
+        }
+        if ($dateTo) {
+            $query->where('start_time', '<=', Carbon::parse($dateTo)->endOfDay());
+        }
 
         if ($roomFilter) {
             $query->where('room_id', $roomFilter);
@@ -156,8 +158,8 @@ class AdminReportController extends Controller
         })->values()->sortByDesc('total_hours')->values();
 
         $summary = [
-            'date_from'          => $from->toDateString(),
-            'date_to'            => $to->toDateString(),
+            'date_from'          => $dateFrom,
+            'date_to'            => $dateTo,
             'total_reservations' => $reservations->count(),
             'total_rooms_used'   => $byRoom->count(),
             'total_visitors'     => $reservations->sum('visitor_count'),
@@ -190,20 +192,22 @@ class AdminReportController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $dateFrom   = $request->input('date_from', Carbon::now()->startOfMonth()->toDateString());
-        $dateTo     = $request->input('date_to', Carbon::now()->toDateString());
+        $dateFrom   = $request->input('date_from');
+        $dateTo     = $request->input('date_to');
         $userFilter = $request->input('user_id', '');
         $format     = $request->input('format', '');
-
-        $from = Carbon::parse($dateFrom)->startOfDay();
-        $to   = Carbon::parse($dateTo)->endOfDay();
 
         $query = Reservation::query()
             ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
             ->whereNull('deleted_at')
-            ->where('start_time', '>=', $from)
-            ->where('start_time', '<=', $to)
             ->orderBy('start_time');
+
+        if ($dateFrom) {
+            $query->where('start_time', '>=', Carbon::parse($dateFrom)->startOfDay());
+        }
+        if ($dateTo) {
+            $query->where('start_time', '<=', Carbon::parse($dateTo)->endOfDay());
+        }
 
         if ($userFilter) {
             $query->where('user_id', $userFilter);
@@ -232,8 +236,8 @@ class AdminReportController extends Controller
         })->values()->sortByDesc('total')->values();
 
         $summary = [
-            'date_from'          => $from->toDateString(),
-            'date_to'            => $to->toDateString(),
+            'date_from'          => $dateFrom,
+            'date_to'            => $dateTo,
             'total_reservations' => $reservations->count(),
             'total_users'        => $byUser->count(),
         ];
@@ -265,21 +269,23 @@ class AdminReportController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $dateFrom     = $request->input('date_from', Carbon::now()->startOfMonth()->toDateString());
-        $dateTo       = $request->input('date_to', Carbon::now()->toDateString());
+        $dateFrom     = $request->input('date_from');
+        $dateTo       = $request->input('date_to');
         $statusFilter = $request->input('status', '');
         $roomFilter   = $request->input('room_id', '');
         $format       = $request->input('format', '');
 
-        $from = Carbon::parse($dateFrom)->startOfDay();
-        $to   = Carbon::parse($dateTo)->endOfDay();
-
         $query = Reservation::query()
             ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
             ->whereNull('deleted_at')
-            ->where('start_time', '>=', $from)
-            ->where('start_time', '<=', $to)
             ->orderBy('start_time');
+
+        if ($dateFrom) {
+            $query->where('start_time', '>=', Carbon::parse($dateFrom)->startOfDay());
+        }
+        if ($dateTo) {
+            $query->where('start_time', '<=', Carbon::parse($dateTo)->endOfDay());
+        }
 
         if ($statusFilter) {
             $query->where('status', $statusFilter);
@@ -308,8 +314,8 @@ class AdminReportController extends Controller
         })->sortByDesc('total')->values();
 
         $summary = [
-            'date_from'      => $from->toDateString(),
-            'date_to'        => $to->toDateString(),
+            'date_from'      => $dateFrom,
+            'date_to'        => $dateTo,
             'total'          => $reservations->count(),
             'pending'        => $reservations->where('status', 'pending')->count(),
             'approved'       => $reservations->where('status', 'approved')->count(),
@@ -423,20 +429,23 @@ class AdminReportController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $dateFrom = $request->input('date_from', Carbon::now()->startOfMonth()->toDateString());
-        $dateTo   = $request->input('date_to', Carbon::now()->toDateString());
+        $dateFrom = $request->input('date_from');
+        $dateTo   = $request->input('date_to');
         $format   = $request->input('format', '');
 
-        $from = Carbon::parse($dateFrom)->startOfDay();
-        $to   = Carbon::parse($dateTo)->endOfDay();
-
-        $reservations = Reservation::query()
+        $query = Reservation::query()
             ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
             ->whereNull('deleted_at')
-            ->where('start_time', '>=', $from)
-            ->where('start_time', '<=', $to)
-            ->orderBy('start_time')
-            ->get();
+            ->orderBy('start_time');
+
+        if ($dateFrom) {
+            $query->where('start_time', '>=', Carbon::parse($dateFrom)->startOfDay());
+        }
+        if ($dateTo) {
+            $query->where('start_time', '<=', Carbon::parse($dateTo)->endOfDay());
+        }
+
+        $reservations = $query->get();
 
         $byDivision = $reservations->groupBy(fn($r) => $r->user?->division_id ?? '__no_division__')
             ->map(function ($items) {
@@ -457,8 +466,8 @@ class AdminReportController extends Controller
             })->values()->sortByDesc('total')->values();
 
         $summary = [
-            'date_from'          => $from->toDateString(),
-            'date_to'            => $to->toDateString(),
+            'date_from'          => $dateFrom,
+            'date_to'            => $dateTo,
             'total_reservations' => $reservations->count(),
             'total_visitors'     => $reservations->sum('visitor_count'),
         ];
@@ -488,13 +497,10 @@ class AdminReportController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $dateFrom   = $request->input('date_from', Carbon::now()->startOfMonth()->toDateString());
-        $dateTo     = $request->input('date_to', Carbon::now()->toDateString());
+        $dateFrom   = $request->input('date_from');
+        $dateTo     = $request->input('date_to');
         $roomFilter = $request->input('room_id', '');
         $format     = $request->input('format', '');
-
-        $from = Carbon::parse($dateFrom)->startOfDay();
-        $to   = Carbon::parse($dateTo)->endOfDay();
 
         $roomQuery = Room::query()
             ->whereNull('deleted_at')
@@ -507,10 +513,17 @@ class AdminReportController extends Controller
 
         $allRooms = $roomQuery->get();
 
-        $complaints = RoomComplaint::query()
-            ->whereNull('deleted_at')
-            ->where('created_at', '>=', $from)
-            ->where('created_at', '<=', $to)
+        $complaintQuery = RoomComplaint::query()
+            ->whereNull('deleted_at');
+
+        if ($dateFrom) {
+            $complaintQuery->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
+        }
+        if ($dateTo) {
+            $complaintQuery->where('created_at', '<=', Carbon::parse($dateTo)->endOfDay());
+        }
+
+        $complaints = $complaintQuery
             ->when($roomFilter, fn($q) => $q->where('room_id', $roomFilter))
             ->get()
             ->groupBy('room_id');
@@ -534,8 +547,8 @@ class AdminReportController extends Controller
         $allComplaints = $complaints->flatten(1);
 
         $summary = [
-            'date_from'           => $from->toDateString(),
-            'date_to'             => $to->toDateString(),
+            'date_from'           => $dateFrom,
+            'date_to'             => $dateTo,
             'total_rooms'         => $allRooms->count(),
             'under_maintenance'   => $allRooms->where('is_maintenance', true)->count(),
             'total_complaints'    => $allComplaints->count(),
@@ -570,21 +583,24 @@ class AdminReportController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $dateFrom = $request->input('date_from', Carbon::now()->startOfMonth()->toDateString());
-        $dateTo   = $request->input('date_to', Carbon::now()->toDateString());
+        $dateFrom = $request->input('date_from');
+        $dateTo   = $request->input('date_to');
         $format   = $request->input('format', '');
 
-        $from = Carbon::parse($dateFrom)->startOfDay();
-        $to   = Carbon::parse($dateTo)->endOfDay();
-
-        $reservations = Reservation::query()
+        $query = Reservation::query()
             ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
             ->whereNull('deleted_at')
             ->whereIn('status', ['approved', 'completed'])
-            ->where('start_time', '>=', $from)
-            ->where('start_time', '<=', $to)
-            ->orderBy('start_time')
-            ->get();
+            ->orderBy('start_time');
+
+        if ($dateFrom) {
+            $query->where('start_time', '>=', Carbon::parse($dateFrom)->startOfDay());
+        }
+        if ($dateTo) {
+            $query->where('start_time', '<=', Carbon::parse($dateTo)->endOfDay());
+        }
+
+        $reservations = $query->get();
 
         $byDivision = $reservations->groupBy(fn($r) => $r->user?->division_id ?? '__no_division__')
             ->map(function ($items) {
@@ -621,8 +637,8 @@ class AdminReportController extends Controller
             })->values()->sortByDesc('total_hours')->values();
 
         $summary = [
-            'date_from'          => $from->toDateString(),
-            'date_to'            => $to->toDateString(),
+            'date_from'          => $dateFrom,
+            'date_to'            => $dateTo,
             'total_reservations' => $reservations->count(),
             'total_hours'        => round($reservations->sum(fn($r) => $r->start_time->diffInMinutes($r->end_time)) / 60, 1),
             'total_visitors'     => $reservations->sum('visitor_count'),

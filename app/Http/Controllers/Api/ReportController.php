@@ -112,19 +112,17 @@ class ReportController extends Controller
             return ApiResponse::validationError($validator->errors()->toArray());
         }
 
-        $from = $request->filled('date_from')
-            ? Carbon::parse($request->input('date_from'))->startOfDay()
-            : Carbon::now()->startOfMonth();
-        $to = $request->filled('date_to')
-            ? Carbon::parse($request->input('date_to'))->endOfDay()
-            : Carbon::now()->endOfDay();
-
         $query = Reservation::query()
             ->with(['room:id,name,floor,capacity', 'user:id,first_name,last_name,employee_id'])
             ->whereNull('deleted_at')
-            ->whereIn('status', ['approved', 'completed'])
-            ->where('start_time', '>=', $from)
-            ->where('start_time', '<=', $to);
+            ->whereIn('status', ['approved', 'completed']);
+
+        if ($request->filled('date_from')) {
+            $query->where('start_time', '>=', Carbon::parse($request->input('date_from'))->startOfDay());
+        }
+        if ($request->filled('date_to')) {
+            $query->where('start_time', '<=', Carbon::parse($request->input('date_to'))->endOfDay());
+        }
 
         if ($request->filled('room_id')) {
             $query->where('room_id', $request->input('room_id'));
@@ -147,8 +145,8 @@ class ReportController extends Controller
         })->values();
 
         $summary = [
-            'date_from'         => $from->toDateString(),
-            'date_to'           => $to->toDateString(),
+            'date_from'         => $request->input('date_from'),
+            'date_to'           => $request->input('date_to'),
             'total_reservations' => $reservations->count(),
             'total_rooms_used'  => $byRoom->count(),
             'total_visitors'    => $reservations->sum('visitor_count'),
@@ -235,8 +233,8 @@ class ReportController extends Controller
         })->values();
 
         $summary = [
-            'date_from'         => $from->toDateString(),
-            'date_to'           => $to->toDateString(),
+            'date_from'         => $request->input('date_from'),
+            'date_to'           => $request->input('date_to'),
             'total_reservations' => $reservations->count(),
             'total_users'       => $byUser->count(),
         ];
@@ -310,8 +308,8 @@ class ReportController extends Controller
         $reservations = $query->get();
 
         $summary = [
-            'date_from'  => $from->toDateString(),
-            'date_to'    => $to->toDateString(),
+            'date_from'  => $request->input('date_from'),
+            'date_to'    => $request->input('date_to'),
             'total'      => $reservations->count(),
             'pending'    => $reservations->where('status', 'pending')->count(),
             'approved'   => $reservations->where('status', 'approved')->count(),
@@ -448,20 +446,19 @@ class ReportController extends Controller
             return ApiResponse::validationError($validator->errors()->toArray());
         }
 
-        $from = $request->filled('date_from')
-            ? Carbon::parse($request->input('date_from'))->startOfDay()
-            : Carbon::now()->startOfMonth();
-        $to = $request->filled('date_to')
-            ? Carbon::parse($request->input('date_to'))->endOfDay()
-            : Carbon::now()->endOfDay();
-
-        $reservations = Reservation::query()
+        $query = Reservation::query()
             ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
             ->whereNull('deleted_at')
-            ->where('start_time', '>=', $from)
-            ->where('start_time', '<=', $to)
-            ->orderBy('start_time')
-            ->get();
+            ->orderBy('start_time');
+
+        if ($request->filled('date_from')) {
+            $query->where('start_time', '>=', Carbon::parse($request->input('date_from'))->startOfDay());
+        }
+        if ($request->filled('date_to')) {
+            $query->where('start_time', '<=', Carbon::parse($request->input('date_to'))->endOfDay());
+        }
+
+        $reservations = $query->get();
 
         $byDivision = $reservations->groupBy(fn($r) => $r->user?->division_id ?? '__no_division__')
             ->map(function ($items) {
@@ -482,8 +479,8 @@ class ReportController extends Controller
             })->values()->sortByDesc('total')->values();
 
         $summary = [
-            'date_from'          => $from->toDateString(),
-            'date_to'            => $to->toDateString(),
+            'date_from'          => $request->input('date_from'),
+            'date_to'            => $request->input('date_to'),
             'total_reservations' => $reservations->count(),
             'total_visitors'     => $reservations->sum('visitor_count'),
         ];
@@ -527,13 +524,6 @@ class ReportController extends Controller
             return ApiResponse::validationError($validator->errors()->toArray());
         }
 
-        $from = $request->filled('date_from')
-            ? Carbon::parse($request->input('date_from'))->startOfDay()
-            : Carbon::now()->startOfMonth();
-        $to = $request->filled('date_to')
-            ? Carbon::parse($request->input('date_to'))->endOfDay()
-            : Carbon::now()->endOfDay();
-
         $roomQuery = Room::query()
             ->whereNull('deleted_at')
             ->orderBy('floor')
@@ -545,10 +535,17 @@ class ReportController extends Controller
 
         $allRooms = $roomQuery->get();
 
-        $complaints = RoomComplaint::query()
-            ->whereNull('deleted_at')
-            ->where('created_at', '>=', $from)
-            ->where('created_at', '<=', $to)
+        $complaintQuery = RoomComplaint::query()
+            ->whereNull('deleted_at');
+
+        if ($request->filled('date_from')) {
+            $complaintQuery->where('created_at', '>=', Carbon::parse($request->input('date_from'))->startOfDay());
+        }
+        if ($request->filled('date_to')) {
+            $complaintQuery->where('created_at', '<=', Carbon::parse($request->input('date_to'))->endOfDay());
+        }
+
+        $complaints = $complaintQuery
             ->when($request->filled('room_id'), fn($q) => $q->where('room_id', $request->input('room_id')))
             ->get()
             ->groupBy('room_id');
@@ -572,8 +569,8 @@ class ReportController extends Controller
         $allComplaints = $complaints->flatten(1);
 
         $summary = [
-            'date_from'           => $from->toDateString(),
-            'date_to'             => $to->toDateString(),
+            'date_from'           => $request->input('date_from'),
+            'date_to'             => $request->input('date_to'),
             'total_rooms'         => $allRooms->count(),
             'under_maintenance'   => $allRooms->where('is_maintenance', true)->count(),
             'total_complaints'    => $allComplaints->count(),
@@ -618,22 +615,20 @@ class ReportController extends Controller
             return ApiResponse::validationError($validator->errors()->toArray());
         }
 
-        $from = $request->filled('date_from')
-            ? Carbon::parse($request->input('date_from'))->startOfDay()
-            : Carbon::now()->startOfMonth()->startOfDay();
-
-        $to = $request->filled('date_to')
-            ? Carbon::parse($request->input('date_to'))->endOfDay()
-            : Carbon::now()->endOfDay();
-
-        $reservations = Reservation::query()
+        $query = Reservation::query()
             ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
             ->whereNull('deleted_at')
             ->whereIn('status', ['approved', 'completed'])
-            ->where('start_time', '>=', $from)
-            ->where('start_time', '<=', $to)
-            ->orderBy('start_time')
-            ->get();
+            ->orderBy('start_time');
+
+        if ($request->filled('date_from')) {
+            $query->where('start_time', '>=', Carbon::parse($request->input('date_from'))->startOfDay());
+        }
+        if ($request->filled('date_to')) {
+            $query->where('start_time', '<=', Carbon::parse($request->input('date_to'))->endOfDay());
+        }
+
+        $reservations = $query->get();
 
         $byDivision = $reservations->groupBy(fn($r) => $r->user?->division_id ?? '__no_division__')
             ->map(function ($items) {
@@ -670,8 +665,8 @@ class ReportController extends Controller
             })->values()->sortByDesc('total_hours')->values();
 
         $summary = [
-            'date_from'          => $from->toDateString(),
-            'date_to'            => $to->toDateString(),
+            'date_from'          => $request->input('date_from'),
+            'date_to'            => $request->input('date_to'),
             'total_reservations' => $reservations->count(),
             'total_hours'        => round($reservations->sum(fn($r) => $r->start_time->diffInMinutes($r->end_time)) / 60, 1),
             'total_visitors'     => $reservations->sum('visitor_count'),
