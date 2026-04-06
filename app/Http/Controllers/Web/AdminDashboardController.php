@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Helpers\TimezoneHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Facility;
 use App\Models\Reservation;
@@ -11,7 +12,6 @@ use App\Models\User;
 use App\Services\ImageService;
 use App\Services\ReservationService;
 use App\Support\WebMessages;
-use App\Helpers\TimezoneHelper;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -158,11 +158,7 @@ class AdminDashboardController extends Controller
             'facility_ids' => 'nullable|array',
             'facility_ids.*' => 'nullable|string|exists:m_facilities,id',
             'is_maintenance' => 'nullable|boolean',
-            'image' => [
-                'nullable', 'file', 'image',
-                'mimes:' . implode(',', ImageService::ALLOWED_MIMES),
-                'max:' . (ImageService::SERVER_MAX_BYTES / 1024),
-            ],
+            'image' => ImageService::validationRules(),
         ]);
 
         $room = new Room();
@@ -178,9 +174,14 @@ class AdminDashboardController extends Controller
         $room->save();
 
         if ($request->hasFile('image')) {
-            $result = $this->imageService->upload($request->file('image'), 'rooms');
-            $room->image_path = $result['path'];
-            $room->save();
+            try {
+                $result = $this->imageService->upload($request->file('image'), 'rooms');
+                $room->image_path = $result['path'];
+                $room->save();
+            } catch (Throwable) {
+                // Image upload failed, but room was created
+                // Continue without image - admin can add later
+            }
         }
 
         $facilityIds = array_filter($validated['facility_ids'] ?? []);
@@ -220,11 +221,7 @@ class AdminDashboardController extends Controller
             'facility_ids' => 'nullable|array',
             'facility_ids.*' => 'nullable|string|exists:m_facilities,id',
             'is_maintenance' => 'nullable|boolean',
-            'image' => [
-                'nullable', 'file', 'image',
-                'mimes:' . implode(',', ImageService::ALLOWED_MIMES),
-                'max:' . (ImageService::SERVER_MAX_BYTES / 1024),
-            ],
+            'image' => ImageService::validationRules(),
         ]);
 
         $room->fill([
@@ -237,8 +234,16 @@ class AdminDashboardController extends Controller
         $room->updated_by = $request->user()->id;
 
         if ($request->hasFile('image')) {
-            $result = $this->imageService->upload($request->file('image'), 'rooms', $room->image_path);
-            $room->image_path = $result['path'];
+            try {
+                $result = $this->imageService->upload(
+                    $request->file('image'),
+                    'rooms',
+                    $room->image_path
+                );
+                $room->image_path = $result['path'];
+            } catch (Throwable) {
+                // Image upload failed, continue with other updates
+            }
         }
 
         $room->save();
