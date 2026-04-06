@@ -1,0 +1,143 @@
+{
+    "name": "Report - Room Usage (Output 5)",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/reports/usage?format=json&date_from=2026-03-01&date_to=2026-03-31",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "reports",
+                "usage"
+            ],
+            "query": [
+                {
+                    "key": "format",
+                    "value": "json",
+                    "description": "Output format: json (default) | pdf | excel"
+                },
+                {
+                    "key": "date_from",
+                    "value": "2026-03-01",
+                    "description": "Optional. Start date (YYYY-MM-DD). Default: start of current month"
+                },
+                {
+                    "key": "date_to",
+                    "value": "2026-03-31",
+                    "description": "Optional. End date (YYYY-MM-DD). Default: today"
+                },
+                {
+                    "key": "room_id",
+                    "value": "",
+                    "description": "Optional. Filter by specific room ID",
+                    "disabled": true
+                }
+            ]
+        },
+        "description": "**Output 5** — Room Usage Summary Report. Admin only. Aggregates approved+completed reservations per room with total hours and visitors."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - JSON format",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/usage?format=json&date_from=2026-03-01&date_to=2026-03-31",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "usage"
+                    ],
+                    "query": [
+                        {
+                            "key": "format",
+                            "value": "json",
+                            "description": "Output format: json (default) | pdf | excel"
+                        },
+                        {
+                            "key": "date_from",
+                            "value": "2026-03-01",
+                            "description": "Optional. Start date (YYYY-MM-DD). Default: start of current month"
+                        },
+                        {
+                            "key": "date_to",
+                            "value": "2026-03-31",
+                            "description": "Optional. End date (YYYY-MM-DD). Default: today"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Laporan rekapitulasi penggunaan berhasil diambil\", \"data\": {\"summary\": {\"date_from\": \"2026-03-01\", \"date_to\": \"2026-03-31\", \"total_reservations\": 42, \"total_rooms_used\": 5, \"total_visitors\": 380}, \"by_room\": [{\"room_id\": \"RM-F01-001\", \"room_name\": \"Ruang Rapat Utama\", \"floor\": 1, \"reserved_count\": 18, \"total_hours\": 54.0, \"total_visitors\": 160}], \"reservations\": []}}"
+        },
+        {
+            "name": "Example ❌ 403 Forbidden - Bukan admin",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/usage?format=json",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "usage"
+                    ],
+                    "query": [
+                        {
+                            "key": "format",
+                            "value": "json"
+                        }
+                    ]
+                }
+            },
+            "status": "Forbidden",
+            "code": 403,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"FORBIDDEN\", \"message\": \"Anda tidak memiliki akses ke resource ini\"}"
+        }
+    ]
+}

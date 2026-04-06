@@ -1,0 +1,92 @@
+{
+    "name": "Mark All Notifications as Read",
+    "request": {
+        "method": "POST",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/notifications/read-all",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "notifications",
+                "read-all"
+            ]
+        },
+        "description": "Bulk mark all unread notifications of the authenticated user as read. Useful for 'Mark all as read' button."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Semua notifikasi ditandai sudah dibaca",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/notifications/read-all",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "notifications",
+                        "read-all"
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Semua notifikasi berhasil ditandai sudah dibaca\", \"data\": null}"
+        },
+        {
+            "name": "Example ❌ 401 Unauthorized",
+            "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/notifications/read-all",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "notifications",
+                        "read-all"
+                    ]
+                }
+            },
+            "status": "Unauthorized",
+            "code": 401,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"UNAUTHORIZED\", \"message\": \"Token tidak valid atau kadaluarsa\"}"
+        }
+    ]
+}

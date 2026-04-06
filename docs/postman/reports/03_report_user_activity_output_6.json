@@ -1,0 +1,147 @@
+{
+    "name": "Report - User Activity (Output 6)",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/reports/user-activity?format=json&date_from=2026-03-01&date_to=2026-03-31",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "reports",
+                "user-activity"
+            ],
+            "query": [
+                {
+                    "key": "format",
+                    "value": "json",
+                    "description": "Output format: json (default) | pdf | excel"
+                },
+                {
+                    "key": "date_from",
+                    "value": "2026-03-01",
+                    "description": "Optional. Start date (YYYY-MM-DD). Default: start of current month"
+                },
+                {
+                    "key": "date_to",
+                    "value": "2026-03-31",
+                    "description": "Optional. End date (YYYY-MM-DD). Default: today"
+                },
+                {
+                    "key": "user_id",
+                    "value": "",
+                    "description": "Optional. Admin only: filter by specific user ID",
+                    "disabled": true
+                }
+            ]
+        },
+        "description": "**Output 6** — Reservation Activity per User. Admin sees all users; regular user only sees their own activity aggregated."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - JSON format (Admin, all users)",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/user-activity?format=json&date_from=2026-03-01&date_to=2026-03-31",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "user-activity"
+                    ],
+                    "query": [
+                        {
+                            "key": "format",
+                            "value": "json",
+                            "description": "Output format: json (default) | pdf | excel"
+                        },
+                        {
+                            "key": "date_from",
+                            "value": "2026-03-01",
+                            "description": "Optional. Start date (YYYY-MM-DD). Default: start of current month"
+                        },
+                        {
+                            "key": "date_to",
+                            "value": "2026-03-31",
+                            "description": "Optional. End date (YYYY-MM-DD). Default: today"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Laporan aktivitas per pengguna berhasil diambil\", \"data\": {\"summary\": {\"date_from\": \"2026-03-01\", \"date_to\": \"2026-03-31\", \"total_reservations\": 42, \"total_users\": 8}, \"by_user\": [{\"user_id\": \"usr-uuid-0005\", \"full_name\": \"Budi Santoso\", \"employee_id\": \"EMP-2025-00005\", \"total\": 8, \"pending\": 1, \"approved\": 2, \"completed\": 4, \"rejected\": 1, \"cancelled\": 0}], \"reservations\": []}}"
+        },
+        {
+            "name": "Example ❌ 403 Forbidden - Bukan admin (untuk filter user_id)",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/user-activity?format=json&user_id=usr-uuid-0005",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "user-activity"
+                    ],
+                    "query": [
+                        {
+                            "key": "format",
+                            "value": "json"
+                        },
+                        {
+                            "key": "user_id",
+                            "value": "usr-uuid-0005"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Laporan aktivitas per pengguna berhasil diambil\", \"data\": {\"summary\": {\"date_from\": \"2026-03-01\", \"date_to\": \"2026-03-31\", \"total_reservations\": 5, \"total_users\": 1}, \"by_user\": [{\"user_id\": \"usr-uuid-0005\", \"full_name\": \"Budi Santoso\", \"employee_id\": \"EMP-2025-00005\", \"total\": 5, \"pending\": 0, \"approved\": 1, \"completed\": 3, \"rejected\": 1, \"cancelled\": 0}], \"reservations\": []}}"
+        }
+    ]
+}

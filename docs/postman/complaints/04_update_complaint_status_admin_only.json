@@ -1,0 +1,335 @@
+{
+    "name": "Update Complaint Status (Admin Only)",
+    "request": {
+        "method": "PATCH",
+        "header": [
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            },
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": "{\"status\": \"in_progress\", \"resolution_notes\": \"Sedang dalam proses pengecekan oleh tim teknis\"}",
+            "options": {
+                "raw": {
+                    "language": "json"
+                }
+            }
+        },
+        "url": {
+            "raw": "{{base_url}}/api/v1/complaints/{{complaint_id}}/status",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "complaints",
+                "{{complaint_id}}",
+                "status"
+            ]
+        },
+        "description": "Admin only. Update complaint status.\n\n**Valid transitions:**\n- `in_progress` — complaint is being handled\n- `resolved` — complaint is resolved (resolution_notes recommended)\n- `rejected` — complaint is rejected (resolution_notes recommended)\n\nOnce `resolved` or `rejected`, the status cannot be changed again."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Ditandai in_progress",
+            "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/complaints/{{complaint_id}}/status",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "complaints",
+                        "{{complaint_id}}",
+                        "status"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"status\": \"in_progress\", \"resolution_notes\": \"Sedang dalam proses pengecekan oleh tim teknis\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Komplain sedang dalam proses penanganan\", \"data\": {\"id\": \"CMP-20260401-001\", \"reservation_id\": \"RSV-20260401-01\", \"reported_by\": \"usr-uuid-0005\", \"room_id\": \"RM-F01-001\", \"facility_id\": \"fac-uuid-001\", \"title\": \"Proyektor tidak menyala\", \"description\": \"Proyektor tidak bisa dinyalakan saat rapat berlangsung\", \"status\": \"in_progress\", \"resolution_notes\": \"Sedang dalam proses pengecekan oleh tim teknis\", \"resolved_at\": null, \"resolved_by\": null, \"photo_url\": null, \"created_at\": \"2026-04-01T05:30:00.000000Z\", \"updated_at\": \"2026-04-01T05:30:00.000000Z\", \"room\": {\"id\": \"RM-F01-001\", \"name\": \"Ruang Rapat Utama\", \"floor\": 1}, \"reservation\": {\"id\": \"RSV-20260401-01\", \"start_time\": \"2026-04-01T02:00:00.000000Z\", \"end_time\": \"2026-04-01T05:00:00.000000Z\"}, \"facility\": {\"id\": \"fac-uuid-001\", \"name\": \"Proyektor\", \"slug\": \"proyektor\"}, \"reporter\": {\"id\": \"usr-uuid-0005\", \"first_name\": \"Budi\", \"last_name\": \"Santoso\"}, \"resolver\": null}}"
+        },
+        {
+            "name": "Example ✅ 200 OK - Diselesaikan (resolved)",
+            "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/complaints/{{complaint_id}}/status",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "complaints",
+                        "{{complaint_id}}",
+                        "status"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"status\": \"resolved\", \"resolution_notes\": \"Proyektor telah diganti dengan unit baru\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Komplain berhasil diselesaikan\", \"data\": {\"id\": \"CMP-20260401-001\", \"reservation_id\": \"RSV-20260401-01\", \"reported_by\": \"usr-uuid-0005\", \"room_id\": \"RM-F01-001\", \"facility_id\": \"fac-uuid-001\", \"title\": \"Proyektor tidak menyala\", \"description\": \"Proyektor tidak bisa dinyalakan saat rapat berlangsung\", \"status\": \"resolved\", \"resolution_notes\": \"Proyektor telah diganti dengan unit baru\", \"resolved_at\": \"2026-04-02T04:00:00.000000Z\", \"resolved_by\": \"usr-uuid-admin\", \"photo_url\": null, \"created_at\": \"2026-04-01T05:30:00.000000Z\", \"updated_at\": \"2026-04-01T05:30:00.000000Z\", \"room\": {\"id\": \"RM-F01-001\", \"name\": \"Ruang Rapat Utama\", \"floor\": 1}, \"reservation\": {\"id\": \"RSV-20260401-01\", \"start_time\": \"2026-04-01T02:00:00.000000Z\", \"end_time\": \"2026-04-01T05:00:00.000000Z\"}, \"facility\": {\"id\": \"fac-uuid-001\", \"name\": \"Proyektor\", \"slug\": \"proyektor\"}, \"reporter\": {\"id\": \"usr-uuid-0005\", \"first_name\": \"Budi\", \"last_name\": \"Santoso\"}, \"resolver\": {\"id\": \"usr-uuid-admin\", \"first_name\": \"Admin\", \"last_name\": \"System\"}}}"
+        },
+        {
+            "name": "Example ❌ 422 - Komplain sudah ditutup",
+            "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/complaints/{{complaint_id}}/status",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "complaints",
+                        "{{complaint_id}}",
+                        "status"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"status\": \"in_progress\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"COMPLAINT_ALREADY_CLOSED\", \"message\": \"Komplain ini sudah ditutup dan tidak dapat diubah lagi\"}"
+        },
+        {
+            "name": "Example ❌ 422 Validation Error - status tidak valid",
+            "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/complaints/{{complaint_id}}/status",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "complaints",
+                        "{{complaint_id}}",
+                        "status"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"status\": \"pending\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"VALIDATION_ERROR\", \"message\": \"Data yang dikirim tidak valid\", \"errors\": {\"status\": [\"The selected status is invalid.\"]}}"
+        },
+        {
+            "name": "Example ❌ 403 Forbidden - Bukan admin",
+            "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/complaints/{{complaint_id}}/status",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "complaints",
+                        "{{complaint_id}}",
+                        "status"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"status\": \"in_progress\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "status": "Forbidden",
+            "code": 403,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"FORBIDDEN\", \"message\": \"Anda tidak memiliki akses ke resource ini\"}"
+        },
+        {
+            "name": "Example ❌ 404 Not Found",
+            "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/complaints/CMP-00000000-999/status",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "complaints",
+                        "CMP-00000000-999",
+                        "status"
+                    ]
+                },
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"status\": \"in_progress\"}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                }
+            },
+            "status": "Not Found",
+            "code": 404,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"NOT_FOUND\", \"message\": \"Komplain tidak ditemukan\"}"
+        }
+    ]
+}

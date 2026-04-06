@@ -1,0 +1,137 @@
+{
+    "name": "List Divisions",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/divisions?",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "divisions"
+            ],
+            "query": [
+                {
+                    "key": "q",
+                    "value": "teknologi",
+                    "description": "Optional. Keyword search on name and code",
+                    "disabled": true
+                }
+            ]
+        },
+        "description": "List all active (non-deleted) divisions. Supports keyword search on name and code (q). Returns all without pagination."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Semua divisi",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/divisions",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "divisions"
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Data divisi berhasil diambil\", \"data\": [{\"id\": \"DIV-001\", \"name\": \"Divisi Teknologi Informasi\", \"code\": \"TI\", \"description\": \"Divisi yang bertanggung jawab atas infrastruktur IT\", \"created_by\": \"usr-uuid-admin\", \"created_at\": \"2026-01-01T00:00:00.000000Z\", \"updated_at\": \"2026-01-01T00:00:00.000000Z\"}, {\"id\": \"DIV-002\", \"name\": \"Divisi Keuangan\", \"code\": \"KEU\", \"description\": \"Divisi pengelolaan keuangan perusahaan\", \"created_by\": \"usr-uuid-admin\", \"created_at\": \"2026-01-01T00:00:00.000000Z\", \"updated_at\": \"2026-01-01T00:00:00.000000Z\"}]}"
+        },
+        {
+            "name": "Example ✅ 200 OK - Filter pencarian q=teknologi",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/divisions?q=teknologi",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "divisions"
+                    ],
+                    "query": [
+                        {
+                            "key": "q",
+                            "value": "teknologi"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Data divisi berhasil diambil\", \"data\": [{\"id\": \"DIV-001\", \"name\": \"Divisi Teknologi Informasi\", \"code\": \"TI\", \"description\": \"Divisi yang bertanggung jawab atas infrastruktur IT\", \"created_by\": \"usr-uuid-admin\", \"created_at\": \"2026-01-01T00:00:00.000000Z\", \"updated_at\": \"2026-01-01T00:00:00.000000Z\"}]}"
+        },
+        {
+            "name": "Example ❌ 401 Unauthorized",
+            "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/divisions",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "divisions"
+                    ]
+                }
+            },
+            "status": "Unauthorized",
+            "code": 401,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"UNAUTHORIZED\", \"message\": \"Token tidak valid atau kadaluarsa\"}"
+        }
+    ]
+}

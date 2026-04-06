@@ -1,0 +1,193 @@
+{
+    "name": "Create Complaint",
+    "request": {
+        "method": "POST",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "body": {
+            "mode": "formdata",
+            "formdata": [
+                {
+                    "key": "reservation_id",
+                    "value": "RSV-20260401-01",
+                    "type": "text",
+                    "description": "Required. Must be a completed reservation owned by the user"
+                },
+                {
+                    "key": "title",
+                    "value": "Proyektor tidak menyala",
+                    "type": "text",
+                    "description": "Required. Max 200 chars"
+                },
+                {
+                    "key": "description",
+                    "value": "Proyektor tidak bisa dinyalakan saat rapat berlangsung. Sudah dicoba restart namun tetap tidak menyala.",
+                    "type": "text",
+                    "description": "Required. Max 2000 chars"
+                },
+                {
+                    "key": "facility_id",
+                    "value": "fac-uuid-001",
+                    "type": "text",
+                    "description": "Optional. Facility UUID related to the complaint"
+                },
+                {
+                    "key": "photo",
+                    "value": "",
+                    "type": "file",
+                    "description": "Optional. Image file (jpg/jpeg/png/webp, max 10MB). Larger than 2MB will be auto-compressed.",
+                    "src": "/path/to/photo.jpg"
+                }
+            ]
+        },
+        "url": {
+            "raw": "{{base_url}}/api/v1/complaints",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "complaints"
+            ]
+        },
+        "description": "Submit a facility complaint for a completed reservation. The reservation must be 'completed' and owned by the authenticated user. Attach an optional photo as multipart/form-data (max 10MB, auto-compressed if >2MB)."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 201 Created - Komplain berhasil dikirim",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/complaints",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "complaints"
+                    ]
+                }
+            },
+            "status": "Created",
+            "code": 201,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Komplain berhasil dikirim\", \"data\": {\"id\": \"CMP-20260401-001\", \"reservation_id\": \"RSV-20260401-01\", \"reported_by\": \"usr-uuid-0005\", \"room_id\": \"RM-F01-001\", \"facility_id\": \"fac-uuid-001\", \"title\": \"Proyektor tidak menyala\", \"description\": \"Proyektor tidak bisa dinyalakan saat rapat berlangsung\", \"status\": \"open\", \"resolution_notes\": null, \"resolved_at\": null, \"resolved_by\": null, \"photo_url\": null, \"created_at\": \"2026-04-01T05:30:00.000000Z\", \"updated_at\": \"2026-04-01T05:30:00.000000Z\", \"room\": {\"id\": \"RM-F01-001\", \"name\": \"Ruang Rapat Utama\", \"floor\": 1}, \"reservation\": {\"id\": \"RSV-20260401-01\", \"start_time\": \"2026-04-01T02:00:00.000000Z\", \"end_time\": \"2026-04-01T05:00:00.000000Z\"}, \"facility\": {\"id\": \"fac-uuid-001\", \"name\": \"Proyektor\", \"slug\": \"proyektor\"}, \"reporter\": {\"id\": \"usr-uuid-0005\", \"first_name\": \"Budi\", \"last_name\": \"Santoso\"}, \"resolver\": null}}"
+        },
+        {
+            "name": "Example ❌ 422 - Reservasi belum selesai",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/complaints",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "complaints"
+                    ]
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"COMPLAINT_INVALID_RESERVATION_STATUS\", \"message\": \"Komplain hanya dapat diajukan untuk reservasi yang sudah selesai (completed)\"}"
+        },
+        {
+            "name": "Example ❌ 422 Validation Error - reservation_id & title wajib",
+            "originalRequest": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/complaints",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "complaints"
+                    ]
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"VALIDATION_ERROR\", \"message\": \"Data yang dikirim tidak valid\", \"errors\": {\"reservation_id\": [\"The reservation id field is required.\"], \"title\": [\"The title field is required.\"]}}"
+        },
+        {
+            "name": "Example ❌ 401 Unauthorized",
+            "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/complaints",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "complaints"
+                    ]
+                }
+            },
+            "status": "Unauthorized",
+            "code": 401,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"UNAUTHORIZED\", \"message\": \"Token tidak valid atau kadaluarsa\"}"
+        }
+    ]
+}

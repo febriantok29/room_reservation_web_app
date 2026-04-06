@@ -22,6 +22,10 @@ FOLDER_DIRS = {
     "Rooms":          "rooms",
     "Facilities":     "facilities",
     "Reservations":   "reservations",
+    "Complaints":     "complaints",
+    "Divisions":      "divisions",
+    "Reports":        "reports",
+    "Notifications":  "notifications",
 }
 
 

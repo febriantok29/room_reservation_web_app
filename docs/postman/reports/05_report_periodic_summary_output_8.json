@@ -1,0 +1,184 @@
+{
+    "name": "Report - Periodic Summary (Output 8)",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/reports/periodic?format=json&period=monthly&year=2026&month=3",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "reports",
+                "periodic"
+            ],
+            "query": [
+                {
+                    "key": "format",
+                    "value": "json",
+                    "description": "Output format: json | pdf | excel"
+                },
+                {
+                    "key": "period",
+                    "value": "monthly",
+                    "description": "Grouping period: daily | weekly | monthly (default: monthly)"
+                },
+                {
+                    "key": "year",
+                    "value": "2026",
+                    "description": "Year (2000-2100). Default: current year"
+                },
+                {
+                    "key": "month",
+                    "value": "3",
+                    "description": "Month (1-12). Only used when period=daily. Default: current month"
+                }
+            ]
+        },
+        "description": "**Output 8** — Periodic Reservation Summary. Groups reservations by day/week/month and shows counts by status. Admin recommended."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Monthly grouping (year=2026)",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/periodic?period=monthly&year=2026",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "periodic"
+                    ],
+                    "query": [
+                        {
+                            "key": "period",
+                            "value": "monthly"
+                        },
+                        {
+                            "key": "year",
+                            "value": "2026"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Laporan ringkasan periodik berhasil diambil\", \"data\": {\"summary\": {\"period\": \"monthly\", \"year\": 2026, \"month\": null, \"total\": 156, \"completed\": 110, \"approved\": 20, \"rejected\": 12, \"cancelled\": 14}, \"data\": [{\"month\": \"2026-01\", \"total\": 12, \"approved\": 2, \"completed\": 8, \"rejected\": 1, \"cancelled\": 1, \"pending\": 0, \"visitors\": 95}, {\"month\": \"2026-02\", \"total\": 15, \"approved\": 3, \"completed\": 10, \"rejected\": 1, \"cancelled\": 1, \"pending\": 0, \"visitors\": 130}, {\"month\": \"2026-03\", \"total\": 18, \"approved\": 4, \"completed\": 12, \"rejected\": 1, \"cancelled\": 1, \"pending\": 0, \"visitors\": 155}]}}"
+        },
+        {
+            "name": "Example ✅ 200 OK - Daily grouping (period=daily, year=2026, month=3)",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/periodic?period=daily&year=2026&month=3",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "periodic"
+                    ],
+                    "query": [
+                        {
+                            "key": "period",
+                            "value": "daily"
+                        },
+                        {
+                            "key": "year",
+                            "value": "2026"
+                        },
+                        {
+                            "key": "month",
+                            "value": "3"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Laporan ringkasan periodik berhasil diambil\", \"data\": {\"summary\": {\"period\": \"daily\", \"year\": 2026, \"month\": 3, \"total\": 18, \"completed\": 12, \"approved\": 3, \"rejected\": 1, \"cancelled\": 2}, \"data\": [{\"date\": \"2026-03-01\", \"total\": 2, \"approved\": 0, \"completed\": 2, \"rejected\": 0, \"cancelled\": 0, \"pending\": 0, \"visitors\": 18}, {\"date\": \"2026-03-05\", \"total\": 3, \"approved\": 1, \"completed\": 2, \"rejected\": 0, \"cancelled\": 0, \"pending\": 0, \"visitors\": 25}]}}"
+        },
+        {
+            "name": "Example ❌ 422 Validation Error - period tidak valid",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/periodic?period=yearly",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "periodic"
+                    ],
+                    "query": [
+                        {
+                            "key": "period",
+                            "value": "yearly"
+                        }
+                    ]
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"VALIDATION_ERROR\", \"message\": \"Data yang dikirim tidak valid\", \"errors\": {\"period\": [\"The selected period is invalid.\"]}}"
+        }
+    ]
+}
