@@ -8,7 +8,6 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\RoomController;
-use App\Http\Controllers\Api\RoomImageController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,8 +33,8 @@ Route::prefix('v1')->middleware('jwt')->group(function () {
     Route::get('/rooms/{id}/availability', [RoomController::class, 'availability']);
 
     // Room image endpoints (separate from room CRUD — multipart only)
-    Route::post('/rooms/{id}/image', [RoomImageController::class, 'store']);
-    Route::delete('/rooms/{id}/image', [RoomImageController::class, 'destroy']);
+    Route::post('/rooms/{id}/image', [RoomController::class, 'storeImage']);
+    Route::delete('/rooms/{id}/image', [RoomController::class, 'destroyImage']);
 
     // Facility master endpoints
     Route::get('/facilities', [FacilityController::class, 'index']);
