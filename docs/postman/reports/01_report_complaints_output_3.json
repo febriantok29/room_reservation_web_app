@@ -1,0 +1,149 @@
+{
+    "name": "Report - Complaints (Output 3)",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/reports/complaints?format=json&date_from=2026-03-01&date_to=2026-03-31",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "reports",
+                "complaints"
+            ],
+            "query": [
+                {
+                    "key": "format",
+                    "value": "json",
+                    "description": "Output format: json (default) | pdf | excel"
+                },
+                {
+                    "key": "date_from",
+                    "value": "2026-03-01",
+                    "description": "Optional. Start date (YYYY-MM-DD). Default: start of current month"
+                },
+                {
+                    "key": "date_to",
+                    "value": "2026-03-31",
+                    "description": "Optional. End date (YYYY-MM-DD). Default: today"
+                },
+                {
+                    "key": "status",
+                    "value": "open",
+                    "description": "Optional. Filter: open | in_progress | resolved | rejected",
+                    "disabled": true
+                },
+                {
+                    "key": "room_id",
+                    "value": "",
+                    "description": "Optional. Filter by room ID",
+                    "disabled": true
+                }
+            ]
+        },
+        "description": "**Output 3** — Complaint & Facility Damage Report. Admin only. Returns complaint list with summary by status."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - JSON format",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/complaints?format=json&date_from=2026-03-01&date_to=2026-03-31",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "complaints"
+                    ],
+                    "query": [
+                        {
+                            "key": "format",
+                            "value": "json",
+                            "description": "Output format: json (default) | pdf | excel"
+                        },
+                        {
+                            "key": "date_from",
+                            "value": "2026-03-01",
+                            "description": "Optional. Start date (YYYY-MM-DD). Default: start of current month"
+                        },
+                        {
+                            "key": "date_to",
+                            "value": "2026-03-31",
+                            "description": "Optional. End date (YYYY-MM-DD). Default: today"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Laporan komplain berhasil diambil\", \"data\": {\"summary\": {\"total\": 12, \"open\": 3, \"in_progress\": 2, \"resolved\": 6, \"rejected\": 1}, \"complaints\": [{\"id\": \"CMP-20260401-001\", \"reservation_id\": \"RSV-20260401-01\", \"reported_by\": \"usr-uuid-0005\", \"room_id\": \"RM-F01-001\", \"facility_id\": \"fac-uuid-001\", \"title\": \"Proyektor tidak menyala\", \"description\": \"Proyektor tidak bisa dinyalakan saat rapat berlangsung\", \"status\": \"open\", \"resolution_notes\": null, \"resolved_at\": null, \"resolved_by\": null, \"photo_url\": null, \"created_at\": \"2026-04-01T05:30:00.000000Z\", \"updated_at\": \"2026-04-01T05:30:00.000000Z\", \"room\": {\"id\": \"RM-F01-001\", \"name\": \"Ruang Rapat Utama\", \"floor\": 1}, \"reservation\": {\"id\": \"RSV-20260401-01\", \"start_time\": \"2026-04-01T02:00:00.000000Z\", \"end_time\": \"2026-04-01T05:00:00.000000Z\"}, \"facility\": {\"id\": \"fac-uuid-001\", \"name\": \"Proyektor\", \"slug\": \"proyektor\"}, \"reporter\": {\"id\": \"usr-uuid-0005\", \"first_name\": \"Budi\", \"last_name\": \"Santoso\"}, \"resolver\": null}]}}"
+        },
+        {
+            "name": "Example ❌ 403 Forbidden - Bukan admin",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/complaints?format=json",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "complaints"
+                    ],
+                    "query": [
+                        {
+                            "key": "format",
+                            "value": "json"
+                        }
+                    ]
+                }
+            },
+            "status": "Forbidden",
+            "code": 403,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"FORBIDDEN\", \"message\": \"Anda tidak memiliki akses ke resource ini\"}"
+        }
+    ]
+}

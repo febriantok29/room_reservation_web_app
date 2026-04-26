@@ -1,0 +1,132 @@
+{
+    "name": "Delete Division (Admin Only)",
+    "request": {
+        "method": "DELETE",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/divisions/{{division_id}}",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "divisions",
+                "{{division_id}}"
+            ]
+        },
+        "description": "Admin only. Soft-delete a division. The division will no longer appear in list/detail endpoints."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Divisi dihapus",
+            "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/divisions/{{division_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "divisions",
+                        "{{division_id}}"
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Divisi berhasil dihapus\", \"data\": null}"
+        },
+        {
+            "name": "Example ❌ 404 Not Found",
+            "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/divisions/DIV-999",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "divisions",
+                        "DIV-999"
+                    ]
+                }
+            },
+            "status": "Not Found",
+            "code": 404,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"NOT_FOUND\", \"message\": \"Divisi tidak ditemukan\"}"
+        },
+        {
+            "name": "Example ❌ 403 Forbidden - Bukan admin",
+            "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/divisions/{{division_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "divisions",
+                        "{{division_id}}"
+                    ]
+                }
+            },
+            "status": "Forbidden",
+            "code": 403,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"FORBIDDEN\", \"message\": \"Anda tidak memiliki akses ke resource ini\"}"
+        }
+    ]
+}

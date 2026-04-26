@@ -1,0 +1,97 @@
+{
+    "name": "Get Division Detail",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/divisions/{{division_id}}",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "divisions",
+                "{{division_id}}"
+            ]
+        },
+        "description": "Get single division detail by ID."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/divisions/{{division_id}}",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "divisions",
+                        "{{division_id}}"
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Detail divisi berhasil diambil\", \"data\": {\"id\": \"DIV-001\", \"name\": \"Divisi Teknologi Informasi\", \"code\": \"TI\", \"description\": \"Divisi yang bertanggung jawab atas infrastruktur IT\", \"created_by\": \"usr-uuid-admin\", \"created_at\": \"2026-01-01T00:00:00.000000Z\", \"updated_at\": \"2026-01-01T00:00:00.000000Z\"}}"
+        },
+        {
+            "name": "Example ❌ 404 Not Found",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/divisions/DIV-999",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "divisions",
+                        "DIV-999"
+                    ]
+                }
+            },
+            "status": "Not Found",
+            "code": 404,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"NOT_FOUND\", \"message\": \"Divisi tidak ditemukan\"}"
+        }
+    ]
+}

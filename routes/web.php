@@ -3,7 +3,9 @@
 use App\Http\Controllers\Web\AdminAuthController;
 use App\Http\Controllers\Web\AdminComplaintController;
 use App\Http\Controllers\Web\AdminDashboardController;
+use App\Http\Controllers\Web\AdminDivisionController;
 use App\Http\Controllers\Web\AdminFacilityController;
+use App\Http\Controllers\Web\AdminReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -44,6 +46,14 @@ Route::prefix('admin')->group(function () {
         Route::put('/facilities/{facility}', [AdminFacilityController::class, 'update'])->name('admin.facilities.update');
         Route::delete('/facilities/{facility}', [AdminFacilityController::class, 'destroy'])->name('admin.facilities.destroy');
 
+        // Division master CRUD
+        Route::get('/divisions', [AdminDivisionController::class, 'index'])->name('admin.divisions');
+        Route::get('/divisions/create', [AdminDivisionController::class, 'create'])->name('admin.divisions.create');
+        Route::post('/divisions', [AdminDivisionController::class, 'store'])->name('admin.divisions.store');
+        Route::get('/divisions/{division}/edit', [AdminDivisionController::class, 'edit'])->name('admin.divisions.edit');
+        Route::put('/divisions/{division}', [AdminDivisionController::class, 'update'])->name('admin.divisions.update');
+        Route::delete('/divisions/{division}', [AdminDivisionController::class, 'destroy'])->name('admin.divisions.destroy');
+
         // Reservations CRUD
         Route::get('/reservations', [AdminDashboardController::class, 'reservations'])->name('admin.reservations');
         Route::get('/reservations/create', [AdminDashboardController::class, 'createReservation'])->name('admin.reservations.create');
@@ -67,6 +77,18 @@ Route::prefix('admin')->group(function () {
         Route::post('/complaints', [AdminComplaintController::class, 'store'])->name('admin.complaints.store');
         Route::get('/complaints/{complaint}', [AdminComplaintController::class, 'show'])->name('admin.complaints.show');
         Route::patch('/complaints/{complaint}/status', [AdminComplaintController::class, 'updateStatus'])->name('admin.complaints.update-status');
+
+        // Reports (Outputs 3, 5, 6, 7, 8, 9, 10)
+        Route::prefix('reports')->name('admin.reports.')->group(function () {
+            Route::get('/complaints',        [AdminReportController::class, 'complaints'])->name('complaints');
+            Route::get('/usage',             [AdminReportController::class, 'usage'])->name('usage');
+            Route::get('/user-activity',     [AdminReportController::class, 'userActivity'])->name('user-activity');
+            Route::get('/schedule-history',  [AdminReportController::class, 'scheduleHistory'])->name('schedule-history');
+            Route::get('/periodic',          [AdminReportController::class, 'periodic'])->name('periodic');
+            Route::get('/division-activity', [AdminReportController::class, 'divisionActivity'])->name('division-activity');
+            Route::get('/maintenance',       [AdminReportController::class, 'maintenance'])->name('maintenance');
+            Route::get('/division-usage',    [AdminReportController::class, 'divisionUsage'])->name('division-usage');
+        });
 
         Route::match(['get', 'post'], '/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
     });

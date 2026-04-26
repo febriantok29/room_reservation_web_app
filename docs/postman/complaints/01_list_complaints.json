@@ -1,0 +1,171 @@
+{
+    "name": "List Complaints",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/complaints?status=open&per_page=10",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "complaints"
+            ],
+            "query": [
+                {
+                    "key": "status",
+                    "value": "open",
+                    "description": "Optional. Filter by status: open | in_progress | resolved | rejected"
+                },
+                {
+                    "key": "room_id",
+                    "value": "",
+                    "description": "Optional. Filter by room ID",
+                    "disabled": true
+                },
+                {
+                    "key": "reservation_id",
+                    "value": "",
+                    "description": "Optional. Filter by reservation ID",
+                    "disabled": true
+                },
+                {
+                    "key": "per_page",
+                    "value": "10",
+                    "description": "Optional. Items per page (1-100)"
+                }
+            ]
+        },
+        "description": "List complaints. Admin sees all; regular users only see their own complaints. Supports filters: status (open/in_progress/resolved/rejected), room_id, reservation_id, per_page."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Daftar komplain (Admin)",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/complaints?status=open&per_page=10",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "complaints"
+                    ],
+                    "query": [
+                        {
+                            "key": "status",
+                            "value": "open"
+                        },
+                        {
+                            "key": "per_page",
+                            "value": "10"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Data komplain berhasil diambil\", \"data\": [{\"id\": \"CMP-20260401-001\", \"reservation_id\": \"RSV-20260401-01\", \"reported_by\": \"usr-uuid-0005\", \"room_id\": \"RM-F01-001\", \"facility_id\": \"fac-uuid-001\", \"title\": \"Proyektor tidak menyala\", \"description\": \"Proyektor tidak bisa dinyalakan saat rapat berlangsung\", \"status\": \"open\", \"resolution_notes\": null, \"resolved_at\": null, \"resolved_by\": null, \"photo_url\": null, \"created_at\": \"2026-04-01T05:30:00.000000Z\", \"updated_at\": \"2026-04-01T05:30:00.000000Z\", \"room\": {\"id\": \"RM-F01-001\", \"name\": \"Ruang Rapat Utama\", \"floor\": 1}, \"reservation\": {\"id\": \"RSV-20260401-01\", \"start_time\": \"2026-04-01T02:00:00.000000Z\", \"end_time\": \"2026-04-01T05:00:00.000000Z\"}, \"facility\": {\"id\": \"fac-uuid-001\", \"name\": \"Proyektor\", \"slug\": \"proyektor\"}, \"reporter\": {\"id\": \"usr-uuid-0005\", \"first_name\": \"Budi\", \"last_name\": \"Santoso\"}, \"resolver\": null}], \"metadata\": {\"total\": 1, \"per_page\": 10, \"current_page\": 1, \"last_page\": 1, \"from\": 1, \"to\": 1}}"
+        },
+        {
+            "name": "Example ✅ 200 OK - Filter resolved + room_id",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/complaints?status=resolved&room_id=RM-F01-001&per_page=5",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "complaints"
+                    ],
+                    "query": [
+                        {
+                            "key": "status",
+                            "value": "resolved"
+                        },
+                        {
+                            "key": "room_id",
+                            "value": "RM-F01-001"
+                        },
+                        {
+                            "key": "per_page",
+                            "value": "5"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Data komplain berhasil diambil\", \"data\": [{\"id\": \"CMP-20260401-001\", \"reservation_id\": \"RSV-20260401-01\", \"reported_by\": \"usr-uuid-0005\", \"room_id\": \"RM-F01-001\", \"facility_id\": \"fac-uuid-001\", \"title\": \"Proyektor tidak menyala\", \"description\": \"Proyektor tidak bisa dinyalakan saat rapat berlangsung\", \"status\": \"resolved\", \"resolution_notes\": \"Proyektor telah diganti dengan unit baru\", \"resolved_at\": \"2026-04-02T04:00:00.000000Z\", \"resolved_by\": \"usr-uuid-admin\", \"photo_url\": null, \"created_at\": \"2026-04-01T05:30:00.000000Z\", \"updated_at\": \"2026-04-01T05:30:00.000000Z\", \"room\": {\"id\": \"RM-F01-001\", \"name\": \"Ruang Rapat Utama\", \"floor\": 1}, \"reservation\": {\"id\": \"RSV-20260401-01\", \"start_time\": \"2026-04-01T02:00:00.000000Z\", \"end_time\": \"2026-04-01T05:00:00.000000Z\"}, \"facility\": {\"id\": \"fac-uuid-001\", \"name\": \"Proyektor\", \"slug\": \"proyektor\"}, \"reporter\": {\"id\": \"usr-uuid-0005\", \"first_name\": \"Budi\", \"last_name\": \"Santoso\"}, \"resolver\": {\"id\": \"usr-uuid-admin\", \"first_name\": \"Admin\", \"last_name\": \"System\"}}], \"metadata\": {\"total\": 1, \"per_page\": 5, \"current_page\": 1, \"last_page\": 1, \"from\": 1, \"to\": 1}}"
+        },
+        {
+            "name": "Example ❌ 401 Unauthorized",
+            "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/complaints",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "complaints"
+                    ]
+                }
+            },
+            "status": "Unauthorized",
+            "code": 401,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"UNAUTHORIZED\", \"message\": \"Token tidak valid atau kadaluarsa\"}"
+        }
+    ]
+}

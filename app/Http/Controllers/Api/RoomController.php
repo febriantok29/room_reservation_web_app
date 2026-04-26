@@ -7,6 +7,7 @@ use App\Http\Responses\ApiResponse;
 use App\Models\Facility;
 use App\Models\Room;
 use App\Services\CSPService;
+use App\Services\ImageService;
 use App\Support\ApiErrorCodes;
 use App\Support\ApiMessages;
 use Illuminate\Http\JsonResponse;
@@ -14,14 +15,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
+use Throwable;
 
 class RoomController extends Controller
 {
     private CSPService $cspService;
+    private ImageService $imageService;
 
-    public function __construct(CSPService $cspService)
+    public function __construct(CSPService $cspService, ImageService $imageService)
     {
         $this->cspService = $cspService;
+        $this->imageService = $imageService;
     }
 
     /**
@@ -287,6 +291,50 @@ class RoomController extends Controller
     }
 
     /**
+     * List all rooms available for a specific time window.
+     *
+     * GET /v1/rooms/available?start_time=...&end_time=...&visitor_count=1
+     */
+    public function available(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'start_time'    => 'required|date',
+            'end_time'      => 'required|date|after:start_time',
+            'visitor_count' => 'nullable|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator->errors()->toArray());
+        }
+
+        $start        = Carbon::parse($request->input('start_time'))->utc();
+        $end          = Carbon::parse($request->input('end_time'))->utc();
+        $visitorCount = (int) $request->input('visitor_count', 1);
+
+        $rooms = Room::query()
+            ->with('facilities')
+            ->whereNull('deleted_at')
+            ->where('is_maintenance', false)
+            ->where('capacity', '>=', $visitorCount)
+            ->orderBy('floor')
+            ->orderBy('name')
+            ->get();
+
+        // Filter out rooms that have an overlapping approved/pending reservation
+        $available = $rooms->filter(function (Room $room) use ($start, $end) {
+            return $this->cspService->isRoomAvailable($room->id, $start, $end);
+        })->values();
+
+        return ApiResponse::success([
+            'start_time'    => $start->toIso8601String(),
+            'end_time'      => $end->toIso8601String(),
+            'visitor_count' => $visitorCount,
+            'total'         => $available->count(),
+            'rooms'         => $available,
+        ], ApiMessages::ROOM_AVAILABLE_LIST_SUCCESS);
+    }
+
+    /**
      * Get available time slots for a room.
      */
     public function availability(Request $request, string $id): JsonResponse
@@ -323,6 +371,96 @@ class RoomController extends Controller
             'interval_minutes' => $intervalMinutes,
             'available_slots' => $slots,
         ], ApiMessages::ROOM_AVAILABILITY_SUCCESS, 200);
+    }
+
+    /**
+     * Upload or replace the image for a room.
+     *
+     * POST /v1/rooms/{id}/image
+     *
+     * Accepts multipart/form-data with field "image".
+     * Files larger than 2 MB are auto-compressed to JPEG.
+     * Server accepts up to 10 MB as incoming file size.
+     */
+    public function storeImage(Request $request, string $id): JsonResponse
+    {
+        if ($forbidden = $this->ensureAdmin($request)) {
+            return $forbidden;
+        }
+
+        $room = Room::query()->where('id', $id)->whereNull('deleted_at')->first();
+
+        if (!$room) {
+            return ApiResponse::notFound(ApiMessages::ROOM_NOT_FOUND);
+        }
+
+        $validator = Validator::make(
+            $request->all(),
+            ['image' => ImageService::validationRules(required: true)],
+            ImageService::validationMessages('image')
+        );
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator->errors()->toArray());
+        }
+
+        try {
+            $result = $this->imageService->upload(
+                $request->file('image'),
+                'rooms',
+                $room->image_path
+            );
+        } catch (Throwable) {
+            return ApiResponse::error(
+                ApiErrorCodes::IMAGE_UPLOAD_FAILED,
+                ApiMessages::IMAGE_UPLOAD_FAILED,
+                500
+            );
+        }
+
+        $room->image_path = $result['path'];
+        $room->updated_by = $request->user()->id;
+        $room->save();
+
+        return ApiResponse::success([
+            'image_id'       => $result['image_id'],
+            'image_url'      => $result['url'],
+            'size_bytes'     => $result['size_bytes'],
+            'was_compressed' => $result['was_compressed'],
+        ], ApiMessages::ROOM_IMAGE_UPLOADED_SUCCESS, 200);
+    }
+
+    /**
+     * Delete the image for a room.
+     *
+     * DELETE /v1/rooms/{id}/image
+     */
+    public function destroyImage(Request $request, string $id): JsonResponse
+    {
+        if ($forbidden = $this->ensureAdmin($request)) {
+            return $forbidden;
+        }
+
+        $room = Room::query()->where('id', $id)->whereNull('deleted_at')->first();
+
+        if (!$room) {
+            return ApiResponse::notFound(ApiMessages::ROOM_NOT_FOUND);
+        }
+
+        if (!$room->image_path) {
+            return ApiResponse::error(
+                ApiErrorCodes::IMAGE_NOT_FOUND,
+                ApiMessages::ROOM_IMAGE_NOT_FOUND,
+                404
+            );
+        }
+
+        $this->imageService->delete($room->image_path);
+        $room->image_path = null;
+        $room->updated_by = $request->user()->id;
+        $room->save();
+
+        return ApiResponse::success(null, ApiMessages::ROOM_IMAGE_DELETED_SUCCESS, 200);
     }
 
     private function ensureAdmin(Request $request): ?JsonResponse

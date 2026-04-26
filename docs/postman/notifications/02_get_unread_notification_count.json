@@ -1,0 +1,127 @@
+{
+    "name": "Get Unread Notification Count",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/notifications/unread-count",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "notifications",
+                "unread-count"
+            ]
+        },
+        "description": "Get count of unread notifications for the badge indicator. Lightweight endpoint — no pagination."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Badge count",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/notifications/unread-count",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "notifications",
+                        "unread-count"
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Jumlah notifikasi belum dibaca berhasil diambil\", \"data\": {\"unread_count\": 3}}"
+        },
+        {
+            "name": "Example ✅ 200 OK - Tidak ada notifikasi belum dibaca",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/notifications/unread-count",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "notifications",
+                        "unread-count"
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Jumlah notifikasi belum dibaca berhasil diambil\", \"data\": {\"unread_count\": 0}}"
+        },
+        {
+            "name": "Example ❌ 401 Unauthorized",
+            "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/notifications/unread-count",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "notifications",
+                        "unread-count"
+                    ]
+                }
+            },
+            "status": "Unauthorized",
+            "code": 401,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"UNAUTHORIZED\", \"message\": \"Token tidak valid atau kadaluarsa\"}"
+        }
+    ]
+}

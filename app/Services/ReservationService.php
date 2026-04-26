@@ -4,6 +4,11 @@ namespace App\Services;
 
 use App\Models\Reservation;
 use App\Models\User;
+use App\Notifications\ReservationApproved;
+use App\Notifications\ReservationCancelled;
+use App\Notifications\ReservationCompleted;
+use App\Notifications\ReservationCreated;
+use App\Notifications\ReservationRejected;
 use App\Support\ApiErrorCodes;
 use App\Support\ApiMessages;
 use Carbon\Carbon;
@@ -88,6 +93,10 @@ class ReservationService
             ]);
 
             $reservation->load(['room', 'user']);
+
+            if ($reservation->user && $reservation->user->fcmTokens()->exists()) {
+                $reservation->user->notify(new ReservationCreated($reservation));
+            }
 
             return [
                 'success' => true,
@@ -215,6 +224,10 @@ class ReservationService
         $reservation->save();
         $reservation->load(['room', 'user']);
 
+        if ($reservation->user && $reservation->user->fcmTokens()->exists()) {
+            $reservation->user->notify(new ReservationCancelled($reservation));
+        }
+
         return [
             'success' => true,
             'data' => $reservation,
@@ -257,6 +270,10 @@ class ReservationService
         $reservation->updated_by = $actor->id;
         $reservation->save();
         $reservation->load(['room', 'user']);
+
+        if ($reservation->user && $reservation->user->fcmTokens()->exists()) {
+            $reservation->user->notify(new ReservationCompleted($reservation));
+        }
 
         return [
             'success' => true,
@@ -355,6 +372,10 @@ class ReservationService
             $reservation->save();
             $reservation->load(['room', 'user']);
 
+            if ($reservation->user && $reservation->user->fcmTokens()->exists()) {
+                $reservation->user->notify(new ReservationApproved($reservation));
+            }
+
             return [
                 'success' => true,
                 'data' => $reservation,
@@ -383,6 +404,10 @@ class ReservationService
         $reservation->updated_by = $actor->id;
         $reservation->save();
         $reservation->load(['room', 'user']);
+
+        if ($reservation->user && $reservation->user->fcmTokens()->exists()) {
+            $reservation->user->notify(new ReservationRejected($reservation));
+        }
 
         return [
             'success' => true,

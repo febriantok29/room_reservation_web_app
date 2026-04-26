@@ -15,10 +15,13 @@ class UsersTableSeeder extends Seeder
     public function run(): void
     {
         $users = [
-            // Admin Users
+            // ========================================
+            // Admin Users (3 total, no division)
+            // ========================================
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'ADMIN01',
+                'employee_id' => 'admin01',
+                'division_id' => null,
                 'email' => 'admin@roomreservation.com',
                 'password' => Hash::make('Admin@123'),
                 'first_name' => 'System',
@@ -29,7 +32,8 @@ class UsersTableSeeder extends Seeder
             ],
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00002',
+                'employee_id' => 'ADM-2026-02',
+                'division_id' => null,
                 'email' => 'john.admin@roomreservation.com',
                 'password' => Hash::make('Admin@123'),
                 'first_name' => 'John',
@@ -38,23 +42,39 @@ class UsersTableSeeder extends Seeder
                 'is_admin' => true,
                 'is_active' => true,
             ],
-
-            // Staff Users (non-admin)
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00003',
-                'email' => 'staff1@roomreservation.com',
-                'password' => Hash::make('Staff@123'),
-                'first_name' => 'Maria',
-                'last_name' => 'Garcia',
-                'date_of_birth' => '1990-05-10',
+                'employee_id' => 'ADM-2025-03',
+                'division_id' => null,
+                'email' => 'emma.admin@roomreservation.com',
+                'password' => Hash::make('Admin@123'),
+                'first_name' => 'Emma',
+                'last_name' => 'Williams',
+                'date_of_birth' => '1989-06-12',
+                'is_admin' => true,
+                'is_active' => true,
+            ],
+
+            // ========================================
+            // Divisi IT (DIV-01) - 2 staff
+            // ========================================
+            [
+                'id' => (string) Str::uuid7(),
+                'employee_id' => 'IT-2020-00009',
+                'division_id' => 'DIV-01',
+                'email' => 'febri.tokan@roomreservation.com',
+                'password' => Hash::make('bimbim'),
+                'first_name' => 'Febriant',
+                'last_name' => 'Oka Nugraha',
+                'date_of_birth' => '1998-02-28',
                 'is_admin' => false,
                 'is_active' => true,
             ],
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00004',
-                'email' => 'staff2@roomreservation.com',
+                'employee_id' => 'IT-2021-00010',
+                'division_id' => 'DIV-01',
+                'email' => 'david.johnson@roomreservation.com',
                 'password' => Hash::make('Staff@123'),
                 'first_name' => 'David',
                 'last_name' => 'Johnson',
@@ -63,22 +83,42 @@ class UsersTableSeeder extends Seeder
                 'is_active' => true,
             ],
 
-            // Additional Staff Users (non-admin)
+            // ========================================
+            // Divisi HRD (DIV-02) - 2 staff (incl. required accounts)
+            // ========================================
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00005',
-                'email' => 'sarah.brown@example.com',
-                'password' => Hash::make('User@123'),
-                'first_name' => 'Sarah',
-                'last_name' => 'Brown',
-                'date_of_birth' => '1990-10-31',
+                'employee_id' => 'HRD-2019-00001',
+                'division_id' => 'DIV-02',
+                'email' => 'dosen.pembimbing@roomreservation.com',
+                'password' => Hash::make('dosenn'),
+                'first_name' => 'Dr. Budi',
+                'last_name' => 'Santoso, M.Kom',
+                'date_of_birth' => '1975-03-22',
                 'is_admin' => false,
                 'is_active' => true,
             ],
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00006',
-                'email' => 'michael.wilson@example.com',
+                'employee_id' => 'HRD-2019-00002',
+                'division_id' => 'DIV-02',
+                'email' => 'rina.hrd@roomreservation.com',
+                'password' => Hash::make('dosenn'),
+                'first_name' => 'Rina',
+                'last_name' => 'Setiawati',
+                'date_of_birth' => '1980-07-15',
+                'is_admin' => false,
+                'is_active' => true,
+            ],
+
+            // ========================================
+            // Divisi Finance (DIV-03) - 2 staff
+            // ========================================
+            [
+                'id' => (string) Str::uuid7(),
+                'employee_id' => 'FIN-2020-00005',
+                'division_id' => 'DIV-03',
+                'email' => 'michael.wilson@roomreservation.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'Michael',
                 'last_name' => 'Wilson',
@@ -88,8 +128,9 @@ class UsersTableSeeder extends Seeder
             ],
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00007',
-                'email' => 'jennifer.davis@example.com',
+                'employee_id' => 'FIN-2021-00012',
+                'division_id' => 'DIV-03',
+                'email' => 'jennifer.davis@roomreservation.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'Jennifer',
                 'last_name' => 'Davis',
@@ -97,10 +138,15 @@ class UsersTableSeeder extends Seeder
                 'is_admin' => false,
                 'is_active' => true,
             ],
+
+            // ========================================
+            // Divisi Marketing (DIV-04) - 1 staff
+            // ========================================
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00008',
-                'email' => 'robert.miller@example.com',
+                'employee_id' => 'MKT-2020-00007',
+                'division_id' => 'DIV-04',
+                'email' => 'robert.miller@roomreservation.com',
                 'password' => Hash::make('User@123'),
                 'first_name' => 'Robert',
                 'last_name' => 'Miller',
@@ -108,25 +154,31 @@ class UsersTableSeeder extends Seeder
                 'is_admin' => false,
                 'is_active' => true,
             ],
+
+            // ========================================
+            // Divisi Operasional (DIV-05) - 2 staff
+            // ========================================
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00009',
-                'email' => 'lisa.anderson@example.com',
-                'password' => Hash::make('User@123'),
-                'first_name' => 'Lisa',
-                'last_name' => 'Anderson',
-                'date_of_birth' => '1989-09-18',
+                'employee_id' => 'OPS-2020-00006',
+                'division_id' => 'DIV-05',
+                'email' => 'maria.garcia@roomreservation.com',
+                'password' => Hash::make('Staff@123'),
+                'first_name' => 'Maria',
+                'last_name' => 'Garcia',
+                'date_of_birth' => '1990-05-10',
                 'is_admin' => false,
                 'is_active' => true,
             ],
             [
                 'id' => (string) Str::uuid7(),
-                'employee_id' => 'EMP-2025-00010',
-                'email' => 'william.taylor@example.com',
+                'employee_id' => 'OPS-2021-00011',
+                'division_id' => 'DIV-05',
+                'email' => 'christopher.martin@roomreservation.com',
                 'password' => Hash::make('User@123'),
-                'first_name' => 'William',
-                'last_name' => 'Taylor',
-                'date_of_birth' => '1994-02-28',
+                'first_name' => 'Christopher',
+                'last_name' => 'Martin',
+                'date_of_birth' => '1993-03-16',
                 'is_admin' => false,
                 'is_active' => true,
             ],
@@ -139,25 +191,28 @@ class UsersTableSeeder extends Seeder
             ]));
         }
 
-        $this->command->info('Users seeded successfully!');
+        $this->command->info('Users seeded: 12 total (3 admins + 9 staff across 5 divisions)');
         $this->command->info('
 ========================================
-Login Credentials:
+REQUIRED LOGIN CREDENTIALS:
 ========================================
-Admin:
-  Email: admin@roomreservation.com
-    Employee ID: ADMIN01
-  Password: Admin@123
+1. Admin System:
+   Employee ID: admin01
+   Password: Admin@123
 
-Staff:
-  Email: staff1@roomreservation.com
-    Employee ID: EMP-2025-00003
-  Password: Staff@123
+2. User Personal (IT Division):
+   Employee ID: IT-2020-00009
+   Email: febri.tokan@roomreservation.com
+   Password: bimbim
 
-Staff (contoh non-admin):
-  Email: sarah.brown@example.com
-    Employee ID: EMP-2025-00005
-  Password: User@123
+3. Lecturer/Supervisor (HRD):
+   Employee ID: HRD-2019-00001
+   Email: dosen.pembimbing@roomreservation.com
+   Password: dosen
+
+Additional accounts:
+   - HRD-2019-00002 (password: dosen)
+   - ADM-2025-03 (admin, password: Admin@123)
 ========================================
         ');
     }

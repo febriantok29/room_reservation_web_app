@@ -1,0 +1,152 @@
+{
+    "name": "List Notifications",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/notifications?per_page=20",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "notifications"
+            ],
+            "query": [
+                {
+                    "key": "unread",
+                    "value": "1",
+                    "description": "Optional. Set 1 to return only unread notifications",
+                    "disabled": true
+                },
+                {
+                    "key": "per_page",
+                    "value": "20",
+                    "description": "Optional. Items per page (max 100, default 20)"
+                }
+            ]
+        },
+        "description": "List all notifications for the authenticated user, newest first. Pass `?unread=1` to filter unread only. Returns paginated results with `unread_count` in metadata for badge updates.\n\n**Notification types:** `reservation_created`, `reservation_approved`, `reservation_rejected`, `reservation_cancelled`, `reservation_completed`"
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - Semua notifikasi (paginated)",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/notifications?per_page=20",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "notifications"
+                    ],
+                    "query": [
+                        {
+                            "key": "per_page",
+                            "value": "20"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Daftar notifikasi berhasil diambil\", \"data\": [{\"id\": \"notif-uuid-001\", \"type\": \"reservation_created\", \"title\": \"Reservasi Dibuat\", \"body\": \"Reservasi Anda untuk Ruang Rapat Utama pada 01 Apr 2026 09:00 - 12:00 telah dibuat dan menunggu persetujuan.\", \"reservation_id\": \"RSV-20260401-01\", \"room_name\": \"Ruang Rapat Utama\", \"status\": \"pending\", \"start_time\": \"2026-04-01T02:00:00.000000Z\", \"end_time\": \"2026-04-01T05:00:00.000000Z\", \"is_read\": false, \"read_at\": null, \"created_at\": \"2026-04-01T02:00:05.000000Z\"}, {\"id\": \"notif-uuid-002\", \"type\": \"reservation_approved\", \"title\": \"Reservasi Disetujui\", \"body\": \"Reservasi Anda untuk Ruang Rapat Utama pada 02 Apr 2026 09:00 - 12:00 telah disetujui.\", \"reservation_id\": \"RSV-20260402-01\", \"room_name\": \"Ruang Rapat Utama\", \"status\": \"approved\", \"start_time\": \"2026-04-02T02:00:00.000000Z\", \"end_time\": \"2026-04-02T05:00:00.000000Z\", \"is_read\": true, \"read_at\": \"2026-04-02T03:00:00.000000Z\", \"created_at\": \"2026-04-01T02:00:05.000000Z\"}], \"metadata\": {\"total\": 15, \"per_page\": 20, \"current_page\": 1, \"last_page\": 1, \"unread_count\": 3}}"
+        },
+        {
+            "name": "Example ✅ 200 OK - Filter hanya yang belum dibaca",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/notifications?unread=1&per_page=20",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "notifications"
+                    ],
+                    "query": [
+                        {
+                            "key": "unread",
+                            "value": "1"
+                        },
+                        {
+                            "key": "per_page",
+                            "value": "20"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Daftar notifikasi berhasil diambil\", \"data\": [{\"id\": \"notif-uuid-001\", \"type\": \"reservation_created\", \"title\": \"Reservasi Dibuat\", \"body\": \"Reservasi Anda untuk Ruang Rapat Utama pada 01 Apr 2026 09:00 - 12:00 telah dibuat dan menunggu persetujuan.\", \"reservation_id\": \"RSV-20260401-01\", \"room_name\": \"Ruang Rapat Utama\", \"status\": \"pending\", \"start_time\": \"2026-04-01T02:00:00.000000Z\", \"end_time\": \"2026-04-01T05:00:00.000000Z\", \"is_read\": false, \"read_at\": null, \"created_at\": \"2026-04-01T02:00:05.000000Z\"}], \"metadata\": {\"total\": 3, \"per_page\": 20, \"current_page\": 1, \"last_page\": 1, \"unread_count\": 3}}"
+        },
+        {
+            "name": "Example ❌ 401 Unauthorized",
+            "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/notifications",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "notifications"
+                    ]
+                }
+            },
+            "status": "Unauthorized",
+            "code": 401,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"UNAUTHORIZED\", \"message\": \"Token tidak valid atau kadaluarsa\"}"
+        }
+    ]
+}

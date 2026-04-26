@@ -82,6 +82,31 @@ final class ApiMessages
     public const COMPLAINT_INVALID_RESERVATION_STATUS = 'Komplain hanya dapat diajukan untuk reservasi yang sudah selesai (completed)';
     public const COMPLAINT_ALREADY_CLOSED = 'Komplain ini sudah ditutup dan tidak dapat diubah lagi';
 
+    public const ROOM_AVAILABLE_LIST_SUCCESS = 'Daftar ruangan tersedia berhasil diambil';
+
+    public const REPORT_COMPLAINT_SUCCESS = 'Laporan komplain berhasil diambil';
+    public const REPORT_USAGE_SUCCESS = 'Laporan rekapitulasi penggunaan berhasil diambil';
+    public const REPORT_USER_ACTIVITY_SUCCESS = 'Laporan aktivitas per pengguna berhasil diambil';
+    public const REPORT_SCHEDULE_HISTORY_SUCCESS = 'Laporan jadwal & histori reservasi berhasil diambil';
+    public const REPORT_PERIODIC_SUCCESS = 'Laporan ringkasan periodik berhasil diambil';
+    public const REPORT_DIVISION_ACTIVITY_SUCCESS = 'Laporan aktivitas per divisi berhasil diambil';
+    public const REPORT_MAINTENANCE_SUCCESS = 'Laporan maintenance & kerusakan berhasil diambil';
+    public const REPORT_DIVISION_USAGE_SUCCESS = 'Laporan pemakaian ruangan per divisi berhasil diambil';
+
+    public const DIVISION_NOT_FOUND = 'Divisi tidak ditemukan';
+    public const DIVISION_LIST_SUCCESS = 'Data divisi berhasil diambil';
+    public const DIVISION_DETAIL_SUCCESS = 'Detail divisi berhasil diambil';
+    public const DIVISION_CREATED_SUCCESS = 'Divisi berhasil ditambahkan';
+    public const DIVISION_UPDATED_SUCCESS = 'Divisi berhasil diperbarui';
+    public const DIVISION_DELETED_SUCCESS = 'Divisi berhasil dihapus';
+
+    public const NOTIFICATION_LIST_SUCCESS = 'Daftar notifikasi berhasil diambil';
+    public const NOTIFICATION_UNREAD_COUNT_SUCCESS = 'Jumlah notifikasi belum dibaca berhasil diambil';
+    public const NOTIFICATION_NOT_FOUND = 'Notifikasi tidak ditemukan';
+    public const NOTIFICATION_MARKED_READ = 'Notifikasi berhasil ditandai sudah dibaca';
+    public const NOTIFICATION_ALL_MARKED_READ = 'Semua notifikasi berhasil ditandai sudah dibaca';
+    public const NOTIFICATION_DELETED = 'Notifikasi berhasil dihapus';
+
     private function __construct()
     {
     }

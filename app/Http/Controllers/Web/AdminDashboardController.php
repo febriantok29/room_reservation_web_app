@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Helpers\TimezoneHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Facility;
 use App\Models\Reservation;
 use App\Models\Room;
+use App\Models\RoomComplaint;
 use App\Models\User;
 use App\Services\ImageService;
 use App\Services\ReservationService;
 use App\Support\WebMessages;
-use App\Helpers\TimezoneHelper;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -37,11 +39,27 @@ class AdminDashboardController extends Controller
     {
         $this->ensureAdminAccess($request);
 
+        $today = Carbon::today();
+        $allRooms = Room::query()->whereNull('deleted_at')->get(['id', 'name', 'floor', 'is_maintenance']);
+
         $summary = [
-            'total_rooms' => Room::query()->whereNull('deleted_at')->count(),
-            'total_users' => User::query()->whereNull('deleted_at')->count(),
-            'pending_reservations' => Reservation::query()->pending()->count(),
+            'total_rooms'           => $allRooms->count(),
+            'maintenance_rooms'     => $allRooms->where('is_maintenance', true)->count(),
+            'total_users'           => User::query()->whereNull('deleted_at')->count(),
+            'pending_reservations'  => Reservation::query()->pending()->count(),
             'approved_reservations' => Reservation::query()->approved()->count(),
+            'today_reservations'    => Reservation::query()
+                ->whereDate('start_time', $today)
+                ->whereIn('status', ['approved', 'pending'])
+                ->count(),
+            'open_complaints'       => RoomComplaint::query()
+                ->whereNull('deleted_at')
+                ->where('status', 'open')
+                ->count(),
+            'in_progress_complaints' => RoomComplaint::query()
+                ->whereNull('deleted_at')
+                ->where('status', 'in_progress')
+                ->count(),
         ];
 
         $latestReservations = Reservation::query()
@@ -50,9 +68,27 @@ class AdminDashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Room status grid: show maintenance state + whether booked today
+        $bookedRoomIds = Reservation::query()
+            ->whereDate('start_time', $today)
+            ->whereIn('status', ['approved', 'pending'])
+            ->pluck('room_id')
+            ->unique();
+
+        $roomStatuses = $allRooms->map(function ($room) use ($bookedRoomIds) {
+            return [
+                'id'           => $room->id,
+                'name'         => $room->name,
+                'floor'        => $room->floor,
+                'maintenance'  => (bool) $room->is_maintenance,
+                'booked_today' => $bookedRoomIds->contains($room->id),
+            ];
+        })->sortBy('floor')->values();
+
         return view('admin.dashboard', [
-            'summary' => $summary,
+            'summary'            => $summary,
             'latestReservations' => $latestReservations,
+            'roomStatuses'       => $roomStatuses,
         ]);
     }
 
@@ -122,11 +158,7 @@ class AdminDashboardController extends Controller
             'facility_ids' => 'nullable|array',
             'facility_ids.*' => 'nullable|string|exists:m_facilities,id',
             'is_maintenance' => 'nullable|boolean',
-            'image' => [
-                'nullable', 'file', 'image',
-                'mimes:' . implode(',', ImageService::ALLOWED_MIMES),
-                'max:' . (ImageService::SERVER_MAX_BYTES / 1024),
-            ],
+            'image' => ImageService::validationRules(),
         ]);
 
         $room = new Room();
@@ -142,9 +174,14 @@ class AdminDashboardController extends Controller
         $room->save();
 
         if ($request->hasFile('image')) {
-            $result = $this->imageService->upload($request->file('image'), 'rooms');
-            $room->image_path = $result['path'];
-            $room->save();
+            try {
+                $result = $this->imageService->upload($request->file('image'), 'rooms');
+                $room->image_path = $result['path'];
+                $room->save();
+            } catch (Throwable) {
+                // Image upload failed, but room was created
+                // Continue without image - admin can add later
+            }
         }
 
         $facilityIds = array_filter($validated['facility_ids'] ?? []);
@@ -184,11 +221,7 @@ class AdminDashboardController extends Controller
             'facility_ids' => 'nullable|array',
             'facility_ids.*' => 'nullable|string|exists:m_facilities,id',
             'is_maintenance' => 'nullable|boolean',
-            'image' => [
-                'nullable', 'file', 'image',
-                'mimes:' . implode(',', ImageService::ALLOWED_MIMES),
-                'max:' . (ImageService::SERVER_MAX_BYTES / 1024),
-            ],
+            'image' => ImageService::validationRules(),
         ]);
 
         $room->fill([
@@ -201,8 +234,16 @@ class AdminDashboardController extends Controller
         $room->updated_by = $request->user()->id;
 
         if ($request->hasFile('image')) {
-            $result = $this->imageService->upload($request->file('image'), 'rooms', $room->image_path);
-            $room->image_path = $result['path'];
+            try {
+                $result = $this->imageService->upload(
+                    $request->file('image'),
+                    'rooms',
+                    $room->image_path
+                );
+                $room->image_path = $result['path'];
+            } catch (Throwable) {
+                // Image upload failed, continue with other updates
+            }
         }
 
         $room->save();

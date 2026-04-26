@@ -1,0 +1,134 @@
+{
+    "name": "Report - Division Room Usage (Output 11)",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/reports/division-usage?format=json&date_from=2026-03-01&date_to=2026-03-31",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "reports",
+                "division-usage"
+            ],
+            "query": [
+                {
+                    "key": "format",
+                    "value": "json",
+                    "description": "Output format: json (default) | pdf | excel"
+                },
+                {
+                    "key": "date_from",
+                    "value": "2026-03-01",
+                    "description": "Optional. Start date (YYYY-MM-DD). Default: start of current month"
+                },
+                {
+                    "key": "date_to",
+                    "value": "2026-03-31",
+                    "description": "Optional. End date (YYYY-MM-DD). Default: today"
+                }
+            ]
+        },
+        "description": "**Output 11** — Division Room Usage Report (Rekapitulasi Pemakaian Ruangan per Divisi). Admin only. Shows total hours used, reservation counts, average hours, and room breakdown per division. Only includes `approved` and `completed` reservations."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - JSON format",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/division-usage?format=json&date_from=2026-03-01&date_to=2026-03-31",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "division-usage"
+                    ],
+                    "query": [
+                        {
+                            "key": "format",
+                            "value": "json"
+                        },
+                        {
+                            "key": "date_from",
+                            "value": "2026-03-01"
+                        },
+                        {
+                            "key": "date_to",
+                            "value": "2026-03-31"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Laporan pemakaian ruangan per divisi berhasil diambil\", \"data\": {\"summary\": {\"date_from\": \"2026-03-01\", \"date_to\": \"2026-03-31\", \"total_reservations\": 24, \"total_hours\": 72.5, \"total_visitors\": 186}, \"by_division\": [{\"division_id\": \"DIV-2026-01\", \"division_name\": \"Operasional\", \"division_code\": \"OPS\", \"reservation_count\": 12, \"total_hours\": 36.0, \"avg_hours\": 3.0, \"total_visitors\": 95, \"rooms_used\": [\"Ruang Rapat Utama\", \"Ruang Konferensi A\"], \"room_breakdown\": [{\"room_name\": \"Ruang Rapat Utama\", \"floor\": 1, \"count\": 8, \"hours\": 24.0, \"visitors\": 64}, {\"room_name\": \"Ruang Konferensi A\", \"floor\": 2, \"count\": 4, \"hours\": 12.0, \"visitors\": 31}]}, {\"division_id\": \"DIV-2026-02\", \"division_name\": \"Keuangan\", \"division_code\": \"KNP\", \"reservation_count\": 8, \"total_hours\": 24.5, \"avg_hours\": 3.1, \"total_visitors\": 62, \"rooms_used\": [\"Ruang Rapat B\"], \"room_breakdown\": [{\"room_name\": \"Ruang Rapat B\", \"floor\": 1, \"count\": 8, \"hours\": 24.5, \"visitors\": 62}]}]}}"
+        },
+        {
+            "name": "Example ❌ 403 Forbidden - Bukan admin",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/division-usage?format=json",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "division-usage"
+                    ],
+                    "query": [
+                        {
+                            "key": "format",
+                            "value": "json"
+                        }
+                    ]
+                }
+            },
+            "status": "Forbidden",
+            "code": 403,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"FORBIDDEN\", \"message\": \"Anda tidak memiliki akses ke resource ini\"}"
+        }
+    ]
+}

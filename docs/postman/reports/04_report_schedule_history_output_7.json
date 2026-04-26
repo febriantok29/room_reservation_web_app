@@ -1,0 +1,153 @@
+{
+    "name": "Report - Schedule History (Output 7)",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/reports/schedule-history?format=json&date_from=2026-03-01&date_to=2026-03-31",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "reports",
+                "schedule-history"
+            ],
+            "query": [
+                {
+                    "key": "format",
+                    "value": "json",
+                    "description": "Output format: json (default) | pdf | excel"
+                },
+                {
+                    "key": "date_from",
+                    "value": "2026-03-01",
+                    "description": "Optional. Start date (YYYY-MM-DD). Default: start of current month"
+                },
+                {
+                    "key": "date_to",
+                    "value": "2026-03-31",
+                    "description": "Optional. End date (YYYY-MM-DD). Default: today"
+                },
+                {
+                    "key": "status",
+                    "value": "",
+                    "description": "Optional. Filter: pending | approved | rejected | completed | cancelled",
+                    "disabled": true
+                },
+                {
+                    "key": "room_id",
+                    "value": "",
+                    "description": "Optional. Filter by room ID",
+                    "disabled": true
+                }
+            ]
+        },
+        "description": "**Output 7** — Reservation Schedule & History Report. Admin sees all; regular user only sees their own."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - JSON format",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/schedule-history?format=json&date_from=2026-03-01&date_to=2026-03-31",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "schedule-history"
+                    ],
+                    "query": [
+                        {
+                            "key": "format",
+                            "value": "json",
+                            "description": "Output format: json (default) | pdf | excel"
+                        },
+                        {
+                            "key": "date_from",
+                            "value": "2026-03-01",
+                            "description": "Optional. Start date (YYYY-MM-DD). Default: start of current month"
+                        },
+                        {
+                            "key": "date_to",
+                            "value": "2026-03-31",
+                            "description": "Optional. End date (YYYY-MM-DD). Default: today"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Laporan jadwal & histori reservasi berhasil diambil\", \"data\": {\"summary\": {\"date_from\": \"2026-03-01\", \"date_to\": \"2026-03-31\", \"total\": 42, \"pending\": 3, \"approved\": 5, \"completed\": 30, \"rejected\": 2, \"cancelled\": 2}, \"reservations\": []}}"
+        },
+        {
+            "name": "Example ❌ 422 Validation Error - date_to sebelum date_from",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/schedule-history?date_from=2026-03-31&date_to=2026-03-01",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "schedule-history"
+                    ],
+                    "query": [
+                        {
+                            "key": "date_from",
+                            "value": "2026-03-31"
+                        },
+                        {
+                            "key": "date_to",
+                            "value": "2026-03-01"
+                        }
+                    ]
+                }
+            },
+            "status": "Unprocessable Entity",
+            "code": 422,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"VALIDATION_ERROR\", \"message\": \"Data yang dikirim tidak valid\", \"errors\": {\"date_to\": [\"The date to field must be a date after or equal to date from.\"]}}"
+        }
+    ]
+}

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
+use App\Models\FcmToken;
 use App\Models\User;
 use App\Services\JwtService;
 use App\Support\ApiErrorCodes;
@@ -35,6 +36,7 @@ class AuthController extends Controller
             'email' => 'nullable|email|max:100',
             'employee_id' => 'nullable|string|max:20',
             'password' => 'required|string|min:6',
+            'fcm_token' => 'nullable|string|max:512',
             'is_debug' => 'nullable|boolean',
             'access_token_ttl' => 'nullable|integer|min:1',
             'refresh_token_ttl' => 'nullable|integer|min:1',
@@ -79,6 +81,11 @@ class AuthController extends Controller
             $accessTokenTtl,
             $refreshTokenTtl
         );
+
+        // Register FCM token for this device if provided
+        if ($fcmToken = $request->input('fcm_token')) {
+            FcmToken::register($user->id, $fcmToken);
+        }
 
         return ApiResponse::success(
             $tokens,
@@ -126,15 +133,25 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout user (client-side should delete tokens)
+     * Logout user. Optionally removes the FCM token for this device so
+     * no further push notifications are sent to it.
      *
      * @param Request $request
      * @return JsonResponse
      */
     public function logout(Request $request): JsonResponse
     {
-        // In stateless JWT implementation, logout is handled client-side by deleting tokens
-        // This endpoint is just for confirmation/logging purposes
+        $validator = Validator::make($request->all(), [
+            'fcm_token' => 'nullable|string|max:512',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator->errors()->toArray());
+        }
+
+        if ($fcmToken = $request->input('fcm_token')) {
+            FcmToken::revoke($fcmToken);
+        }
 
         return ApiResponse::success(
             null,
@@ -169,5 +186,27 @@ class AuthController extends Controller
             ApiMessages::AUTH_ME_SUCCESS,
             200
         );
+    }
+
+    /**
+     * Register or refresh the FCM device token for the authenticated user.
+     * Call this whenever Firebase SDK provides a new token (onTokenRefresh).
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function updateFcmToken(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'fcm_token' => 'required|string|max:512',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator->errors()->toArray());
+        }
+
+        FcmToken::register($request->user()->id, $request->input('fcm_token'));
+
+        return ApiResponse::success(null, 'FCM token updated successfully.', 200);
     }
 }

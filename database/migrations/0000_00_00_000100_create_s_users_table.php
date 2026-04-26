@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('id', 36)->primary()->comment('UUIDv7 generated in code');
 
             // User Information
-            $table->string('employee_id', 20)->unique()->comment('Employee ID (EMP-YYYY-#####)');
+            $table->string('employee_id', 25)->unique()->comment('Employee ID (DIV_CODE-YYYY-NNNNN or ADM-YYYY-NN)');
+            $table->string('division_id', 10)->nullable()->comment('FK to m_divisions.id');
             $table->string('email', 100)->unique()->comment('Email address');
             $table->string('password')->comment('Hashed password');
             $table->string('first_name', 50)->comment('First name');
@@ -33,8 +34,12 @@ return new class extends Migration
             $table->timestamp('deleted_at')->nullable();
             $table->string('deleted_by', 36)->nullable();
 
+            // Foreign keys
+            $table->foreign('division_id')->references('id')->on('m_divisions')->onDelete('set null');
+
             // Indexes for performance
             $table->index('employee_id');
+            $table->index('division_id');
             $table->index('email');
             $table->index('is_admin');
             $table->index('is_active');

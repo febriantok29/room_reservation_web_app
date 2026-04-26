@@ -104,14 +104,8 @@ class AdminComplaintController extends Controller
             'facility_id'    => 'nullable|string|exists:m_facilities,id',
             'title'          => 'required|string|max:200',
             'description'    => 'required|string|max:2000',
-            'photo'          => [
-                'nullable',
-                'file',
-                'image',
-                'mimes:' . implode(',', ImageService::ALLOWED_MIMES),
-                'max:'   . (ImageService::SERVER_MAX_BYTES / 1024),
-            ],
-        ], [
+            'photo'          => ImageService::validationRules(),
+        ], array_merge([
             'reservation_id.required' => 'Reservasi wajib dipilih.',
             'reservation_id.exists'   => 'Reservasi tidak ditemukan.',
             'facility_id.exists'      => 'Fasilitas tidak ditemukan.',
@@ -119,10 +113,7 @@ class AdminComplaintController extends Controller
             'title.max'               => 'Judul komplain maksimal 200 karakter.',
             'description.required'    => 'Deskripsi komplain wajib diisi.',
             'description.max'         => 'Deskripsi maksimal 2.000 karakter.',
-            'photo.image'             => 'File harus berupa gambar.',
-            'photo.mimes'             => 'Format foto harus jpg, jpeg, png, atau webp.',
-            'photo.max'               => 'Ukuran foto maksimal 10 MB.',
-        ]);
+        ], ImageService::validationMessages('photo')));
 
         $reservation = Reservation::query()
             ->where('id', $validated['reservation_id'])

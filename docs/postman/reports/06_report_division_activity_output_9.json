@@ -1,0 +1,137 @@
+{
+    "name": "Report - Division Activity (Output 9)",
+    "request": {
+        "method": "GET",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "url": {
+            "raw": "{{base_url}}/api/v1/reports/division-activity?format=json&date_from=2026-03-01&date_to=2026-03-31",
+            "host": [
+                "{{base_url}}"
+            ],
+            "path": [
+                "api",
+                "v1",
+                "reports",
+                "division-activity"
+            ],
+            "query": [
+                {
+                    "key": "format",
+                    "value": "json",
+                    "description": "Output format: json (default) | pdf | excel"
+                },
+                {
+                    "key": "date_from",
+                    "value": "2026-03-01",
+                    "description": "Optional. Start date (YYYY-MM-DD). Default: start of current month"
+                },
+                {
+                    "key": "date_to",
+                    "value": "2026-03-31",
+                    "description": "Optional. End date (YYYY-MM-DD). Default: today"
+                }
+            ]
+        },
+        "description": "**Output 9** — Reservation Activity per Division. Admin only. Groups reservations by user's division with status counts and visitor totals."
+    },
+    "response": [
+        {
+            "name": "Example ✅ 200 OK - JSON format",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/division-activity?format=json&date_from=2026-03-01&date_to=2026-03-31",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "division-activity"
+                    ],
+                    "query": [
+                        {
+                            "key": "format",
+                            "value": "json",
+                            "description": "Output format: json (default) | pdf | excel"
+                        },
+                        {
+                            "key": "date_from",
+                            "value": "2026-03-01",
+                            "description": "Optional. Start date (YYYY-MM-DD). Default: start of current month"
+                        },
+                        {
+                            "key": "date_to",
+                            "value": "2026-03-31",
+                            "description": "Optional. End date (YYYY-MM-DD). Default: today"
+                        }
+                    ]
+                }
+            },
+            "status": "OK",
+            "code": 200,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": true, \"message\": \"Laporan aktivitas per divisi berhasil diambil\", \"data\": {\"summary\": {\"date_from\": \"2026-03-01\", \"date_to\": \"2026-03-31\", \"total_reservations\": 42, \"total_visitors\": 380}, \"by_division\": [{\"division_id\": \"DIV-001\", \"division_name\": \"Divisi Teknologi Informasi\", \"division_code\": \"TI\", \"total\": 15, \"approved\": 2, \"completed\": 11, \"rejected\": 1, \"cancelled\": 1, \"pending\": 0, \"visitors\": 130}], \"reservations\": []}}"
+        },
+        {
+            "name": "Example ❌ 403 Forbidden - Bukan admin",
+            "originalRequest": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{access_token}}"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/v1/reports/division-activity?format=json",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "v1",
+                        "reports",
+                        "division-activity"
+                    ],
+                    "query": [
+                        {
+                            "key": "format",
+                            "value": "json"
+                        }
+                    ]
+                }
+            },
+            "status": "Forbidden",
+            "code": 403,
+            "_postman_previewlanguage": "json",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json; charset=utf-8"
+                }
+            ],
+            "cookie": [],
+            "body": "{\"success\": false, \"error_code\": \"FORBIDDEN\", \"message\": \"Anda tidak memiliki akses ke resource ini\"}"
+        }
+    ]
+}
