@@ -172,17 +172,19 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-2 mb-3">
-                                <div class="custom-control custom-checkbox mb-2">
+                            <div class="col-md-3 mb-3">
+                                <div class="custom-control custom-checkbox">
                                     <input type="checkbox" class="custom-control-input" id="create_with_snack"
                                         name="with_snack" value="1">
-                                    <label class="custom-control-label" for="create_with_snack">Snack</label>
+                                    <label class="custom-control-label" for="create_with_snack">Dengan Snack</label>
                                 </div>
                             </div>
-                            <div class="col-md-2 mb-3">
-                                <input type="checkbox" class="custom-control-input" id="create_with_lunch"
-                                    name="with_lunch" value="1">
-                                <label class="custom-control-label" for="create_with_lunch">Makan Siang</label>
+                            <div class="col-md-3 mb-3">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="create_with_lunch"
+                                        name="with_lunch" value="1">
+                                    <label class="custom-control-label" for="create_with_lunch">Dengan Makan Siang</label>
+                                </div>
                             </div>
                         </div>
 
@@ -207,7 +209,7 @@
 @stop
 
 @push('css')
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.css" rel="stylesheet">
     <style>
         /* FullCalendar custom styles */
         #calendar {
@@ -278,7 +280,7 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/locales/id.global.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        $(function() {
             const calendarEl = document.getElementById('calendar');
             const eventModal = $('#eventModal');
             const eventModalBody = $('#eventModalBody');
@@ -369,11 +371,11 @@
                         ${props.visitor_count} orang
                     </div>
                     ${props.purpose ? `
-                                                                        <div class="mb-2">
-                                                                            <strong><i class="fas fa-clipboard-list"></i> Keperluan:</strong><br>
-                                                                            ${props.purpose}
-                                                                        </div>
-                                                                        ` : ''}
+                                                                                        <div class="mb-2">
+                                                                                            <strong><i class="fas fa-clipboard-list"></i> Keperluan:</strong><br>
+                                                                                            ${props.purpose}
+                                                                                        </div>
+                                                                                        ` : ''}
                 `;
 
                     eventModalBody.html(html);

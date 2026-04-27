@@ -677,14 +677,16 @@ class AdminDashboardController extends Controller
         $query = Reservation::query()
             ->with(['room', 'user']);
 
-        // Filter by date range
+        // Filter by date range (wrapped in closure to avoid OR precedence issues)
         if ($start && $end) {
-            $query->whereBetween('start_time', [$start, $end])
-                ->orWhereBetween('end_time', [$start, $end])
-                ->orWhere(function ($q) use ($start, $end) {
-                    $q->where('start_time', '<=', $start)
-                      ->where('end_time', '>=', $end);
-                });
+            $query->where(function ($q) use ($start, $end) {
+                $q->whereBetween('start_time', [$start, $end])
+                  ->orWhereBetween('end_time', [$start, $end])
+                  ->orWhere(function ($subQ) use ($start, $end) {
+                      $subQ->where('start_time', '<=', $start)
+                           ->where('end_time', '>=', $end);
+                  });
+            });
         }
 
         // Filter by room
@@ -693,9 +695,12 @@ class AdminDashboardController extends Controller
         }
 
         // Filter by status
-        if ($statusFilter) {
+        if ($statusFilter && $statusFilter !== '') {
             $statuses = explode(',', $statusFilter);
-            $query->whereIn('status', $statuses);
+            $statuses = array_filter($statuses); // Remove empty values
+            if (count($statuses) > 0) {
+                $query->whereIn('status', $statuses);
+            }
         }
 
         $reservations = $query->get();
