@@ -293,47 +293,24 @@ class AdminDashboardController extends Controller
         // and pending reservations that have passed their start_time become 'cancelled'
         $this->reservationService->autoTransition();
 
-        $searchQuery = trim((string) $request->query('q', ''));
-        $statusFilter = strtolower(trim((string) $request->query('status', '')));
-        $allowedStatuses = ['pending', 'approved', 'rejected', 'completed', 'cancelled'];
-        if (!in_array($statusFilter, $allowedStatuses, true)) {
-            $statusFilter = '';
-        }
+        // Get all rooms for filter dropdown and form
+        $rooms = Room::query()
+            ->whereNull('deleted_at')
+            ->orderBy('floor')
+            ->orderBy('name')
+            ->get(['id', 'name', 'floor', 'capacity']);
 
-        $reservationsQuery = Reservation::query()
-            ->with(['room', 'user']);
-
-        if ($searchQuery !== '') {
-            $reservationsQuery->where(function ($query) use ($searchQuery) {
-                $query->where('id', 'like', "%{$searchQuery}%")
-                    ->orWhere('purpose', 'like', "%{$searchQuery}%")
-                    ->orWhereHas('room', function ($roomQuery) use ($searchQuery) {
-                        $roomQuery->where('name', 'like', "%{$searchQuery}%")
-                                ->orWhereRaw('CAST(floor AS CHAR) LIKE ?', ["%{$searchQuery}%"]);
-                    })
-                    ->orWhereHas('user', function ($userQuery) use ($searchQuery) {
-                        $userQuery->where('first_name', 'like', "%{$searchQuery}%")
-                            ->orWhere('last_name', 'like', "%{$searchQuery}%")
-                            ->orWhereRaw("TRIM(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, ''))) LIKE ?", ["%{$searchQuery}%"])
-                            ->orWhere('employee_id', 'like', "%{$searchQuery}%")
-                            ->orWhere('email', 'like', "%{$searchQuery}%");
-                    });
-            });
-        }
-
-        if ($statusFilter !== '') {
-            $reservationsQuery->where('status', $statusFilter);
-        }
-
-        $reservations = $reservationsQuery
-            ->orderByDesc('start_time')
-            ->paginate(10)
-            ->withQueryString();
+        // Get all users for dropdown
+        $users = User::query()
+            ->whereNull('deleted_at')
+            ->where('is_active', true)
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get(['id', 'first_name', 'last_name', 'employee_id']);
 
         return view('admin.reservations.index', [
-            'reservations' => $reservations,
-            'searchQuery' => $searchQuery,
-            'statusFilter' => $statusFilter,
+            'rooms' => $rooms,
+            'users' => $users,
         ]);
     }
 
@@ -371,7 +348,7 @@ class AdminDashboardController extends Controller
         ]);
     }
 
-    public function storeReservation(Request $request): RedirectResponse
+    public function storeReservation(Request $request)
     {
         $this->ensureAdminAccess($request);
 
@@ -392,10 +369,16 @@ class AdminDashboardController extends Controller
         [$startTime, $endTime] = $this->buildReservationDateTimes($validated['reservation_date'], $validated['start_clock'], $validated['end_clock']);
 
         if ($startTime->gte($endTime)) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => WebMessages::RESERVATION_END_AFTER_START, 'errors' => ['end_clock' => [WebMessages::RESERVATION_END_AFTER_START]]], 422);
+            }
             return back()->withErrors(['end_clock' => WebMessages::RESERVATION_END_AFTER_START])->withInput();
         }
 
         if ($startTime->lte(now())) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => WebMessages::RESERVATION_START_AFTER_NOW, 'errors' => ['start_clock' => [WebMessages::RESERVATION_START_AFTER_NOW]]], 422);
+            }
             return back()->withErrors(['start_clock' => WebMessages::RESERVATION_START_AFTER_NOW])->withInput();
         }
 
@@ -410,13 +393,23 @@ class AdminDashboardController extends Controller
             ]);
 
             if (!$result['success']) {
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => $result['message'], 'errors' => $this->formatReservationServiceErrors($result)], 422);
+                }
                 return back()->withErrors($this->formatReservationServiceErrors($result))->withInput();
+            }
+
+            if ($request->expectsJson()) {
+                return response()->json(['success' => true, 'message' => WebMessages::RESERVATION_CREATED_SUCCESS, 'reservation' => $result['reservation'] ?? null]);
             }
 
             return redirect()
                 ->route('admin.reservations')
                 ->with('success', WebMessages::RESERVATION_CREATED_SUCCESS);
         } catch (Throwable $exception) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => WebMessages::RESERVATION_STORE_FAILED], 500);
+            }
             return back()->withErrors(['reservation' => WebMessages::RESERVATION_STORE_FAILED])->withInput();
         }
     }
@@ -666,5 +659,136 @@ class AdminDashboardController extends Controller
         session(['user_timezone' => $request->input('timezone')]);
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Get reservations as calendar events (JSON for FullCalendar)
+     */
+    public function getCalendarEvents(Request $request)
+    {
+        $this->ensureAdminAccess($request);
+        $this->reservationService->autoTransition();
+
+        $start = $request->query('start');
+        $end = $request->query('end');
+        $roomFilter = $request->query('room_id');
+        $statusFilter = $request->query('status');
+
+        $query = Reservation::query()
+            ->with(['room', 'user']);
+
+        // Filter by date range
+        if ($start && $end) {
+            $query->whereBetween('start_time', [$start, $end])
+                ->orWhereBetween('end_time', [$start, $end])
+                ->orWhere(function ($q) use ($start, $end) {
+                    $q->where('start_time', '<=', $start)
+                      ->where('end_time', '>=', $end);
+                });
+        }
+
+        // Filter by room
+        if ($roomFilter) {
+            $query->where('room_id', $roomFilter);
+        }
+
+        // Filter by status
+        if ($statusFilter) {
+            $statuses = explode(',', $statusFilter);
+            $query->whereIn('status', $statuses);
+        }
+
+        $reservations = $query->get();
+
+        $events = $reservations->map(function ($reservation) {
+            // Color based on status
+            $color = match ($reservation->status) {
+                'pending' => '#ffc107',
+                'approved' => '#28a745',
+                'rejected' => '#dc3545',
+                'completed' => '#007bff',
+                'cancelled' => '#6c757d',
+                default => '#6c757d',
+            };
+
+            return [
+                'id' => $reservation->id,
+                'title' => $reservation->room?->name . ' - ' . ($reservation->user?->full_name ?? '-'),
+                'start' => $reservation->start_time->toIso8601String(),
+                'end' => $reservation->end_time->toIso8601String(),
+                'backgroundColor' => $color,
+                'borderColor' => $color,
+                'textColor' => '#ffffff',
+                'extendedProps' => [
+                    'reservation_id' => $reservation->id,
+                    'room_id' => $reservation->room_id,
+                    'room_name' => $reservation->room?->name,
+                    'user_name' => $reservation->user?->full_name,
+                    'purpose' => $reservation->purpose,
+                    'status' => $reservation->status,
+                    'visitor_count' => $reservation->visitor_count,
+                ],
+            ];
+        });
+
+        return response()->json($events);
+    }
+
+    /**
+     * Update reservation time via drag & drop (JSON response)
+     */
+    public function updateReservationTime(Request $request, Reservation $reservation)
+    {
+        $this->ensureAdminAccess($request);
+
+        $validated = $request->validate([
+            'start_time' => 'required|date',
+            'end_time' => 'required|date',
+        ]);
+
+        $startTime = Carbon::parse($validated['start_time']);
+        $endTime = Carbon::parse($validated['end_time']);
+
+        if ($startTime->gte($endTime)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Waktu selesai harus setelah waktu mulai',
+            ], 400);
+        }
+
+        if ($startTime->lte(now())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Waktu mulai harus di masa depan',
+            ], 400);
+        }
+
+        try {
+            $result = $this->reservationService->update($request->user(), $reservation, [
+                'user_id' => $reservation->user_id,
+                'room_id' => $reservation->room_id,
+                'start_time' => $startTime->format('Y-m-d H:i:s'),
+                'end_time' => $endTime->format('Y-m-d H:i:s'),
+                'purpose' => $reservation->purpose,
+                'visitor_count' => $reservation->visitor_count,
+            ]);
+
+            if (!$result['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $result['message'],
+                ], 400);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Jadwal reservasi berhasil diperbarui',
+            ]);
+        } catch (Throwable $exception) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memperbarui jadwal reservasi',
+            ], 500);
+        }
     }
 }
