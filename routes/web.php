@@ -63,6 +63,10 @@ Route::prefix('admin')->group(function () {
         Route::delete('/reservations/{reservation}', [AdminDashboardController::class, 'destroyReservation'])->name('admin.reservations.destroy');
         Route::post('/reservations/{reservation}/complete', [AdminDashboardController::class, 'completeReservation'])->name('admin.reservations.complete');
 
+        // Calendar endpoints
+        Route::get('/reservations/calendar/events', [AdminDashboardController::class, 'getCalendarEvents'])->name('admin.reservations.calendar.events');
+        Route::patch('/reservations/{reservation}/time', [AdminDashboardController::class, 'updateReservationTime'])->name('admin.reservations.update-time');
+
         // User timezone
         Route::post('/set-timezone', [AdminDashboardController::class, 'setUserTimezone'])->name('admin.set-timezone');
 
