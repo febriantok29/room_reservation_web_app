@@ -14,6 +14,7 @@ use App\Support\ApiMessages;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ReservationService
 {
@@ -71,12 +72,36 @@ class ReservationService
             );
 
             if (!$constraint['valid']) {
+                // Log constraint errors for debugging
+                Log::warning('Reservation constraint validation failed', [
+                    'room_id' => $roomId,
+                    'start_time' => $startTime,
+                    'end_time' => $endTime,
+                    'visitor_count' => $visitorCount,
+                    'constraint_errors' => $constraint['errors'] ?? []
+                ]);
+
+                // Format errors as flat array for better frontend display
+                $errorMessages = [];
+                if (isset($constraint['errors']) && is_array($constraint['errors'])) {
+                    foreach ($constraint['errors'] as $error) {
+                        $errorMessages[] = $error;
+                    }
+                }
+
+                // Use first constraint error as main message, or fallback to generic message
+                $mainMessage = !empty($errorMessages)
+                    ? $errorMessages[0]
+                    : ApiMessages::RESERVATION_CONSTRAINT_CREATE_FAILED;
+
                 return [
                     'success' => false,
                     'status_code' => 422,
                     'error_code' => ApiErrorCodes::RESERVATION_CONSTRAINT_FAILED,
-                    'message' => ApiMessages::RESERVATION_CONSTRAINT_CREATE_FAILED,
-                    'errors' => ['constraints' => $constraint['errors']],
+                    'message' => $mainMessage,
+                    'errors' => [
+                        'reservation' => $errorMessages ?: ['Reservasi tidak valid']
+                    ],
                 ];
             }
 
@@ -87,6 +112,8 @@ class ReservationService
                 'end_time' => $endTime,
                 'purpose' => $payload['purpose'] ?? null,
                 'visitor_count' => $visitorCount,
+                'with_snack' => $payload['with_snack'] ?? false,
+                'with_lunch' => $payload['with_lunch'] ?? false,
                 'status' => 'pending',
                 'created_by' => $actor->id,
                 'updated_by' => $actor->id,
