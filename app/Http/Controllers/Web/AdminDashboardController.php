@@ -361,6 +361,8 @@ class AdminDashboardController extends Controller
                 'end_clock' => 'required|date_format:H:i',
                 'purpose' => 'nullable|string|max:1000',
                 'visitor_count' => 'required|integer|min:1|max:1000',
+                'with_snack' => 'nullable|in:0,1',
+                'with_lunch' => 'nullable|in:0,1',
             ],
             $this->reservationValidationMessages(),
             $this->reservationValidationAttributes()
@@ -390,6 +392,8 @@ class AdminDashboardController extends Controller
                 'end_time' => $endTime->format('Y-m-d H:i:s'),
                 'purpose' => $validated['purpose'] ?? null,
                 'visitor_count' => (int) $validated['visitor_count'],
+                'with_snack' => (bool) ($validated['with_snack'] ?? false),
+                'with_lunch' => (bool) ($validated['with_lunch'] ?? false),
             ]);
 
             if (!$result['success']) {
