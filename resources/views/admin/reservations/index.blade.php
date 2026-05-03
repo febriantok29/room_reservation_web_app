@@ -371,11 +371,11 @@
                         ${props.visitor_count} orang
                     </div>
                     ${props.purpose ? `
-                                                                                        <div class="mb-2">
-                                                                                            <strong><i class="fas fa-clipboard-list"></i> Keperluan:</strong><br>
-                                                                                            ${props.purpose}
-                                                                                        </div>
-                                                                                        ` : ''}
+                                                                                                <div class="mb-2">
+                                                                                                    <strong><i class="fas fa-clipboard-list"></i> Keperluan:</strong><br>
+                                                                                                    ${props.purpose}
+                                                                                                </div>
+                                                                                                ` : ''}
                 `;
 
                     eventModalBody.html(html);
@@ -525,6 +525,9 @@
                     '<i class="fas fa-spinner fa-spin mr-1"></i>Menyimpan...');
                 createFormErrors.addClass('d-none').html('');
 
+                const formData = $(this).serialize();
+                console.log('Submitting reservation:', formData);
+
                 $.ajax({
                     url: '{{ route('admin.reservations.store') }}',
                     type: 'POST',
@@ -532,8 +535,10 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                         'Accept': 'application/json'
                     },
-                    data: $(this).serialize(),
+                    data: formData,
                     success: function(response) {
+                        console.log('Success response:', response);
+
                         // Close modal
                         $('#createModal').modal('hide');
 
@@ -547,19 +552,29 @@
                         $('#createReservationForm')[0].reset();
                     },
                     error: function(xhr) {
+                        console.error('Error response:', xhr.status, xhr.responseJSON);
+
                         // Show error messages
-                        const errors = xhr.responseJSON?.errors || {};
+                        const responseData = xhr.responseJSON || {};
+                        const errors = responseData.errors || {};
                         let errorHtml =
                             '<strong>Terjadi kesalahan:</strong><ul class="mb-0 pl-3">';
 
-                        if (Object.keys(errors).length > 0) {
+                        // Check if errors is an object with properties
+                        if (typeof errors === 'object' && errors !== null && !Array.isArray(
+                                errors) && Object.keys(errors).length > 0) {
                             $.each(errors, function(field, messages) {
-                                $.each(messages, function(index, message) {
-                                    errorHtml += '<li>' + message + '</li>';
-                                });
+                                if (Array.isArray(messages)) {
+                                    $.each(messages, function(index, message) {
+                                        errorHtml += '<li>' + message + '</li>';
+                                    });
+                                } else {
+                                    errorHtml += '<li>' + messages + '</li>';
+                                }
                             });
                         } else {
-                            errorHtml += '<li>' + (xhr.responseJSON?.message ||
+                            // Fallback to main message
+                            errorHtml += '<li>' + (responseData.message ||
                                 'Gagal membuat reservasi') + '</li>';
                         }
 
@@ -567,6 +582,7 @@
                         createFormErrors.removeClass('d-none').html(errorHtml);
                     },
                     complete: function() {
+                        console.log('Request completed');
                         // Re-enable button
                         submitBtn.prop('disabled', false).html(originalText);
                     }
