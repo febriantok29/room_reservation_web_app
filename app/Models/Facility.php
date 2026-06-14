@@ -78,8 +78,16 @@ class Facility extends Model
     public static function normalizeNames(array $names): array
     {
         return collect($names)
-            ->map(fn ($name) => str_replace(['_', '-'], ' ', (string) $name))
-            ->map(fn (string $name) => Str::of($name)->squish()->lower()->toString())
+            ->map(function ($name) {
+                $name = (string) $name;
+                // If it's a UUID, keep it as is
+                if (Str::isUuid($name)) {
+                    return $name;
+                }
+                // Otherwise, normalize spaces and separators
+                return str_replace(['_', '-'], ' ', $name);
+            })
+            ->map(fn (string $name) => Str::isUuid($name) ? $name : Str::of($name)->squish()->lower()->toString())
             ->filter(fn (string $name) => $name !== '')
             ->unique()
             ->values()
@@ -106,9 +114,18 @@ class Facility extends Model
     {
         $ids = [];
 
-        foreach (self::normalizeNames($inputs) as $normalizedName) {
-            $slug = Str::slug($normalizedName, '_');
+        foreach (self::normalizeNames($inputs) as $input) {
+            // 1. Check if it's an existing UUID
+            if (Str::isUuid($input)) {
+                $existing = self::query()->find($input);
+                if ($existing) {
+                    $ids[] = $existing->id;
+                    continue;
+                }
+            }
 
+            // 2. Otherwise treat as name/slug
+            $slug = Str::slug($input, '_');
             if ($slug === '') {
                 continue;
             }
@@ -117,7 +134,7 @@ class Facility extends Model
                 ['slug' => $slug],
                 [
                     'id' => (string) Str::uuid7(),
-                    'name' => Str::of($normalizedName)->title()->toString(),
+                    'name' => Str::of($input)->title()->toString(),
                 ]
             );
 
