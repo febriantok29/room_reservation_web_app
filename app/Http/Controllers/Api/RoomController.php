@@ -41,6 +41,7 @@ class RoomController extends Controller
             'start_time' => $request->input('start_time'),
             'end_time' => $request->input('end_time'),
             'per_page' => $request->input('per_page'),
+            'search'    => $request->input('search'),
         ], [
             'floor' => 'nullable|integer|min:1|max:99',
             'min_capacity' => 'nullable|integer|min:1',
@@ -49,6 +50,7 @@ class RoomController extends Controller
             'start_time' => 'nullable|date',
             'end_time' => 'nullable|required_with:start_time|date|after:start_time',
             'per_page' => 'nullable|integer|min:1|max:100',
+            'search' => 'nullable|string|max:100',
         ]);
 
         if ($validator->fails()) {
@@ -58,6 +60,13 @@ class RoomController extends Controller
         $query = Room::query()
             ->with('facilities:id,name,slug')
             ->whereNull('deleted_at');
+
+        if ($request->filled('search')) {
+            $keyword = trim((string) $request->input('search'));
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', "%{$keyword}%");
+            });
+        }
 
         if ($request->filled('floor')) {
             $query->byFloor((int) $request->input('floor'));

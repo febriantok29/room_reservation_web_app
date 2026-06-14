@@ -104,8 +104,13 @@ class ReservationController extends Controller
         }
 
         // Only admins may specify a different user_id
-        if ($request->filled('user_id') && !$request->user()?->isAdmin()) {
-            return ApiResponse::forbidden();
+        if ($request->filled('user_id')) {
+            $requestedUserId = $request->input('user_id');
+            $currentUserId = $request->user()?->id;
+
+            if ($requestedUserId !== $currentUserId && !$request->user()?->isAdmin()) {
+                return ApiResponse::forbidden();
+            }
         }
 
         $result = $this->reservationService->create($request->user(), $validator->validated());

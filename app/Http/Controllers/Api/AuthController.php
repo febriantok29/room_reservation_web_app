@@ -82,6 +82,16 @@ class AuthController extends Controller
             $refreshTokenTtl
         );
 
+        // Add user info to response so frontend can use it as alternative auth
+        $tokens['user'] = [
+            'id' => $user->id,
+            'name' => $user->full_name,
+            'email' => $user->email,
+            'employee_id' => $user->employee_id,
+            'is_admin' => $user->is_admin,
+            'is_active' => $user->is_active,
+        ];
+
         // Register FCM token for this device if provided
         if ($fcmToken = $request->input('fcm_token')) {
             FcmToken::register($user->id, $fcmToken);
