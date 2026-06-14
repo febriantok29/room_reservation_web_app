@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     Route::post('/auth/login', [AuthController::class, 'login']);
     Route::post('/auth/refresh', [AuthController::class, 'refresh']);
+
+    Route::get('/facilities', [FacilityController::class, 'index']);
+    Route::get('/facilities/{id}', [FacilityController::class, 'show']);
 });
 
 // Protected routes (authentication required)
@@ -37,9 +40,7 @@ Route::prefix('v1')->middleware('jwt')->group(function () {
     Route::delete('/rooms/{id}/image', [RoomController::class, 'destroyImage']);
 
     // Facility master endpoints
-    Route::get('/facilities', [FacilityController::class, 'index']);
     Route::post('/facilities', [FacilityController::class, 'store']);
-    Route::get('/facilities/{id}', [FacilityController::class, 'show']);
     Route::put('/facilities/{id}', [FacilityController::class, 'update']);
     Route::delete('/facilities/{id}', [FacilityController::class, 'destroy']);
 
