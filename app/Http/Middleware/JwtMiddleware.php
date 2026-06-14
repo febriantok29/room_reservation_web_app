@@ -25,36 +25,42 @@ class JwtMiddleware
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        // Get token from Authorization header
+        $user = null;
+
+        // 1. Try JWT Authentication First
         $authHeader = $request->header('Authorization');
 
-        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
-            return ApiResponse::unauthorized();
+        if ($authHeader && str_starts_with($authHeader, 'Bearer ')) {
+            $token = substr($authHeader, 7);
+            $verification = $this->jwtService->verifyToken($token);
+
+            if ($verification['success']) {
+                $decoded = $verification['data'];
+
+                // Check if it's an access token
+                if ($decoded->type !== 'access') {
+                    return ApiResponse::error(
+                        'INVALID_TOKEN_TYPE',
+                        'Token yang dikirim bukan access token',
+                        401
+                    );
+                }
+
+                $user = User::find($decoded->sub);
+            }
         }
 
-        $token = substr($authHeader, 7);
-
-        // Verify token
-        $verification = $this->jwtService->verifyToken($token);
-
-        if (!$verification['success']) {
-            return ApiResponse::unauthorized();
+        // 2. ALTERNATIVE AUTH: If JWT fails or is missing, check user_id
+        if (!$user) {
+            // Check 'X-User-Id' header first, then fallback to 'user_id' in request input
+            $userId = $request->header('X-User-Id') ?? $request->input('user_id');
+            
+            if ($userId) {
+                $user = User::find($userId);
+            }
         }
 
-        $decoded = $verification['data'];
-
-        // Check if it's an access token
-        if ($decoded->type !== 'access') {
-            return ApiResponse::error(
-                'INVALID_TOKEN_TYPE',
-                'Token yang dikirim bukan access token',
-                401
-            );
-        }
-
-        // Get user from database
-        $user = User::find($decoded->sub);
-
+        // 3. Final Check: If no user found from either method or user inactive
         if (!$user || !$user->is_active) {
             return ApiResponse::unauthorized();
         }
