@@ -296,7 +296,6 @@ class ReservationController extends Controller
             ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id'])
             ->where('start_time', '>=', $from)
             ->where('start_time', '<=', $to)
-            ->whereIn('status', ['pending', 'approved', 'completed'])
             ->orderBy('start_time')
             ->get();
 
@@ -304,10 +303,19 @@ class ReservationController extends Controller
         foreach ($reservations as $reservation) {
             $day = $reservation->start_time->toDateString();
             if (!isset($summary[$day])) {
-                $summary[$day] = ['total' => 0, 'pending' => 0, 'approved' => 0, 'completed' => 0];
+                $summary[$day] = [
+                    'total' => 0,
+                    'pending' => 0,
+                    'approved' => 0,
+                    'completed' => 0,
+                    'rejected' => 0,
+                    'cancelled' => 0,
+                ];
             }
             $summary[$day]['total']++;
-            $summary[$day][$reservation->status]++;
+            if (isset($summary[$day][$reservation->status])) {
+                $summary[$day][$reservation->status]++;
+            }
         }
 
         return ApiResponse::success([
