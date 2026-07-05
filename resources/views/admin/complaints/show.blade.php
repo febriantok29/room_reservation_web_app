@@ -196,7 +196,7 @@
                                 <small class="text-muted">Wajib diisi jika status Diselesaikan atau Ditolak.</small>
                             </div>
 
-                            <div class="form-group mb-2">
+                            <div id="checkbox-maintenance" class="form-group mb-2">
                                 <div class="custom-control custom-checkbox">
                                     <input type="checkbox" class="custom-control-input" id="set_maintenance"
                                         name="set_maintenance" value="1" {{ old('set_maintenance') ? 'checked' : '' }}>
@@ -206,6 +206,19 @@
                                 </div>
                                 <small class="text-muted ml-4">Aktifkan jika ruangan perlu dihentikan sementara dari pemesanan
                                     untuk perbaikan.</small>
+                            </div>
+
+                            <div id="checkbox-unset-maintenance" class="form-group mb-2" style="display:none;">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="unset_maintenance"
+                                        name="unset_maintenance" value="1"
+                                        {{ old('unset_maintenance') ? 'checked' : '' }}>
+                                    <label class="custom-control-label" for="unset_maintenance">
+                                        Tandai ruangan <strong>tidak Maintenance</strong>
+                                    </label>
+                                </div>
+                                <small class="text-muted ml-4">Centang jika ruangan sudah selesai diperbaiki dan siap digunakan
+                                    kembali.</small>
                             </div>
 
                             <button type="submit" class="btn btn-warning btn-block btn-sm">
@@ -232,3 +245,26 @@
 
     </div>
 @stop
+
+@push('js')
+    <script>
+        (function() {
+            const statusEl = document.getElementById('status');
+            const boxMaintenance = document.getElementById('checkbox-maintenance');
+            const boxUnset = document.getElementById('checkbox-unset-maintenance');
+
+            function toggle() {
+                const isResolved = statusEl.value === 'resolved';
+                boxMaintenance.style.display = isResolved ? 'none' : '';
+                boxUnset.style.display = isResolved ? '' : 'none';
+                if (!isResolved) document.getElementById('unset_maintenance').checked = false;
+                if (isResolved) document.getElementById('set_maintenance').checked = false;
+            }
+
+            if (statusEl) {
+                statusEl.addEventListener('change', toggle);
+                toggle();
+            }
+        })();
+    </script>
+@endpush
