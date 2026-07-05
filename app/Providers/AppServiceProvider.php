@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\RoomComplaint;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,7 +25,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrap();
 
-        // Explicit route model binding so {complaint} resolves to RoomComplaint
-        Route::model('complaint', RoomComplaint::class);
+        if (app()->runningInConsole() === false) {
+            URL::forceRootUrl(request()->getSchemeAndHttpHost());
+        }
     }
 }
