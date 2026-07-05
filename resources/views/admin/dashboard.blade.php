@@ -85,7 +85,7 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-4 col-sm-6 mb-2">
-            <a href="{{ route('admin.complaints') }}" class="text-decoration-none">
+            <a href="{{ route('admin.complaints') }}" class="text-decoration-none text-dark">
                 <div class="info-box shadow-none mb-0" style="border-left:4px solid #ffc107;">
                     <span class="info-box-icon bg-warning"><i class="fas fa-exclamation-circle"></i></span>
                     <div class="info-box-content">
@@ -96,9 +96,9 @@
             </a>
         </div>
         <div class="col-lg-3 col-md-4 col-sm-6 mb-2">
-            <a href="{{ route('admin.complaints') }}" class="text-decoration-none">
-                <div class="info-box shadow-none mb-0" style="border-left:4px solid #6f42c1;">
-                    <span class="info-box-icon" style="background:#6f42c1;"><i class="fas fa-wrench"></i></span>
+            <a href="{{ route('admin.complaints') }}" class="text-decoration-none text-dark">
+                <div class="info-box shadow-none mb-0" style="border-left:4px solid #000;">
+                    <span class="info-box-icon" style="background:#000;color:#fff;"><i class="fas fa-wrench"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Komplain Dikerjakan</span>
                         <span class="info-box-number">{{ $summary['in_progress_complaints'] }}</span>

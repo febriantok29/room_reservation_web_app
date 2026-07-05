@@ -11,8 +11,10 @@ use App\Models\RoomComplaint;
 use App\Models\User;
 use App\Services\ImageService;
 use App\Services\ReservationService;
+use App\Support\ReservationStatus;
 use App\Support\WebMessages;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -50,7 +52,7 @@ class AdminDashboardController extends Controller
             'approved_reservations' => Reservation::query()->approved()->count(),
             'today_reservations'    => Reservation::query()
                 ->whereDate('start_time', $today)
-                ->whereIn('status', ['approved', 'pending'])
+                ->whereIn('status', [ReservationStatus::Approved->value, ReservationStatus::Pending->value])
                 ->count(),
             'open_complaints'       => RoomComplaint::query()
                 ->whereNull('deleted_at')
@@ -71,7 +73,7 @@ class AdminDashboardController extends Controller
         // Room status grid: show maintenance state + whether booked today
         $bookedRoomIds = Reservation::query()
             ->whereDate('start_time', $today)
-            ->whereIn('status', ['approved', 'pending'])
+            ->whereIn('status', [ReservationStatus::Approved->value, ReservationStatus::Pending->value])
             ->pluck('room_id')
             ->unique();
 
@@ -518,11 +520,18 @@ class AdminDashboardController extends Controller
             ->with('success', WebMessages::RESERVATION_CANCELLED_SUCCESS);
     }
 
-    public function completeReservation(Request $request, Reservation $reservation): RedirectResponse
+    public function completeReservation(Request $request, Reservation $reservation): mixed
     {
         $this->ensureAdminAccess($request);
 
         $result = $this->reservationService->complete($request->user(), $reservation);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => $result['success'],
+                'message' => $result['message'],
+            ], $result['success'] ? 200 : 422);
+        }
 
         if (!$result['success']) {
             return back()->withErrors(['reservation' => $result['message']]);
@@ -531,6 +540,28 @@ class AdminDashboardController extends Controller
         return redirect()
             ->route('admin.reservations')
             ->with('success', WebMessages::RESERVATION_COMPLETED_SUCCESS);
+    }
+
+    public function cancelReservation(Request $request, Reservation $reservation): mixed
+    {
+        $this->ensureAdminAccess($request);
+
+        $result = $this->reservationService->cancel($request->user(), $reservation);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => $result['success'],
+                'message' => $result['message'],
+            ], $result['success'] ? 200 : 422);
+        }
+
+        if (!$result['success']) {
+            return back()->withErrors(['reservation' => $result['message']]);
+        }
+
+        return redirect()
+            ->route('admin.reservations')
+            ->with('success', WebMessages::RESERVATION_CANCELLED_SUCCESS);
     }
 
     public function approvals(Request $request): View
@@ -581,7 +612,7 @@ class AdminDashboardController extends Controller
         ]);
     }
 
-    public function approveReservation(Request $request, Reservation $reservation): RedirectResponse
+    public function approveReservation(Request $request, Reservation $reservation): mixed
     {
         $this->ensureAdminAccess($request);
 
@@ -593,6 +624,13 @@ class AdminDashboardController extends Controller
 
         $result = $this->reservationService->approve($request->user(), $reservation, $targetRoomId);
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => $result['success'],
+                'message' => $result['message'],
+            ], $result['success'] ? 200 : 422);
+        }
+
         if (!$result['success']) {
             return back()->withErrors(['approval' => $result['message']]);
         }
@@ -602,11 +640,18 @@ class AdminDashboardController extends Controller
             ->with('success', WebMessages::RESERVATION_APPROVED_SUCCESS);
     }
 
-    public function rejectReservation(Request $request, Reservation $reservation): RedirectResponse
+    public function rejectReservation(Request $request, Reservation $reservation): mixed
     {
         $this->ensureAdminAccess($request);
 
         $result = $this->reservationService->reject($request->user(), $reservation);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => $result['success'],
+                'message' => $result['message'],
+            ], $result['success'] ? 200 : 422);
+        }
 
         if (!$result['success']) {
             return back()->withErrors(['approval' => $result['message']]);
@@ -712,11 +757,11 @@ class AdminDashboardController extends Controller
         $events = $reservations->map(function ($reservation) {
             // Color based on status
             $color = match ($reservation->status) {
-                'pending' => '#ffc107',
-                'approved' => '#28a745',
-                'rejected' => '#dc3545',
-                'completed' => '#007bff',
-                'cancelled' => '#6c757d',
+                ReservationStatus::Pending->value   => '#ffc107',
+                ReservationStatus::Approved->value  => '#28a745',
+                ReservationStatus::Rejected->value  => '#dc3545',
+                ReservationStatus::Completed->value => '#007bff',
+                ReservationStatus::Cancelled->value => '#6c757d',
                 default => '#6c757d',
             };
 

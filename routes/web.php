@@ -62,6 +62,7 @@ Route::prefix('admin')->group(function () {
         Route::put('/reservations/{reservation}', [AdminDashboardController::class, 'updateReservation'])->name('admin.reservations.update');
         Route::delete('/reservations/{reservation}', [AdminDashboardController::class, 'destroyReservation'])->name('admin.reservations.destroy');
         Route::post('/reservations/{reservation}/complete', [AdminDashboardController::class, 'completeReservation'])->name('admin.reservations.complete');
+        Route::post('/reservations/{reservation}/cancel', [AdminDashboardController::class, 'cancelReservation'])->name('admin.reservations.cancel');
 
         // Calendar endpoints
         Route::get('/reservations/calendar/events', [AdminDashboardController::class, 'getCalendarEvents'])->name('admin.reservations.calendar.events');
