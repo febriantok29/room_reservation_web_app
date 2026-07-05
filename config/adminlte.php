@@ -64,7 +64,7 @@ return [
     */
 
     'logo' => '<b>Rapa</b>Track',
-    'logo_img' => 'images/logo.jpg',
+    'logo_img' => 'images/logo.png',
     'logo_img_class' => 'brand-image elevation-3',
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
@@ -86,7 +86,7 @@ return [
     'auth_logo' => [
         'enabled' => true,
         'img' => [
-            'path' => 'images/logo.jpg',
+            'path' => 'images/logo.png',
             'alt' => 'RapaTrack',
             'class' => '',
             'width' => 50,
@@ -113,7 +113,7 @@ return [
         'enabled' => true,
         'mode' => 'fullscreen',
         'img' => [
-            'path' => 'images/logo.jpg',
+            'path' => 'images/logo.png',
             'alt' => 'RapaTrack',
             'effect' => 'animation__shake',
             'width' => 60,
