@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Support\ReservationStatus;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -37,11 +38,11 @@ class DivisionActivityReportExport implements FromArray, WithHeadings, WithTitle
                 $row['division_name'],
                 $row['division_code'],
                 $row['total'],
-                $row['approved'],
-                $row['completed'],
-                $row['rejected'],
-                $row['cancelled'],
-                $row['pending'],
+                $row[ReservationStatus::Approved->value],
+                $row[ReservationStatus::Completed->value],
+                $row[ReservationStatus::Rejected->value],
+                $row[ReservationStatus::Cancelled->value],
+                $row[ReservationStatus::Pending->value],
                 $row['visitors'],
             ];
         }
