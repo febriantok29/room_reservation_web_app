@@ -1,11 +1,11 @@
 @extends('adminlte::page')
 
-@section('title', 'Rekap Periodik')
+@section('title', 'Rekap Periodik Reservasi')
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap:.75rem;">
         <div>
-            <h1 class="m-0">Rekap Periodik</h1>
+            <h1 class="m-0">Rekap Periodik Reservasi</h1>
             <div class="page-subtitle">Tren reservasi harian, mingguan, atau bulanan.</div>
         </div>
         <div class="d-flex" style="gap:.5rem;">

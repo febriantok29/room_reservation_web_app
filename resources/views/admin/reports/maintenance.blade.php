@@ -1,11 +1,11 @@
 @extends('adminlte::page')
 
-@section('title', 'Laporan Maintenance & Kerusakan')
+@section('title', 'Laporan Status Maintenance Ruangan')
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap:.75rem;">
         <div>
-            <h1 class="m-0">Laporan Maintenance &amp; Kerusakan</h1>
+            <h1 class="m-0">Laporan Status Maintenance Ruangan</h1>
             <div class="page-subtitle">Kondisi ruangan beserta riwayat komplain dan status maintenance.</div>
         </div>
         <div class="d-flex" style="gap:.5rem;">

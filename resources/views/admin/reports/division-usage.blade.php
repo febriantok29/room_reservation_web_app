@@ -1,11 +1,11 @@
 @extends('adminlte::page')
 
-@section('title', 'Laporan Pemakaian Per-Divisi')
+@section('title', 'Laporan Pemakaian per Divisi')
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap:.75rem;">
         <div>
-            <h1 class="m-0">Laporan Pemakaian Ruangan Per-Divisi</h1>
+            <h1 class="m-0">Laporan Pemakaian per Divisi</h1>
             <div class="page-subtitle">Rekapitulasi durasi dan pemakaian ruangan berdasarkan divisi (reservasi disetujui
                 &amp; selesai).</div>
         </div>
@@ -109,7 +109,7 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap:.75rem;">
         <div>
-            <h1 class="m-0">Laporan Pemakaian Ruangan per Divisi</h1>
+            <h1 class="m-0">Laporan Pemakaian per Divisi</h1>
             <div class="page-subtitle">Rekapitulasi durasi dan pemakaian ruangan berdasarkan divisi (reservasi disetujui &
                 selesai).</div>
         </div>
