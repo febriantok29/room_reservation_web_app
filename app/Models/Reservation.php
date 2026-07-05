@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Helpers\TimezoneHelper;
 use App\Services\ReservationIdGenerator;
+use App\Support\ReservationStatus;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -152,7 +153,7 @@ class Reservation extends Model
      */
     public function scopePending($query)
     {
-        return $query->where('status', 'pending');
+        return $query->where('status', ReservationStatus::Pending->value);
     }
 
     /**
@@ -160,7 +161,7 @@ class Reservation extends Model
      */
     public function scopeApproved($query)
     {
-        return $query->where('status', 'approved');
+        return $query->where('status', ReservationStatus::Approved->value);
     }
 
     /**
@@ -168,7 +169,7 @@ class Reservation extends Model
      */
     public function scopeCompleted($query)
     {
-        return $query->where('status', 'completed');
+        return $query->where('status', ReservationStatus::Completed->value);
     }
 
     /**
@@ -176,7 +177,7 @@ class Reservation extends Model
      */
     public function scopeActive($query)
     {
-        return $query->whereIn('status', ['pending', 'approved']);
+        return $query->whereIn('status', [ReservationStatus::Pending->value, ReservationStatus::Approved->value]);
     }
 
     /**
@@ -185,7 +186,7 @@ class Reservation extends Model
     public function scopeUpcoming($query)
     {
         return $query->where('start_time', '>', now())
-            ->whereIn('status', ['pending', 'approved']);
+            ->whereIn('status', [ReservationStatus::Pending->value, ReservationStatus::Approved->value]);
     }
 
     /**
@@ -225,7 +226,7 @@ class Reservation extends Model
      */
     public function isPending(): bool
     {
-        return $this->status === 'pending';
+        return $this->status === ReservationStatus::Pending->value;
     }
 
     /**
@@ -233,7 +234,7 @@ class Reservation extends Model
      */
     public function isApproved(): bool
     {
-        return $this->status === 'approved';
+        return $this->status === ReservationStatus::Approved->value;
     }
 
     /**
@@ -241,7 +242,7 @@ class Reservation extends Model
      */
     public function isRejected(): bool
     {
-        return $this->status === 'rejected';
+        return $this->status === ReservationStatus::Rejected->value;
     }
 
     /**
@@ -249,7 +250,7 @@ class Reservation extends Model
      */
     public function isCompleted(): bool
     {
-        return $this->status === 'completed';
+        return $this->status === ReservationStatus::Completed->value;
     }
 
     /**
@@ -257,7 +258,7 @@ class Reservation extends Model
      */
     public function isCancelled(): bool
     {
-        return $this->status === 'cancelled';
+        return $this->status === ReservationStatus::Cancelled->value;
     }
 
     /**
@@ -290,7 +291,7 @@ class Reservation extends Model
      */
     public function isUpcoming(): bool
     {
-        return $this->start_time > now() && in_array($this->status, ['pending', 'approved']);
+        return $this->start_time > now() && in_array($this->status, [ReservationStatus::Pending->value, ReservationStatus::Approved->value]);
     }
 
     /**
