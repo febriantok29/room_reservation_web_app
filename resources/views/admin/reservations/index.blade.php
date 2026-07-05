@@ -57,9 +57,12 @@
                 </div>
                 <div class="col-lg-3 col-md-12 text-right">
                     <label class="mb-1 text-sm font-weight-bold d-block">Legenda</label>
-                    <div class="text-sm">
-                        <i class="fas fa-square text-warning"></i> Menunggu
-                        <i class="fas fa-square text-success ml-2"></i> Disetujui
+                    <div class="text-sm" style="line-height:1.8;">
+                        <i class="fas fa-square text-warning"></i> Menunggu &nbsp;
+                        <i class="fas fa-square text-success"></i> Disetujui<br>
+                        <i class="fas fa-square text-danger"></i> Ditolak &nbsp;
+                        <i class="fas fa-square text-primary"></i> Selesai &nbsp;
+                        <i class="fas fa-square text-secondary"></i> Dibatalkan
                     </div>
                 </div>
             </div>
@@ -88,11 +91,8 @@
                         <i class="fas fa-spinner fa-spin"></i> Loading...
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer flex-wrap" style="gap:.35rem;" id="eventModalFooter">
                     <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Tutup</button>
-                    <a href="#" id="eventDetailBtn" class="btn btn-primary btn-sm">
-                        <i class="fas fa-eye"></i> Lihat Detail
-                    </a>
                 </div>
             </div>
         </div>
@@ -210,6 +210,7 @@
 
 @push('css')
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/main.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         /* FullCalendar custom styles */
         #calendar {
@@ -279,16 +280,18 @@
 @push('js')
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/locales/id.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script>
         $(function() {
             const calendarEl = document.getElementById('calendar');
             const eventModal = $('#eventModal');
             const eventModalBody = $('#eventModalBody');
-            const eventDetailBtn = $('#eventDetailBtn');
+            const eventModalFooter = $('#eventModalFooter');
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
             // Initialize calendar
             const calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridDay',
+                initialView: 'dayGridMonth',
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
@@ -347,114 +350,114 @@
                     const statusLabel = getStatusLabel(props.status);
 
                     const html = `
-                    <div class="mb-3">
-                        <span class="status-badge ${statusClass}">${statusLabel}</span>
-                    </div>
-                    <div class="mb-2">
-                        <strong><i class="fas fa-hashtag"></i> ID Reservasi:</strong><br>
-                        ${props.reservation_id}
-                    </div>
-                    <div class="mb-2">
-                        <strong><i class="fas fa-door-open"></i> Ruangan:</strong><br>
-                        ${props.room_name || '-'}
-                    </div>
-                    <div class="mb-2">
-                        <strong><i class="fas fa-user"></i> Pemohon:</strong><br>
-                        ${props.user_name || '-'}
-                    </div>
-                    <div class="mb-2">
-                        <strong><i class="fas fa-clock"></i> Waktu:</strong><br>
-                        ${formatDateTime(event.start)} - ${formatTime(event.end)}
-                    </div>
-                    <div class="mb-2">
-                        <strong><i class="fas fa-users"></i> Jumlah Pengunjung:</strong><br>
-                        ${props.visitor_count} orang
-                    </div>
-                    ${props.purpose ? `
-                                                                                                <div class="mb-2">
-                                                                                                    <strong><i class="fas fa-clipboard-list"></i> Keperluan:</strong><br>
-                                                                                                    ${props.purpose}
-                                                                                                </div>
-                                                                                                ` : ''}
-                `;
+                        <div class="mb-3">
+                            <span class="status-badge ${statusClass}">${statusLabel}</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong><i class="fas fa-hashtag mr-1"></i>ID Reservasi:</strong><br>
+                            <span class="text-monospace">${props.reservation_id}</span>
+                        </div>
+                        <div class="mb-2">
+                            <strong><i class="fas fa-door-open mr-1"></i>Ruangan:</strong><br>
+                            ${props.room_name || '-'}
+                        </div>
+                        <div class="mb-2">
+                            <strong><i class="fas fa-user mr-1"></i>Pemohon:</strong><br>
+                            ${props.user_name || '-'}
+                        </div>
+                        <div class="mb-2">
+                            <strong><i class="fas fa-clock mr-1"></i>Waktu:</strong><br>
+                            ${formatDateTime(event.start)} &ndash; ${formatTime(event.end)}
+                        </div>
+                        <div class="mb-2">
+                            <strong><i class="fas fa-users mr-1"></i>Jumlah Pengunjung:</strong><br>
+                            ${props.visitor_count} orang
+                        </div>
+                        ${props.purpose ? `<div class="mb-2"><strong><i class="fas fa-clipboard-list mr-1"></i>Keperluan:</strong><br>${props.purpose}</div>` : ''}
+                    `;
 
                     eventModalBody.html(html);
-                    eventDetailBtn.attr('href', '/admin/reservations/' + props.reservation_id +
-                        '/edit');
+                    updateModalFooter(props.status, props.reservation_id);
                     eventModal.modal('show');
                 },
 
                 // Event drag & drop - update time
                 eventDrop: function(info) {
-                    if (!confirm('Ubah jadwal reservasi ini?')) {
-                        info.revert();
-                        return;
-                    }
+                    Swal.fire({
+                        title: 'Ubah Jadwal?',
+                        text: 'Jadwal reservasi ini akan diperbarui sesuai posisi baru.',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, ubah',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#007bff',
+                    }).then(function(result) {
+                        if (!result.isConfirmed) { info.revert(); return; }
 
-                    const event = info.event;
-                    const props = event.extendedProps;
+                        const event = info.event;
+                        const props = event.extendedProps;
 
-                    $.ajax({
-                        url: '/admin/reservations/' + props.reservation_id + '/time',
-                        type: 'PATCH',
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: {
-                            start_time: event.start.toISOString(),
-                            end_time: event.end.toISOString()
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                alert('Jadwal berhasil diperbarui');
-                            } else {
+                        $.ajax({
+                            url: '/admin/reservations/' + props.reservation_id + '/time',
+                            type: 'PATCH',
+                            headers: { 'X-CSRF-TOKEN': csrfToken },
+                            data: {
+                                start_time: event.start.toISOString(),
+                                end_time: event.end.toISOString()
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Jadwal berhasil diperbarui.', timer: 2000, showConfirmButton: false });
+                                } else {
+                                    info.revert();
+                                    Swal.fire({ icon: 'error', title: 'Gagal', text: response.message || 'Gagal memperbarui jadwal.' });
+                                }
+                            },
+                            error: function(xhr) {
                                 info.revert();
-                                alert(response.message || 'Gagal memperbarui jadwal');
+                                Swal.fire({ icon: 'error', title: 'Gagal', text: xhr.responseJSON?.message || 'Gagal memperbarui jadwal.' });
                             }
-                        },
-                        error: function(xhr) {
-                            info.revert();
-                            const message = xhr.responseJSON?.message ||
-                                'Gagal memperbarui jadwal';
-                            alert(message);
-                        }
+                        });
                     });
                 },
 
                 // Event resize - update end time
                 eventResize: function(info) {
-                    if (!confirm('Ubah durasi reservasi ini?')) {
-                        info.revert();
-                        return;
-                    }
+                    Swal.fire({
+                        title: 'Ubah Durasi?',
+                        text: 'Durasi reservasi ini akan diperbarui sesuai ukuran baru.',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, ubah',
+                        cancelButtonText: 'Batal',
+                        confirmButtonColor: '#007bff',
+                    }).then(function(result) {
+                        if (!result.isConfirmed) { info.revert(); return; }
 
-                    const event = info.event;
-                    const props = event.extendedProps;
+                        const event = info.event;
+                        const props = event.extendedProps;
 
-                    $.ajax({
-                        url: '/admin/reservations/' + props.reservation_id + '/time',
-                        type: 'PATCH',
-                        headers: {
-                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        },
-                        data: {
-                            start_time: event.start.toISOString(),
-                            end_time: event.end.toISOString()
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                alert('Durasi berhasil diperbarui');
-                            } else {
+                        $.ajax({
+                            url: '/admin/reservations/' + props.reservation_id + '/time',
+                            type: 'PATCH',
+                            headers: { 'X-CSRF-TOKEN': csrfToken },
+                            data: {
+                                start_time: event.start.toISOString(),
+                                end_time: event.end.toISOString()
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Durasi berhasil diperbarui.', timer: 2000, showConfirmButton: false });
+                                } else {
+                                    info.revert();
+                                    Swal.fire({ icon: 'error', title: 'Gagal', text: response.message || 'Gagal memperbarui durasi.' });
+                                }
+                            },
+                            error: function(xhr) {
                                 info.revert();
-                                alert(response.message || 'Gagal memperbarui durasi');
+                                Swal.fire({ icon: 'error', title: 'Gagal', text: xhr.responseJSON?.message || 'Gagal memperbarui durasi.' });
                             }
-                        },
-                        error: function(xhr) {
-                            info.revert();
-                            const message = xhr.responseJSON?.message ||
-                                'Gagal memperbarui durasi';
-                            alert(message);
-                        }
+                        });
                     });
                 },
 
@@ -526,7 +529,6 @@
                 createFormErrors.addClass('d-none').html('');
 
                 const formData = $(this).serialize();
-                console.log('Submitting reservation:', formData);
 
                 $.ajax({
                     url: '{{ route('admin.reservations.store') }}',
@@ -537,22 +539,12 @@
                     },
                     data: formData,
                     success: function(response) {
-                        console.log('Success response:', response);
-
-                        // Close modal
                         $('#createModal').modal('hide');
-
-                        // Show success message
-                        alert('✅ Reservasi berhasil dibuat!');
-
-                        // Refresh calendar
+                        Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Reservasi berhasil dibuat.', timer: 2000, showConfirmButton: false });
                         calendar.refetchEvents();
-
-                        // Reset form
                         $('#createReservationForm')[0].reset();
                     },
                     error: function(xhr) {
-                        console.error('Error response:', xhr.status, xhr.responseJSON);
 
                         // Show error messages
                         const responseData = xhr.responseJSON || {};
@@ -582,14 +574,13 @@
                         createFormErrors.removeClass('d-none').html(errorHtml);
                     },
                     complete: function() {
-                        console.log('Request completed');
-                        // Re-enable button
                         submitBtn.prop('disabled', false).html(originalText);
                     }
                 });
             });
 
-            // Helper functions
+            // ── Helper functions ────────────────────────────────────────────
+
             function getSelectedStatuses() {
                 const statuses = [];
                 $('input[type="checkbox"][id^="status"]:checked').each(function() {
@@ -608,6 +599,97 @@
                 };
                 return labels[status] || status.toUpperCase();
             }
+
+            // Update modal footer buttons based on current reservation status
+            function updateModalFooter(status, reservationId) {
+                const editUrl = '/admin/reservations/' + reservationId + '/edit';
+                let html = `
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Tutup</button>
+                    <a href="${editUrl}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-eye mr-1"></i>Lihat Detail
+                    </a>
+                `;
+
+                if (status === 'pending') {
+                    html += `
+                        <button type="button" class="btn btn-outline-dark btn-sm"
+                            onclick="doCalendarAction('cancel','${reservationId}','Batalkan Reservasi','Reservasi ini akan dibatalkan dan tidak bisa dikembalikan.','Batalkan','#6c757d')">
+                            <i class="fas fa-ban mr-1"></i>Batalkan
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm"
+                            onclick="doCalendarAction('reject','${reservationId}','Tolak Reservasi','Reservasi ini akan ditolak. Pemohon akan diberitahu.','Tolak','#dc3545')">
+                            <i class="fas fa-times mr-1"></i>Tolak
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm"
+                            onclick="doCalendarAction('approve','${reservationId}','Setujui Reservasi','Reservasi ini akan disetujui. Pemohon akan diberitahu.','Setujui','#28a745')">
+                            <i class="fas fa-check mr-1"></i>Setujui
+                        </button>
+                    `;
+                } else if (status === 'approved') {
+                    html += `
+                        <button type="button" class="btn btn-outline-dark btn-sm"
+                            onclick="doCalendarAction('cancel','${reservationId}','Batalkan Reservasi','Reservasi yang sudah disetujui ini akan dibatalkan.','Batalkan','#6c757d')">
+                            <i class="fas fa-ban mr-1"></i>Batalkan
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm"
+                            onclick="doCalendarAction('complete','${reservationId}','Selesaikan Reservasi','Tandai reservasi ini sebagai selesai.','Selesaikan','#007bff')">
+                            <i class="fas fa-check-double mr-1"></i>Selesaikan
+                        </button>
+                    `;
+                }
+
+                eventModalFooter.html(html);
+            }
+
+            // Generic action handler for approve / reject / complete / cancel
+            window.doCalendarAction = function(action, reservationId, title, text, confirmText, confirmColor) {
+                Swal.fire({
+                    title: title,
+                    text: text,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: confirmText,
+                    cancelButtonText: 'Kembali',
+                    confirmButtonColor: confirmColor,
+                    reverseButtons: true,
+                }).then(function(result) {
+                    if (!result.isConfirmed) return;
+
+                    const urlMap = {
+                        approve:  '/admin/approvals/'    + reservationId + '/approve',
+                        reject:   '/admin/approvals/'    + reservationId + '/reject',
+                        complete: '/admin/reservations/' + reservationId + '/complete',
+                        cancel:   '/admin/reservations/' + reservationId + '/cancel',
+                    };
+
+                    $.ajax({
+                        url: urlMap[action],
+                        type: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        success: function(response) {
+                            eventModal.modal('hide');
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: response.message || 'Aksi berhasil dijalankan.',
+                                timer: 2500,
+                                showConfirmButton: false,
+                            });
+                            calendar.refetchEvents();
+                        },
+                        error: function(xhr) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: xhr.responseJSON?.message || 'Terjadi kesalahan, coba lagi.',
+                            });
+                        }
+                    });
+                });
+            };
 
             function formatDateTime(date) {
                 return new Date(date).toLocaleString('id-ID', {
