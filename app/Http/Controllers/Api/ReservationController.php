@@ -8,6 +8,7 @@ use App\Models\Reservation;
 use App\Services\ReservationService;
 use App\Support\ApiErrorCodes;
 use App\Support\ApiMessages;
+use App\Support\ReservationStatus;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -305,11 +306,11 @@ class ReservationController extends Controller
             if (!isset($summary[$day])) {
                 $summary[$day] = [
                     'total' => 0,
-                    'pending' => 0,
-                    'approved' => 0,
-                    'completed' => 0,
-                    'rejected' => 0,
-                    'cancelled' => 0,
+                    ReservationStatus::Pending->value   => 0,
+                    ReservationStatus::Approved->value  => 0,
+                    ReservationStatus::Completed->value => 0,
+                    ReservationStatus::Rejected->value  => 0,
+                    ReservationStatus::Cancelled->value => 0,
                 ];
             }
             $summary[$day]['total']++;

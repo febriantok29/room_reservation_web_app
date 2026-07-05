@@ -10,6 +10,7 @@ use App\Services\CSPService;
 use App\Services\ImageService;
 use App\Support\ApiErrorCodes;
 use App\Support\ApiMessages;
+use App\Support\ReservationStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -117,7 +118,7 @@ class RoomController extends Controller
 
             $query->whereDoesntHave('reservations', function ($q) use ($start, $end) {
                 $q->whereNull('deleted_at')
-                  ->whereIn('status', ['pending', 'approved'])
+                  ->whereIn('status', [ReservationStatus::Pending->value, ReservationStatus::Approved->value])
                   ->where(function ($sub) use ($start, $end) {
                       $sub->where(function ($a) use ($start, $end) {
                           $a->where('start_time', '<=', $start)

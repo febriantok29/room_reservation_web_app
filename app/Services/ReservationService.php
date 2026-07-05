@@ -11,6 +11,7 @@ use App\Notifications\ReservationCreated;
 use App\Notifications\ReservationRejected;
 use App\Support\ApiErrorCodes;
 use App\Support\ApiMessages;
+use App\Support\ReservationStatus;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -114,7 +115,7 @@ class ReservationService
                 'visitor_count' => $visitorCount,
                 'with_snack' => $payload['with_snack'] ?? false,
                 'with_lunch' => $payload['with_lunch'] ?? false,
-                'status' => 'pending',
+                'status' => ReservationStatus::Pending->value,
                 'created_by' => $actor->id,
                 'updated_by' => $actor->id,
             ]);
@@ -226,7 +227,7 @@ class ReservationService
             return $this->forbidden();
         }
 
-        if (in_array($reservation->status, ['rejected', 'completed', 'cancelled'], true)) {
+        if (in_array($reservation->status, [ReservationStatus::Rejected->value, ReservationStatus::Completed->value, ReservationStatus::Cancelled->value], true)) {
             return [
                 'success' => false,
                 'status_code' => 422,
@@ -246,7 +247,7 @@ class ReservationService
             ];
         }
 
-        $reservation->status = 'cancelled';
+        $reservation->status = ReservationStatus::Cancelled->value;
         $reservation->updated_by = $actor->id;
         $reservation->save();
         $reservation->load(['room', 'user']);
@@ -273,7 +274,7 @@ class ReservationService
             return $this->forbidden();
         }
 
-        if ($reservation->status !== 'approved') {
+        if ($reservation->status !== ReservationStatus::Approved->value) {
             return [
                 'success' => false,
                 'status_code' => 422,
@@ -293,7 +294,7 @@ class ReservationService
         //     ];
         // }
 
-        $reservation->status = 'completed';
+        $reservation->status = ReservationStatus::Completed->value;
         $reservation->updated_by = $actor->id;
         $reservation->save();
         $reservation->load(['room', 'user']);
@@ -320,15 +321,15 @@ class ReservationService
 
         // Mark pending reservations as cancelled if they've started
         $expired = Reservation::query()
-            ->where('status', 'pending')
+            ->where('status', ReservationStatus::Pending->value)
             ->where('start_time', '<=', $now)  // Changed from < to <= to handle exact time edge cases
-            ->update(['status' => 'cancelled', 'updated_by' => null]);
+            ->update(['status' => ReservationStatus::Cancelled->value, 'updated_by' => null]);
 
         // Mark approved reservations as completed if they've ended
         $completed = Reservation::query()
-            ->where('status', 'approved')
+            ->where('status', ReservationStatus::Approved->value)
             ->where('end_time', '<=', $now)  // Changed from < to <= to handle exact time edge cases
-            ->update(['status' => 'completed', 'updated_by' => null]);
+            ->update(['status' => ReservationStatus::Completed->value, 'updated_by' => null]);
 
         return ['expired' => $expired, 'completed' => $completed];
     }
@@ -394,7 +395,7 @@ class ReservationService
             }
 
             $reservation->room_id   = $roomId;
-            $reservation->status    = 'approved';
+            $reservation->status    = ReservationStatus::Approved->value;
             $reservation->updated_by = $actor->id;
             $reservation->save();
             $reservation->load(['room', 'user']);
@@ -427,7 +428,7 @@ class ReservationService
             ];
         }
 
-        $reservation->status = 'rejected';
+        $reservation->status = ReservationStatus::Rejected->value;
         $reservation->updated_by = $actor->id;
         $reservation->save();
         $reservation->load(['room', 'user']);

@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Support\ApiMessages;
+use App\Support\OperatingHours;
+use App\Support\ReservationStatus;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use InvalidArgumentException;
@@ -45,7 +47,7 @@ class CSPService
         $query = DB::table('t_reservations')
             ->where('room_id', $roomId)
             ->whereNull('deleted_at')
-            ->whereIn('status', ['pending', 'approved']) // Only check active reservations
+            ->whereIn('status', [ReservationStatus::Pending->value, ReservationStatus::Approved->value]) // Only check active reservations
             ->where(function ($q) use ($startTime, $endTime) {
                 // Standard half-open interval overlap: [existingStart, existingEnd) ∩ [newStart, newEnd) ≠ ∅
                 // Equivalent to: existingStart < newEnd AND existingEnd > newStart
@@ -100,7 +102,7 @@ class CSPService
         $query = DB::table('t_reservations')
             ->where('room_id', $roomId)
             ->whereNull('deleted_at')
-            ->whereIn('status', ['pending', 'approved'])
+            ->whereIn('status', [ReservationStatus::Pending->value, ReservationStatus::Approved->value])
             ->where(function ($q) use ($startTime, $endTime) {
                 // Standard half-open interval overlap
                 $q->where('start_time', '<', $endTime)
@@ -192,8 +194,8 @@ class CSPService
         int $intervalMinutes = 30
     ): array {
         $date = $date instanceof Carbon ? $date : Carbon::parse($date);
-        $startOfDay = $date->copy()->setTime(8, 0); // Start at 8 AM
-        $endOfDay = $date->copy()->setTime(18, 0); // End at 6 PM
+        $startOfDay = $date->copy()->setTime(OperatingHours::START_HOUR, 0);
+        $endOfDay = $date->copy()->setTime(OperatingHours::END_HOUR, 0);
 
         $availableSlots = [];
         $current = $startOfDay->copy();
