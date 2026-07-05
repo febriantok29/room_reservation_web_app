@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Support\ReservationStatus;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -42,11 +43,11 @@ class PeriodicReportExport implements FromArray, WithHeadings, WithTitle, WithSt
         return $this->grouped->map(fn($row) => [
             $row[$key],
             $row['total'],
-            $row['approved'],
-            $row['completed'],
-            $row['rejected'],
-            $row['cancelled'],
-            $row['pending'],
+            $row[ReservationStatus::Approved->value],
+            $row[ReservationStatus::Completed->value],
+            $row[ReservationStatus::Rejected->value],
+            $row[ReservationStatus::Cancelled->value],
+            $row[ReservationStatus::Pending->value],
             $row['visitors'],
         ])->toArray();
     }

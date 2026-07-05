@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Support\ReservationStatus;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -40,9 +41,9 @@ class UsageReportExport implements FromArray, WithHeadings, WithTitle, WithStyle
             $r->start_time && $r->end_time ? $r->start_time->diffInMinutes($r->end_time) : 0,
             $r->visitor_count,
             match ($r->status) {
-                'approved'  => 'Disetujui',
-                'completed' => 'Selesai',
-                default     => $r->status,
+                ReservationStatus::Approved->value  => 'Disetujui',
+                ReservationStatus::Completed->value => 'Selesai',
+                default => $r->status,
             },
         ])->toArray();
     }

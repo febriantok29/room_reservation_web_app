@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Support\ReservationStatus;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -39,12 +40,12 @@ class ScheduleHistoryReportExport implements FromArray, WithHeadings, WithTitle,
             $r->end_time?->format('d/m/Y H:i'),
             $r->visitor_count,
             match ($r->status) {
-                'pending'   => 'Menunggu',
-                'approved'  => 'Disetujui',
-                'completed' => 'Selesai',
-                'rejected'  => 'Ditolak',
-                'cancelled' => 'Dibatalkan',
-                default     => $r->status,
+                ReservationStatus::Pending->value   => 'Menunggu',
+                ReservationStatus::Approved->value  => 'Disetujui',
+                ReservationStatus::Completed->value => 'Selesai',
+                ReservationStatus::Rejected->value  => 'Ditolak',
+                ReservationStatus::Cancelled->value => 'Dibatalkan',
+                default => $r->status,
             },
             $r->purpose ?? '-',
         ])->toArray();

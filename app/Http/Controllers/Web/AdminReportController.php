@@ -16,6 +16,7 @@ use App\Exports\UsageReportExport;
 use App\Exports\UserActivityReportExport;
 use App\Exports\ScheduleHistoryReportExport;
 use App\Exports\PeriodicReportExport;
+use App\Support\ReservationStatus;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -126,7 +127,7 @@ class AdminReportController extends Controller
         $query = Reservation::query()
             ->with(['room:id,name,floor,capacity', 'user:id,first_name,last_name,employee_id'])
             ->whereNull('deleted_at')
-            ->whereIn('status', ['approved', 'completed']);
+            ->whereIn('status', [ReservationStatus::Approved->value, ReservationStatus::Completed->value]);
 
         if ($dateFrom) {
             $query->where('start_time', '>=', Carbon::parse($dateFrom)->startOfDay());
@@ -225,11 +226,11 @@ class AdminReportController extends Controller
                 'division_name'  => $first->user?->division?->name ?? 'Admin / Tanpa Divisi',
                 'division_code'  => $first->user?->division?->code ?? '-',
                 'total'          => $items->count(),
-                'pending'        => $items->where('status', 'pending')->count(),
-                'approved'       => $items->where('status', 'approved')->count(),
-                'completed'      => $items->where('status', 'completed')->count(),
-                'rejected'       => $items->where('status', 'rejected')->count(),
-                'cancelled'      => $items->where('status', 'cancelled')->count(),
+                ReservationStatus::Pending->value   => $items->where('status', ReservationStatus::Pending->value)->count(),
+                ReservationStatus::Approved->value  => $items->where('status', ReservationStatus::Approved->value)->count(),
+                ReservationStatus::Completed->value => $items->where('status', ReservationStatus::Completed->value)->count(),
+                ReservationStatus::Rejected->value  => $items->where('status', ReservationStatus::Rejected->value)->count(),
+                ReservationStatus::Cancelled->value => $items->where('status', ReservationStatus::Cancelled->value)->count(),
                 'total_hours'    => round($totalMinutes / 60, 1),
                 'total_visitors' => $items->sum('visitor_count'),
             ];
@@ -303,11 +304,11 @@ class AdminReportController extends Controller
                 'room_name'      => $first->room?->name ?? '-',
                 'floor'          => $first->room?->floor ?? null,
                 'total'          => $items->count(),
-                'pending'        => $items->where('status', 'pending')->count(),
-                'approved'       => $items->where('status', 'approved')->count(),
-                'completed'      => $items->where('status', 'completed')->count(),
-                'rejected'       => $items->where('status', 'rejected')->count(),
-                'cancelled'      => $items->where('status', 'cancelled')->count(),
+                ReservationStatus::Pending->value   => $items->where('status', ReservationStatus::Pending->value)->count(),
+                ReservationStatus::Approved->value  => $items->where('status', ReservationStatus::Approved->value)->count(),
+                ReservationStatus::Completed->value => $items->where('status', ReservationStatus::Completed->value)->count(),
+                ReservationStatus::Rejected->value  => $items->where('status', ReservationStatus::Rejected->value)->count(),
+                ReservationStatus::Cancelled->value => $items->where('status', ReservationStatus::Cancelled->value)->count(),
                 'total_hours'    => round($totalMinutes / 60, 1),
                 'total_visitors' => $items->sum('visitor_count'),
             ];
@@ -317,11 +318,11 @@ class AdminReportController extends Controller
             'date_from'      => $dateFrom,
             'date_to'        => $dateTo,
             'total'          => $reservations->count(),
-            'pending'        => $reservations->where('status', 'pending')->count(),
-            'approved'       => $reservations->where('status', 'approved')->count(),
-            'completed'      => $reservations->where('status', 'completed')->count(),
-            'rejected'       => $reservations->where('status', 'rejected')->count(),
-            'cancelled'      => $reservations->where('status', 'cancelled')->count(),
+            ReservationStatus::Pending->value   => $reservations->where('status', ReservationStatus::Pending->value)->count(),
+            ReservationStatus::Approved->value  => $reservations->where('status', ReservationStatus::Approved->value)->count(),
+            ReservationStatus::Completed->value => $reservations->where('status', ReservationStatus::Completed->value)->count(),
+            ReservationStatus::Rejected->value  => $reservations->where('status', ReservationStatus::Rejected->value)->count(),
+            ReservationStatus::Cancelled->value => $reservations->where('status', ReservationStatus::Cancelled->value)->count(),
             'total_rooms'    => $byRoom->count(),
         ];
 
@@ -385,11 +386,11 @@ class AdminReportController extends Controller
             return [
                 $labelKey   => $key,
                 'total'     => $items->count(),
-                'approved'  => $items->where('status', 'approved')->count(),
-                'completed' => $items->where('status', 'completed')->count(),
-                'rejected'  => $items->where('status', 'rejected')->count(),
-                'cancelled' => $items->where('status', 'cancelled')->count(),
-                'pending'   => $items->where('status', 'pending')->count(),
+                ReservationStatus::Approved->value  => $items->where('status', ReservationStatus::Approved->value)->count(),
+                ReservationStatus::Completed->value => $items->where('status', ReservationStatus::Completed->value)->count(),
+                ReservationStatus::Rejected->value  => $items->where('status', ReservationStatus::Rejected->value)->count(),
+                ReservationStatus::Cancelled->value => $items->where('status', ReservationStatus::Cancelled->value)->count(),
+                ReservationStatus::Pending->value   => $items->where('status', ReservationStatus::Pending->value)->count(),
                 'visitors'  => $items->sum('visitor_count'),
             ];
         })->values();
@@ -399,10 +400,10 @@ class AdminReportController extends Controller
             'year'      => $year,
             'month'     => $period === 'daily' ? $month : null,
             'total'     => $reservations->count(),
-            'completed' => $reservations->where('status', 'completed')->count(),
-            'approved'  => $reservations->where('status', 'approved')->count(),
-            'rejected'  => $reservations->where('status', 'rejected')->count(),
-            'cancelled' => $reservations->where('status', 'cancelled')->count(),
+            ReservationStatus::Completed->value => $reservations->where('status', ReservationStatus::Completed->value)->count(),
+            ReservationStatus::Approved->value  => $reservations->where('status', ReservationStatus::Approved->value)->count(),
+            ReservationStatus::Rejected->value  => $reservations->where('status', ReservationStatus::Rejected->value)->count(),
+            ReservationStatus::Cancelled->value => $reservations->where('status', ReservationStatus::Cancelled->value)->count(),
         ];
 
         if ($format === 'pdf') {
@@ -456,11 +457,11 @@ class AdminReportController extends Controller
                     'division_name' => $division?->name ?? 'Admin / Tanpa Divisi',
                     'division_code' => $division?->code ?? '-',
                     'total'         => $items->count(),
-                    'approved'      => $items->where('status', 'approved')->count(),
-                    'completed'     => $items->where('status', 'completed')->count(),
-                    'rejected'      => $items->where('status', 'rejected')->count(),
-                    'cancelled'     => $items->where('status', 'cancelled')->count(),
-                    'pending'       => $items->where('status', 'pending')->count(),
+                    ReservationStatus::Approved->value  => $items->where('status', ReservationStatus::Approved->value)->count(),
+                    ReservationStatus::Completed->value => $items->where('status', ReservationStatus::Completed->value)->count(),
+                    ReservationStatus::Rejected->value  => $items->where('status', ReservationStatus::Rejected->value)->count(),
+                    ReservationStatus::Cancelled->value => $items->where('status', ReservationStatus::Cancelled->value)->count(),
+                    ReservationStatus::Pending->value   => $items->where('status', ReservationStatus::Pending->value)->count(),
                     'visitors'      => $items->sum('visitor_count'),
                 ];
             })->values()->sortByDesc('total')->values();
@@ -590,7 +591,7 @@ class AdminReportController extends Controller
         $query = Reservation::query()
             ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
             ->whereNull('deleted_at')
-            ->whereIn('status', ['approved', 'completed'])
+            ->whereIn('status', [ReservationStatus::Approved->value, ReservationStatus::Completed->value])
             ->orderBy('start_time');
 
         if ($dateFrom) {

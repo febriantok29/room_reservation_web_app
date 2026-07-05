@@ -10,6 +10,7 @@ use App\Models\Room;
 use App\Models\RoomComplaint;
 use App\Models\User;
 use App\Support\ApiMessages;
+use App\Support\ReservationStatus;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -115,7 +116,7 @@ class ReportController extends Controller
         $query = Reservation::query()
             ->with(['room:id,name,floor,capacity', 'user:id,first_name,last_name,employee_id'])
             ->whereNull('deleted_at')
-            ->whereIn('status', ['approved', 'completed']);
+            ->whereIn('status', [ReservationStatus::Approved->value, ReservationStatus::Completed->value]);
 
         if ($request->filled('date_from')) {
             $query->where('start_time', '>=', Carbon::parse($request->input('date_from'))->startOfDay());
@@ -224,11 +225,11 @@ class ReportController extends Controller
                 'full_name'   => $first->user?->full_name ?? '-',
                 'employee_id' => $first->user?->employee_id ?? '-',
                 'total'       => $items->count(),
-                'pending'     => $items->where('status', 'pending')->count(),
-                'approved'    => $items->where('status', 'approved')->count(),
-                'completed'   => $items->where('status', 'completed')->count(),
-                'rejected'    => $items->where('status', 'rejected')->count(),
-                'cancelled'   => $items->where('status', 'cancelled')->count(),
+                ReservationStatus::Pending->value   => $items->where('status', ReservationStatus::Pending->value)->count(),
+                ReservationStatus::Approved->value  => $items->where('status', ReservationStatus::Approved->value)->count(),
+                ReservationStatus::Completed->value => $items->where('status', ReservationStatus::Completed->value)->count(),
+                ReservationStatus::Rejected->value  => $items->where('status', ReservationStatus::Rejected->value)->count(),
+                ReservationStatus::Cancelled->value => $items->where('status', ReservationStatus::Cancelled->value)->count(),
             ];
         })->values();
 
@@ -311,11 +312,11 @@ class ReportController extends Controller
             'date_from'  => $request->input('date_from'),
             'date_to'    => $request->input('date_to'),
             'total'      => $reservations->count(),
-            'pending'    => $reservations->where('status', 'pending')->count(),
-            'approved'   => $reservations->where('status', 'approved')->count(),
-            'completed'  => $reservations->where('status', 'completed')->count(),
-            'rejected'   => $reservations->where('status', 'rejected')->count(),
-            'cancelled'  => $reservations->where('status', 'cancelled')->count(),
+            ReservationStatus::Pending->value   => $reservations->where('status', ReservationStatus::Pending->value)->count(),
+            ReservationStatus::Approved->value  => $reservations->where('status', ReservationStatus::Approved->value)->count(),
+            ReservationStatus::Completed->value => $reservations->where('status', ReservationStatus::Completed->value)->count(),
+            ReservationStatus::Rejected->value  => $reservations->where('status', ReservationStatus::Rejected->value)->count(),
+            ReservationStatus::Cancelled->value => $reservations->where('status', ReservationStatus::Cancelled->value)->count(),
         ];
 
         $format = $request->input('format', 'json');
@@ -389,11 +390,11 @@ class ReportController extends Controller
             return [
                 $labelKey    => $key,
                 'total'      => $items->count(),
-                'approved'   => $items->where('status', 'approved')->count(),
-                'completed'  => $items->where('status', 'completed')->count(),
-                'rejected'   => $items->where('status', 'rejected')->count(),
-                'cancelled'  => $items->where('status', 'cancelled')->count(),
-                'pending'    => $items->where('status', 'pending')->count(),
+                ReservationStatus::Approved->value  => $items->where('status', ReservationStatus::Approved->value)->count(),
+                ReservationStatus::Completed->value => $items->where('status', ReservationStatus::Completed->value)->count(),
+                ReservationStatus::Rejected->value  => $items->where('status', ReservationStatus::Rejected->value)->count(),
+                ReservationStatus::Cancelled->value => $items->where('status', ReservationStatus::Cancelled->value)->count(),
+                ReservationStatus::Pending->value   => $items->where('status', ReservationStatus::Pending->value)->count(),
                 'visitors'   => $items->sum('visitor_count'),
             ];
         })->values();
@@ -403,10 +404,10 @@ class ReportController extends Controller
             'year'       => $year,
             'month'      => $period === 'daily' ? $month : null,
             'total'      => $reservations->count(),
-            'completed'  => $reservations->where('status', 'completed')->count(),
-            'approved'   => $reservations->where('status', 'approved')->count(),
-            'rejected'   => $reservations->where('status', 'rejected')->count(),
-            'cancelled'  => $reservations->where('status', 'cancelled')->count(),
+            ReservationStatus::Completed->value => $reservations->where('status', ReservationStatus::Completed->value)->count(),
+            ReservationStatus::Approved->value  => $reservations->where('status', ReservationStatus::Approved->value)->count(),
+            ReservationStatus::Rejected->value  => $reservations->where('status', ReservationStatus::Rejected->value)->count(),
+            ReservationStatus::Cancelled->value => $reservations->where('status', ReservationStatus::Cancelled->value)->count(),
         ];
 
         $format = $request->input('format', 'json');
@@ -469,11 +470,11 @@ class ReportController extends Controller
                     'division_name' => $division?->name ?? 'Admin / Tanpa Divisi',
                     'division_code' => $division?->code ?? '-',
                     'total'         => $items->count(),
-                    'approved'      => $items->where('status', 'approved')->count(),
-                    'completed'     => $items->where('status', 'completed')->count(),
-                    'rejected'      => $items->where('status', 'rejected')->count(),
-                    'cancelled'     => $items->where('status', 'cancelled')->count(),
-                    'pending'       => $items->where('status', 'pending')->count(),
+                    ReservationStatus::Approved->value  => $items->where('status', ReservationStatus::Approved->value)->count(),
+                    ReservationStatus::Completed->value => $items->where('status', ReservationStatus::Completed->value)->count(),
+                    ReservationStatus::Rejected->value  => $items->where('status', ReservationStatus::Rejected->value)->count(),
+                    ReservationStatus::Cancelled->value => $items->where('status', ReservationStatus::Cancelled->value)->count(),
+                    ReservationStatus::Pending->value   => $items->where('status', ReservationStatus::Pending->value)->count(),
                     'visitors'      => $items->sum('visitor_count'),
                 ];
             })->values()->sortByDesc('total')->values();
@@ -618,7 +619,7 @@ class ReportController extends Controller
         $query = Reservation::query()
             ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
             ->whereNull('deleted_at')
-            ->whereIn('status', ['approved', 'completed'])
+            ->whereIn('status', [ReservationStatus::Approved->value, ReservationStatus::Completed->value])
             ->orderBy('start_time');
 
         if ($request->filled('date_from')) {
