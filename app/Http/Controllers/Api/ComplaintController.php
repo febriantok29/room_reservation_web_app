@@ -9,6 +9,7 @@ use App\Models\RoomComplaint;
 use App\Services\ImageService;
 use App\Support\ApiErrorCodes;
 use App\Support\ApiMessages;
+use App\Support\ReservationStatus;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -155,7 +156,7 @@ class ComplaintController extends Controller
         }
 
         // Complaints are only allowed for completed reservations
-        if ($reservation->status !== 'completed') {
+        if ($reservation->status !== ReservationStatus::Completed->value) {
             return ApiResponse::error(
                 ApiErrorCodes::COMPLAINT_INVALID_RESERVATION_STATUS,
                 ApiMessages::COMPLAINT_INVALID_RESERVATION_STATUS,

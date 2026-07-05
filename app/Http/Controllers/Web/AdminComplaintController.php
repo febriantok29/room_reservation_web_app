@@ -8,6 +8,7 @@ use App\Models\Reservation;
 use App\Models\RoomComplaint;
 use App\Services\ImageService;
 use App\Support\ApiMessages;
+use App\Support\ReservationStatus;
 use App\Support\WebMessages;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -79,7 +80,7 @@ class AdminComplaintController extends Controller
 
         $reservations = Reservation::query()
             ->with(['room', 'user'])
-            ->where('status', 'completed')
+            ->where('status', ReservationStatus::Completed->value)
             ->whereNull('deleted_at')
             ->orderByDesc('start_time')
             ->get();
@@ -117,7 +118,7 @@ class AdminComplaintController extends Controller
 
         $reservation = Reservation::query()
             ->where('id', $validated['reservation_id'])
-            ->where('status', 'completed')
+            ->where('status', ReservationStatus::Completed->value)
             ->whereNull('deleted_at')
             ->first();
 
@@ -188,6 +189,7 @@ class AdminComplaintController extends Controller
             'status'           => 'required|in:in_progress,resolved,rejected',
             'resolution_notes' => 'nullable|string|max:2000',
             'set_maintenance'  => 'nullable|boolean',
+            'unset_maintenance' => 'nullable|boolean',
         ], [
             'status.required' => 'Status wajib dipilih.',
             'status.in'       => 'Status tidak valid.',
@@ -208,6 +210,8 @@ class AdminComplaintController extends Controller
 
         if ($request->boolean('set_maintenance') && $complaint->room) {
             $complaint->room->update(['is_maintenance' => true]);
+        } elseif ($request->boolean('unset_maintenance') && $complaint->room) {
+            $complaint->room->update(['is_maintenance' => false]);
         }
 
         $message = match ($validated['status']) {
