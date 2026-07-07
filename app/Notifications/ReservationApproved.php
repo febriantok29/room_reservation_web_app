@@ -18,7 +18,9 @@ class ReservationApproved extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['database', FcmChannel::class];
+        return $notifiable->fcmTokens()->exists()
+            ? ['database', FcmChannel::class]
+            : ['database'];
     }
 
     public function toArray(object $notifiable): array

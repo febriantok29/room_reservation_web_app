@@ -122,7 +122,7 @@ class ReservationService
 
             $reservation->load(['room', 'user']);
 
-            if ($reservation->user && $reservation->user->fcmTokens()->exists()) {
+            if ($reservation->user) {
                 $reservation->user->notify(new ReservationCreated($reservation));
             }
 
@@ -252,7 +252,7 @@ class ReservationService
         $reservation->save();
         $reservation->load(['room', 'user']);
 
-        if ($reservation->user && $reservation->user->fcmTokens()->exists()) {
+        if ($reservation->user) {
             $reservation->user->notify(new ReservationCancelled($reservation));
         }
 
@@ -299,7 +299,7 @@ class ReservationService
         $reservation->save();
         $reservation->load(['room', 'user']);
 
-        if ($reservation->user && $reservation->user->fcmTokens()->exists()) {
+        if ($reservation->user) {
             $reservation->user->notify(new ReservationCompleted($reservation));
         }
 
@@ -400,7 +400,7 @@ class ReservationService
             $reservation->save();
             $reservation->load(['room', 'user']);
 
-            if ($reservation->user && $reservation->user->fcmTokens()->exists()) {
+            if ($reservation->user) {
                 $reservation->user->notify(new ReservationApproved($reservation));
             }
 
@@ -433,7 +433,7 @@ class ReservationService
         $reservation->save();
         $reservation->load(['room', 'user']);
 
-        if ($reservation->user && $reservation->user->fcmTokens()->exists()) {
+        if ($reservation->user) {
             $reservation->user->notify(new ReservationRejected($reservation));
         }
 
