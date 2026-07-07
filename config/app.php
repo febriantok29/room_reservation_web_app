@@ -80,6 +80,8 @@ return [
 
     'timezone_user' => env('APP_TIMEZONE_USER', 'Asia/Jakarta'),
 
+    'jwt_secret' => env('JWT_SECRET'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
