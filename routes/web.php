@@ -5,6 +5,7 @@ use App\Http\Controllers\Web\AdminComplaintController;
 use App\Http\Controllers\Web\AdminDashboardController;
 use App\Http\Controllers\Web\AdminDivisionController;
 use App\Http\Controllers\Web\AdminFacilityController;
+use App\Http\Controllers\Web\AdminFcmTestController;
 use App\Http\Controllers\Web\AdminReportController;
 use Illuminate\Support\Facades\Route;
 
@@ -94,6 +95,10 @@ Route::prefix('admin')->group(function () {
             Route::get('/maintenance',       [AdminReportController::class, 'maintenance'])->name('maintenance');
             Route::get('/division-usage',    [AdminReportController::class, 'divisionUsage'])->name('division-usage');
         });
+
+        // Tools
+        Route::get('/tools/fcm-test', [AdminFcmTestController::class, 'showForm'])->name('admin.tools.fcm-test');
+        Route::post('/tools/fcm-test', [AdminFcmTestController::class, 'send'])->name('admin.tools.fcm-test.send');
 
         Route::match(['get', 'post'], '/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
     });

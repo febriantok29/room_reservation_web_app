@@ -390,6 +390,12 @@ return [
             'route' => 'admin.reports.complaints',
             'icon' => 'fas fa-fw fa-exclamation-triangle',
         ],
+        ['header' => 'TOOLS'],
+        [
+            'text' => 'Test Notifikasi',
+            'route' => 'admin.tools.fcm-test',
+            'icon' => 'fas fa-fw fa-paper-plane',
+        ],
         [
             'text' => 'Keluar',
             'route' => 'admin.logout',
