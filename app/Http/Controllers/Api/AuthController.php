@@ -14,6 +14,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @group Auth
+ *
+ * Login, refresh token, dan manajemen sesi. Token JWT kustom (bukan Sanctum) — access token berlaku
+ * 15 menit, refresh token 7 hari.
+ */
 class AuthController extends Controller
 {
     private JwtService $jwtService;
@@ -24,10 +30,44 @@ class AuthController extends Controller
     }
 
     /**
-     * Login user and return JWT tokens
+     * Login
      *
-     * @param Request $request
-     * @return JsonResponse
+     * Login menggunakan email atau employee_id, mengembalikan access_token dan refresh_token.
+     *
+     * @unauthenticated
+     *
+     * @bodyParam login string Email atau employee_id (alternatif dari email/employee_id terpisah). Example: budi@haleyorapower.co.id
+     * @bodyParam email string Email karyawan. Example: budi@haleyorapower.co.id
+     * @bodyParam employee_id string Kode divisi + nomor pegawai. Example: IT-001
+     * @bodyParam password string required Kata sandi. Example: password123
+     * @bodyParam fcm_token string Token FCM device untuk push notification. Example: fcm_device_token_xyz
+     * @bodyParam is_debug boolean Jika true, TTL token bisa dikustomisasi lewat access_token_ttl/refresh_token_ttl. Example: false
+     * @bodyParam access_token_ttl integer TTL access token dalam detik (hanya berlaku jika is_debug true). Example: 900
+     * @bodyParam refresh_token_ttl integer TTL refresh token dalam detik (hanya berlaku jika is_debug true). Example: 604800
+     *
+     * @response 200 scenario="Login berhasil" {
+     *   "success": true,
+     *   "message": "Login berhasil",
+     *   "data": {
+     *     "access_token": "eyJhbGciOiJIUzI1NiIs...",
+     *     "refresh_token": "eyJhbGciOiJIUzI1NiIs...",
+     *     "user": {
+     *       "id": "USR-001",
+     *       "name": "Budi Santoso",
+     *       "email": "budi@haleyorapower.co.id",
+     *       "employee_id": "IT-001",
+     *       "division_id": "DIV-01",
+     *       "division": {"id": "DIV-01", "name": "Information Technology", "code": "IT"},
+     *       "is_admin": false,
+     *       "is_active": true
+     *     }
+     *   }
+     * }
+     * @response 401 scenario="Email/employee_id atau password salah" {
+     *   "success": false,
+     *   "error_code": "INVALID_CREDENTIALS",
+     *   "message": "Email/No. Induk Karyawan atau password salah"
+     * }
      */
     public function login(Request $request): JsonResponse
     {
@@ -53,7 +93,7 @@ class AuthController extends Controller
             ->orWhere('employee_id', $login)
             ->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return ApiResponse::error(
                 ApiErrorCodes::INVALID_CREDENTIALS,
                 ApiMessages::AUTH_INVALID_CREDENTIALS,
@@ -70,8 +110,8 @@ class AuthController extends Controller
             );
         }
 
-        // Issue tokens with optional debug mode
-        $isDebug = $request->boolean('is_debug', false);
+        // Debug TTL overrides only work when APP_DEBUG is on
+        $isDebug = config('app.debug') && $request->boolean('is_debug', false);
         $accessTokenTtl = $request->input('access_token_ttl');
         $refreshTokenTtl = $request->input('refresh_token_ttl');
 
@@ -82,15 +122,7 @@ class AuthController extends Controller
             $refreshTokenTtl
         );
 
-        // Add user info to response so frontend can use it as alternative auth
-        $tokens['user'] = [
-            'id' => $user->id,
-            'name' => $user->full_name,
-            'email' => $user->email,
-            'employee_id' => $user->employee_id,
-            'is_admin' => $user->is_admin,
-            'is_active' => $user->is_active,
-        ];
+        $tokens['user'] = $user->toAuthArray();
 
         // Register FCM token for this device if provided
         if ($fcmToken = $request->input('fcm_token')) {
@@ -105,10 +137,31 @@ class AuthController extends Controller
     }
 
     /**
-     * Refresh access token using refresh token
+     * Refresh token
      *
-     * @param Request $request
-     * @return JsonResponse
+     * Menukar refresh_token yang masih valid dengan access_token baru.
+     *
+     * @unauthenticated
+     *
+     * @bodyParam refresh_token string required Refresh token yang didapat saat login. Example: eyJhbGciOiJIUzI1NiIs...
+     * @bodyParam is_debug boolean Jika true, TTL access token bisa dikustomisasi lewat access_token_ttl. Example: false
+     * @bodyParam access_token_ttl integer TTL access token dalam detik (hanya berlaku jika is_debug true). Example: 900
+     *
+     * @response 200 scenario="Refresh berhasil" {
+     *   "success": true,
+     *   "message": "Token refresh berhasil",
+     *   "data": {
+     *     "access_token": "eyJhbGciOiJIUzI1NiIs...",
+     *     "token_type": "Bearer",
+     *     "expires_in": 900,
+     *     "is_debug": false
+     *   }
+     * }
+     * @response 401 scenario="Refresh token tidak valid/kedaluwarsa" {
+     *   "success": false,
+     *   "error_code": "UNAUTHORIZED",
+     *   "message": "Token tidak valid atau kadaluarsa"
+     * }
      */
     public function refresh(Request $request): JsonResponse
     {
@@ -122,7 +175,7 @@ class AuthController extends Controller
             return ApiResponse::validationError($validator->errors()->toArray());
         }
 
-        $isDebug = $request->boolean('is_debug', false);
+        $isDebug = config('app.debug') && $request->boolean('is_debug', false);
         $accessTokenTtl = $request->input('access_token_ttl');
 
         $tokens = $this->jwtService->refreshAccessToken(
@@ -131,7 +184,7 @@ class AuthController extends Controller
             $accessTokenTtl
         );
 
-        if (!$tokens) {
+        if (! $tokens) {
             return ApiResponse::unauthorized();
         }
 
@@ -143,11 +196,17 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout user. Optionally removes the FCM token for this device so
-     * no further push notifications are sent to it.
+     * Logout
      *
-     * @param Request $request
-     * @return JsonResponse
+     * Menghapus FCM token perangkat ini (opsional) agar tidak lagi menerima push notification.
+     *
+     * @bodyParam fcm_token string Token FCM device yang ingin dicabut. Example: fcm_device_token_xyz
+     *
+     * @response 200 scenario="Logout berhasil" {
+     *   "success": true,
+     *   "message": "Logout berhasil. Mohon hapus token dari perangkat Anda",
+     *   "data": null
+     * }
      */
     public function logout(Request $request): JsonResponse
     {
@@ -171,39 +230,51 @@ class AuthController extends Controller
     }
 
     /**
-     * Get current authenticated user
+     * Profil saya
      *
-     * @param Request $request
-     * @return JsonResponse
+     * Mengambil data karyawan yang sedang login berdasarkan access token.
+     *
+     * @response 200 scenario="Sukses" {
+     *   "success": true,
+     *   "message": "Data pengguna berhasil diambil",
+     *   "data": {
+     *     "id": "USR-001",
+     *     "name": "Budi Santoso",
+     *     "email": "budi@haleyorapower.co.id",
+     *     "employee_id": "IT-001",
+     *     "is_admin": false,
+     *     "is_active": true
+     *   }
+     * }
      */
     public function me(Request $request): JsonResponse
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             return ApiResponse::unauthorized();
         }
 
         return ApiResponse::success(
-            [
-                'id' => $user->id,
-                'name' => $user->full_name,
-                'email' => $user->email,
-                'employee_id' => $user->employee_id,
-                'is_admin' => $user->is_admin,
-                'is_active' => $user->is_active,
-            ],
+            $user->toAuthArray(),
             ApiMessages::AUTH_ME_SUCCESS,
             200
         );
     }
 
     /**
-     * Register or refresh the FCM device token for the authenticated user.
-     * Call this whenever Firebase SDK provides a new token (onTokenRefresh).
+     * Update FCM token
      *
-     * @param Request $request
-     * @return JsonResponse
+     * Daftarkan atau perbarui token FCM device untuk user yang sedang login. Panggil setiap kali
+     * Firebase SDK memberi token baru (onTokenRefresh).
+     *
+     * @bodyParam fcm_token string required Token FCM device. Example: fcm_device_token_xyz
+     *
+     * @response 200 scenario="Sukses" {
+     *   "success": true,
+     *   "message": "FCM token updated successfully.",
+     *   "data": null
+     * }
      */
     public function updateFcmToken(Request $request): JsonResponse
     {
@@ -217,6 +288,6 @@ class AuthController extends Controller
 
         FcmToken::register($request->user()->id, $request->input('fcm_token'));
 
-        return ApiResponse::success(null, 'FCM token updated successfully.', 200);
+        return ApiResponse::success(null, ApiMessages::AUTH_FCM_TOKEN_UPDATED, 200);
     }
 }

@@ -124,6 +124,33 @@ class User extends Authenticatable
     }
 
     /**
+     * Alias so packages reading `name` (e.g. AdminLTE navbar) work.
+     */
+    public function getNameAttribute(): string
+    {
+        return $this->full_name;
+    }
+
+    /**
+     * Canonical user payload for auth responses (login, me) — API and web share this shape.
+     */
+    public function toAuthArray(): array
+    {
+        $this->loadMissing('division:id,name,code');
+
+        return [
+            'id' => $this->id,
+            'name' => $this->full_name,
+            'email' => $this->email,
+            'employee_id' => $this->employee_id,
+            'division_id' => $this->division_id,
+            'division' => $this->division?->only(['id', 'name', 'code']),
+            'is_admin' => $this->is_admin,
+            'is_active' => $this->is_active,
+        ];
+    }
+
+    /**
      * Check if user is admin.
      */
     public function isAdmin(): bool
