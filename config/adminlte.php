@@ -330,6 +330,11 @@ return [
             'icon' => 'fas fa-fw fa-building',
         ],
         [
+            'text' => 'Karyawan',
+            'route' => 'admin.users',
+            'icon' => 'fas fa-fw fa-users',
+        ],
+        [
             'header' => 'RESERVASI & PENGADUAN',
         ],
         [

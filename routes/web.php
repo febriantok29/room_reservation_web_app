@@ -7,6 +7,7 @@ use App\Http\Controllers\Web\AdminDivisionController;
 use App\Http\Controllers\Web\AdminFacilityController;
 use App\Http\Controllers\Web\AdminFcmTestController;
 use App\Http\Controllers\Web\AdminReportController;
+use App\Http\Controllers\Web\AdminUserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -54,6 +55,15 @@ Route::prefix('admin')->group(function () {
         Route::get('/divisions/{division}/edit', [AdminDivisionController::class, 'edit'])->name('admin.divisions.edit');
         Route::put('/divisions/{division}', [AdminDivisionController::class, 'update'])->name('admin.divisions.update');
         Route::delete('/divisions/{division}', [AdminDivisionController::class, 'destroy'])->name('admin.divisions.destroy');
+
+        // Users CRUD
+        Route::get('/users', [AdminUserController::class, 'index'])->name('admin.users');
+        Route::get('/users/create', [AdminUserController::class, 'create'])->name('admin.users.create');
+        Route::post('/users', [AdminUserController::class, 'store'])->name('admin.users.store');
+        Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('admin.users.edit');
+        Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('admin.users.update');
+        Route::post('/users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])->name('admin.users.reset-password');
+        Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('admin.users.destroy');
 
         // Reservations CRUD
         Route::get('/reservations', [AdminDashboardController::class, 'reservations'])->name('admin.reservations');
