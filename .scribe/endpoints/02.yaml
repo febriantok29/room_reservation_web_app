@@ -1,0 +1,995 @@
+name: Reservations
+description: |-
+
+  Transaksi reservasi ruang rapat. Validasi non-overlap, kapasitas, dan maintenance dijalankan oleh
+  CSPService (lihat app/Services/CSPService.php) — kegagalan constraint mengembalikan 422 dengan
+  error_code RESERVATION_CONSTRAINT_FAILED.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/reservations
+    metadata:
+      custom: []
+      groupName: Reservations
+      groupDescription: |-
+
+        Transaksi reservasi ruang rapat. Validasi non-overlap, kapasitas, dan maintenance dijalankan oleh
+        CSPService (lihat app/Services/CSPService.php) — kegagalan constraint mengembalikan 422 dengan
+        error_code RESERVATION_CONSTRAINT_FAILED.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'List reservasi'
+      description: 'Karyawan biasa hanya melihat reservasi miliknya; admin melihat semua.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      status:
+        custom: []
+        name: status
+        description: 'Filter status.'
+        required: false
+        example: approved
+        type: string
+        enumValues:
+          - pending
+          - approved
+          - rejected
+          - completed
+          - cancelled
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      room_id:
+        custom: []
+        name: room_id
+        description: 'Filter berdasarkan ruangan.'
+        required: false
+        example: RM-LT01
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      date_from:
+        custom: []
+        name: date_from
+        description: 'date Filter start_time >= tanggal ini (ISO 8601).'
+        required: false
+        example: '2026-07-01'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      date_to:
+        custom: []
+        name: date_to
+        description: 'date Filter start_time <= tanggal ini, harus >= date_from.'
+        required: false
+        example: '2026-07-31'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Aktifkan paginasi dengan ukuran halaman ini (1-100).'
+        required: false
+        example: 15
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      status: approved
+      room_id: RM-LT01
+      date_from: '2026-07-01'
+      date_to: '2026-07-31'
+      per_page: 15
+    bodyParameters:
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: false
+        example: cancelled
+        type: string
+        enumValues:
+          - pending
+          - approved
+          - rejected
+          - completed
+          - cancelled
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      room_id:
+        custom: []
+        name: room_id
+        description: 'Must match an existing stored value.'
+        required: false
+        example: architecto
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      date_from:
+        custom: []
+        name: date_from
+        description: 'Must be a valid date.'
+        required: false
+        example: '2026-07-18T14:58:36'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      date_to:
+        custom: []
+        name: date_to
+        description: 'Must be a valid date. Must be a date after or equal to <code>date_from</code>.'
+        required: false
+        example: '2052-08-10'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      per_page:
+        custom: []
+        name: per_page
+        description: 'Must be at least 1. Must not be greater than 100.'
+        required: false
+        example: 22
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      status: cancelled
+      room_id: architecto
+      date_from: '2026-07-18T14:58:36'
+      date_to: '2052-08-10'
+      per_page: 22
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Data reservasi berhasil diambil",
+            "data": []
+          }
+        headers: []
+        description: 'Sukses tanpa paginasi'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/reservations/calendar
+    metadata:
+      custom: []
+      groupName: Reservations
+      groupDescription: |-
+
+        Transaksi reservasi ruang rapat. Validasi non-overlap, kapasitas, dan maintenance dijalankan oleh
+        CSPService (lihat app/Services/CSPService.php) — kegagalan constraint mengembalikan 422 dengan
+        error_code RESERVATION_CONSTRAINT_FAILED.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Kalender reservasi bulanan'
+      description: |-
+        Mengembalikan ringkasan jumlah reservasi per hari (per status) dan daftar reservasi untuk
+        bulan yang diminta.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters:
+      year:
+        custom: []
+        name: year
+        description: Tahun.
+        required: true
+        example: 2026
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      month:
+        custom: []
+        name: month
+        description: 'Bulan (1-12).'
+        required: true
+        example: 7
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanQueryParameters:
+      year: 2026
+      month: 7
+    bodyParameters:
+      year:
+        custom: []
+        name: year
+        description: 'Must be at least 2000. Must not be greater than 2100.'
+        required: true
+        example: 1
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      month:
+        custom: []
+        name: month
+        description: 'Must be at least 1. Must not be greater than 12.'
+        required: true
+        example: 4
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      year: 1
+      month: 4
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Data kalender reservasi berhasil diambil",
+            "data": {
+              "year": 2026,
+              "month": 7,
+              "summary": {
+                "2026-07-17": {
+                  "total": 2,
+                  "pending": 1,
+                  "approved": 1,
+                  "completed": 0,
+                  "rejected": 0,
+                  "cancelled": 0
+                }
+              },
+              "reservations": []
+            }
+          }
+        headers: []
+        description: Sukses
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/reservations/{id}'
+    metadata:
+      custom: []
+      groupName: Reservations
+      groupDescription: |-
+
+        Transaksi reservasi ruang rapat. Validasi non-overlap, kapasitas, dan maintenance dijalankan oleh
+        CSPService (lihat app/Services/CSPService.php) — kegagalan constraint mengembalikan 422 dengan
+        error_code RESERVATION_CONSTRAINT_FAILED.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Detail reservasi'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'ID reservasi.'
+        required: true
+        example: RSV-20260717-01
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: RSV-20260717-01
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"success":false,"error_code":"UNAUTHORIZED","message":"Token tidak valid atau kadaluarsa"}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+      -
+        custom: []
+        status: 403
+        content: |-
+          {
+            "success": false,
+            "error_code": "FORBIDDEN",
+            "message": "Anda tidak memiliki akses ke resource ini"
+          }
+        headers: []
+        description: 'Bukan pemilik reservasi dan bukan admin'
+      -
+        custom: []
+        status: 404
+        content: |-
+          {
+            "success": false,
+            "error_code": "NOT_FOUND",
+            "message": "Reservasi tidak ditemukan"
+          }
+        headers: []
+        description: 'Tidak ditemukan'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/reservations
+    metadata:
+      custom: []
+      groupName: Reservations
+      groupDescription: |-
+
+        Transaksi reservasi ruang rapat. Validasi non-overlap, kapasitas, dan maintenance dijalankan oleh
+        CSPService (lihat app/Services/CSPService.php) — kegagalan constraint mengembalikan 422 dengan
+        error_code RESERVATION_CONSTRAINT_FAILED.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Buat reservasi baru'
+      description: |-
+        Divalidasi oleh CSPService: waktu valid, room ada & tidak maintenance, kapasitas cukup, dan
+        tidak overlap dengan reservasi berstatus pending/approved lain di ruangan yang sama.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      room_id:
+        custom: []
+        name: room_id
+        description: 'ID ruangan.'
+        required: true
+        example: RM-LT01
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      user_id:
+        custom: []
+        name: user_id
+        description: 'ID karyawan pemesan (hanya bisa diisi admin untuk memesan atas nama orang lain).'
+        required: false
+        example: USR-001
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+      start_time:
+        custom: []
+        name: start_time
+        description: 'Waktu mulai, harus di masa depan (ISO 8601 UTC).'
+        required: true
+        example: '2026-07-20T09:00:00Z'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      end_time:
+        custom: []
+        name: end_time
+        description: 'Waktu selesai, harus setelah start_time.'
+        required: true
+        example: '2026-07-20T10:00:00Z'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      purpose:
+        custom: []
+        name: purpose
+        description: 'Agenda rapat.'
+        required: false
+        example: 'Rapat koordinasi divisi IT'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+      visitor_count:
+        custom: []
+        name: visitor_count
+        description: 'Jumlah peserta, tidak boleh melebihi kapasitas ruangan.'
+        required: true
+        example: 8
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      with_snack:
+        custom: []
+        name: with_snack
+        description: 'Sertakan snack.'
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+      with_lunch:
+        custom: []
+        name: with_lunch
+        description: 'Sertakan makan siang.'
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      room_id: RM-LT01
+      user_id: USR-001
+      start_time: '2026-07-20T09:00:00Z'
+      end_time: '2026-07-20T10:00:00Z'
+      purpose: 'Rapat koordinasi divisi IT'
+      visitor_count: 8
+      with_snack: true
+      with_lunch: false
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 201
+        content: |-
+          {
+            "success": true,
+            "message": "Reservasi berhasil dibuat dan menunggu persetujuan",
+            "data": {}
+          }
+        headers: []
+        description: 'Reservasi berhasil dibuat'
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "error_code": "RESERVATION_CONSTRAINT_FAILED",
+            "message": "Slot waktu tidak tersedia, karena bentrok dengan reservasi lain."
+          }
+        headers: []
+        description: 'Slot waktu bentrok dengan reservasi lain (CSP non-overlapping)'
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "error_code": "RESERVATION_CONSTRAINT_FAILED",
+            "message": "Jumlah pengunjung melebihi kapasitas ruangan."
+          }
+        headers: []
+        description: 'Jumlah peserta melebihi kapasitas ruangan'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/v1/reservations/{id}'
+    metadata:
+      custom: []
+      groupName: Reservations
+      groupDescription: |-
+
+        Transaksi reservasi ruang rapat. Validasi non-overlap, kapasitas, dan maintenance dijalankan oleh
+        CSPService (lihat app/Services/CSPService.php) — kegagalan constraint mengembalikan 422 dengan
+        error_code RESERVATION_CONSTRAINT_FAILED.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Update reservasi'
+      description: |-
+        Semua field bersifat opsional (partial update), tapi minimal satu harus diisi. Diperiksa ulang
+        lewat CSPService (waktu, kapasitas, overlap) sebelum disimpan.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'ID reservasi.'
+        required: true
+        example: RSV-20260717-01
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: RSV-20260717-01
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      room_id:
+        custom: []
+        name: room_id
+        description: 'ID ruangan baru.'
+        required: false
+        example: RM-LT02
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      start_time:
+        custom: []
+        name: start_time
+        description: 'Waktu mulai baru, harus di masa depan.'
+        required: false
+        example: '2026-07-20T09:00:00Z'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      end_time:
+        custom: []
+        name: end_time
+        description: 'Waktu selesai baru, harus setelah start_time.'
+        required: false
+        example: '2026-07-20T10:30:00Z'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      purpose:
+        custom: []
+        name: purpose
+        description: 'Agenda rapat.'
+        required: false
+        example: 'Rapat koordinasi divisi IT'
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+      visitor_count:
+        custom: []
+        name: visitor_count
+        description: 'Jumlah peserta baru.'
+        required: false
+        example: 10
+        type: integer
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+      with_snack:
+        custom: []
+        name: with_snack
+        description: 'Sertakan snack.'
+        required: false
+        example: true
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+      with_lunch:
+        custom: []
+        name: with_lunch
+        description: 'Sertakan makan siang.'
+        required: false
+        example: false
+        type: boolean
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      room_id: RM-LT02
+      start_time: '2026-07-20T09:00:00Z'
+      end_time: '2026-07-20T10:30:00Z'
+      purpose: 'Rapat koordinasi divisi IT'
+      visitor_count: 10
+      with_snack: true
+      with_lunch: false
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Reservasi berhasil diperbarui",
+            "data": {}
+          }
+        headers: []
+        description: 'Berhasil diperbarui'
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "error_code": "NO_UPDATE_PAYLOAD",
+            "message": "Tidak ada data yang dikirim untuk diperbarui"
+          }
+        headers: []
+        description: 'Tidak ada field yang dikirim'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/reservations/{id}/cancel'
+    metadata:
+      custom: []
+      groupName: Reservations
+      groupDescription: |-
+
+        Transaksi reservasi ruang rapat. Validasi non-overlap, kapasitas, dan maintenance dijalankan oleh
+        CSPService (lihat app/Services/CSPService.php) — kegagalan constraint mengembalikan 422 dengan
+        error_code RESERVATION_CONSTRAINT_FAILED.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Batalkan reservasi'
+      description: 'Hanya reservasi milik sendiri (atau oleh admin) yang belum berlangsung yang bisa dibatalkan.'
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'ID reservasi.'
+        required: true
+        example: RSV-20260717-01
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: RSV-20260717-01
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Reservasi berhasil dibatalkan",
+            "data": {}
+          }
+        headers: []
+        description: 'Berhasil dibatalkan'
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "error_code": "RESERVATION_ALREADY_STARTED",
+            "message": "Reservasi yang sudah dimulai tidak dapat diubah"
+          }
+        headers: []
+        description: 'Reservasi sudah dimulai'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/reservations/{id}/complete'
+    metadata:
+      custom: []
+      groupName: Reservations
+      groupDescription: |-
+
+        Transaksi reservasi ruang rapat. Validasi non-overlap, kapasitas, dan maintenance dijalankan oleh
+        CSPService (lihat app/Services/CSPService.php) — kegagalan constraint mengembalikan 422 dengan
+        error_code RESERVATION_CONSTRAINT_FAILED.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Selesaikan reservasi'
+      description: |-
+        Menandai reservasi sebagai completed. Hanya berlaku untuk reservasi approved yang waktunya
+        sudah berakhir.
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'ID reservasi.'
+        required: true
+        example: RSV-20260717-01
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: RSV-20260717-01
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Reservasi berhasil selesai",
+            "data": {}
+          }
+        headers: []
+        description: 'Berhasil diselesaikan'
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "error_code": "RESERVATION_NOT_FINISHED",
+            "message": "Reservasi belum berakhir"
+          }
+        headers: []
+        description: 'Reservasi belum berakhir'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/reservations/{id}/approve'
+    metadata:
+      custom: []
+      groupName: Reservations
+      groupDescription: |-
+
+        Transaksi reservasi ruang rapat. Validasi non-overlap, kapasitas, dan maintenance dijalankan oleh
+        CSPService (lihat app/Services/CSPService.php) — kegagalan constraint mengembalikan 422 dengan
+        error_code RESERVATION_CONSTRAINT_FAILED.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Setujui reservasi (admin)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'ID reservasi.'
+        required: true
+        example: RSV-20260717-01
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: RSV-20260717-01
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Reservasi berhasil disetujui",
+            "data": {}
+          }
+        headers: []
+        description: 'Berhasil disetujui'
+      -
+        custom: []
+        status: 422
+        content: |-
+          {
+            "success": false,
+            "error_code": "RESERVATION_CONSTRAINT_FAILED",
+            "message": "Reservasi tidak dapat disetujui karena melanggar aturan"
+          }
+        headers: []
+        description: 'Melanggar constraint saat disetujui (misal jadi overlap)'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/reservations/{id}/reject'
+    metadata:
+      custom: []
+      groupName: Reservations
+      groupDescription: |-
+
+        Transaksi reservasi ruang rapat. Validasi non-overlap, kapasitas, dan maintenance dijalankan oleh
+        CSPService (lihat app/Services/CSPService.php) — kegagalan constraint mengembalikan 422 dengan
+        error_code RESERVATION_CONSTRAINT_FAILED.
+      subgroup: ''
+      subgroupDescription: ''
+      title: 'Tolak reservasi (admin)'
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_KEY}'
+      Content-Type: application/json
+      Accept: application/json
+    urlParameters:
+      id:
+        custom: []
+        name: id
+        description: 'ID reservasi.'
+        required: true
+        example: RSV-20260717-01
+        type: string
+        enumValues: []
+        exampleWasSpecified: true
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      id: RSV-20260717-01
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 200
+        content: |-
+          {
+            "success": true,
+            "message": "Reservasi berhasil ditolak",
+            "data": {}
+          }
+        headers: []
+        description: 'Berhasil ditolak'
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 6g43cv8PD1aE5beadkZfhV6'
+    controller: null
+    method: null
+    route: null
