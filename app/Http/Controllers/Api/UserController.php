@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\EnsuresAdminAccess;
 use App\Http\Responses\ApiResponse;
 use App\Models\User;
 use App\Support\ApiMessages;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    use EnsuresAdminAccess;
+
     /**
      * List active non-admin users.
      * Used by admin when creating a reservation on behalf of another user.
@@ -57,12 +60,4 @@ class UserController extends Controller
         return ApiResponse::success($query->get(), ApiMessages::USER_LIST_SUCCESS);
     }
 
-    private function ensureAdmin(Request $request): ?JsonResponse
-    {
-        if (!$request->user()?->isAdmin()) {
-            return ApiResponse::forbidden();
-        }
-
-        return null;
-    }
 }

@@ -284,15 +284,15 @@ class ReservationService
             ];
         }
 
-        // if ($reservation->end_time->gt(now())) {
-        //     return [
-        //         'success' => false,
-        //         'status_code' => 422,
-        //         'error_code' => ApiErrorCodes::RESERVATION_NOT_FINISHED,
-        //         'message' => ApiMessages::RESERVATION_NOT_FINISHED,
-        //         'errors' => [],
-        //     ];
-        // }
+        if ($reservation->end_time->gt(now())) {
+            return [
+                'success' => false,
+                'status_code' => 422,
+                'error_code' => ApiErrorCodes::RESERVATION_NOT_FINISHED,
+                'message' => ApiMessages::RESERVATION_NOT_FINISHED,
+                'errors' => [],
+            ];
+        }
 
         $reservation->status = ReservationStatus::Completed->value;
         $reservation->updated_by = $actor->id;

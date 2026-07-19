@@ -14,6 +14,7 @@ final class ApiMessages
     public const AUTH_REFRESH_SUCCESS = 'Token refresh berhasil';
     public const AUTH_LOGOUT_SUCCESS = 'Logout berhasil. Mohon hapus token dari perangkat Anda';
     public const AUTH_ME_SUCCESS = 'Data pengguna berhasil diambil';
+    public const AUTH_FCM_TOKEN_UPDATED = 'Token FCM berhasil diperbarui';
 
     public const UNAUTHORIZED = 'Token tidak valid atau kadaluarsa';
     public const FORBIDDEN = 'Anda tidak memiliki akses ke resource ini';

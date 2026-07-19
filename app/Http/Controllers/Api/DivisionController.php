@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\EnsuresAdminAccess;
 use App\Http\Responses\ApiResponse;
 use App\Models\Division;
 use App\Services\DivisionIdGenerator;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
 
 class DivisionController extends Controller
 {
+    use EnsuresAdminAccess;
+
     public function index(Request $request): JsonResponse
     {
         $query = Division::query()->whereNull('deleted_at')->orderBy('id');
@@ -74,7 +77,7 @@ class DivisionController extends Controller
             'created_by'  => $request->user()?->id,
         ]);
 
-        return ApiResponse::created($division, ApiMessages::DIVISION_CREATED_SUCCESS);
+        return ApiResponse::success($division, ApiMessages::DIVISION_CREATED_SUCCESS, 201);
     }
 
     public function update(Request $request, string $id): JsonResponse

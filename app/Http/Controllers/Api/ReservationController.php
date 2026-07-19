@@ -14,6 +14,13 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @group Reservations
+ *
+ * Transaksi reservasi ruang rapat. Validasi non-overlap, kapasitas, dan maintenance dijalankan oleh
+ * CSPService (lihat app/Services/CSPService.php) — kegagalan constraint mengembalikan 422 dengan
+ * error_code RESERVATION_CONSTRAINT_FAILED.
+ */
 class ReservationController extends Controller
 {
     private ReservationService $reservationService;
@@ -23,6 +30,23 @@ class ReservationController extends Controller
         $this->reservationService = $reservationService;
     }
 
+    /**
+     * List reservasi
+     *
+     * Karyawan biasa hanya melihat reservasi miliknya; admin melihat semua.
+     *
+     * @queryParam status string Filter status. Enum: pending,approved,rejected,completed,cancelled. Example: approved
+     * @queryParam room_id string Filter berdasarkan ruangan. Example: RM-LT01
+     * @queryParam date_from date Filter start_time >= tanggal ini (ISO 8601). Example: 2026-07-01
+     * @queryParam date_to date Filter start_time <= tanggal ini, harus >= date_from. Example: 2026-07-31
+     * @queryParam per_page int Aktifkan paginasi dengan ukuran halaman ini (1-100). Example: 15
+     *
+     * @response 200 scenario="Sukses tanpa paginasi" {
+     *   "success": true,
+     *   "message": "Data reservasi berhasil diambil",
+     *   "data": []
+     * }
+     */
     public function index(Request $request): JsonResponse
     {
         // ensure statuses are up‑to‑date in case the scheduler hasn't run yet
@@ -52,11 +76,11 @@ class ReservationController extends Controller
         }
 
         if ($request->filled('date_from')) {
-            $query->where('start_time', '>=', $request->input('date_from'));
+            $query->where('start_time', '>=', Carbon::parse($request->input('date_from'))->startOfDay());
         }
 
         if ($request->filled('date_to')) {
-            $query->where('start_time', '<=', $request->input('date_to'));
+            $query->where('start_time', '<=', Carbon::parse($request->input('date_to'))->endOfDay());
         }
 
         $perPage = $request->input('per_page');
@@ -69,6 +93,22 @@ class ReservationController extends Controller
         return ApiResponse::success($query->get(), ApiMessages::RESERVATION_LIST_SUCCESS);
     }
 
+    /**
+     * Detail reservasi
+     *
+     * @urlParam id string required ID reservasi. Example: RSV-20260717-01
+     *
+     * @response 404 scenario="Tidak ditemukan" {
+     *   "success": false,
+     *   "error_code": "NOT_FOUND",
+     *   "message": "Reservasi tidak ditemukan"
+     * }
+     * @response 403 scenario="Bukan pemilik reservasi dan bukan admin" {
+     *   "success": false,
+     *   "error_code": "FORBIDDEN",
+     *   "message": "Anda tidak memiliki akses ke resource ini"
+     * }
+     */
     public function show(Request $request, string $id): JsonResponse
     {
         $reservation = Reservation::query()
@@ -76,17 +116,48 @@ class ReservationController extends Controller
             ->where('id', $id)
             ->first();
 
-        if (!$reservation) {
+        if (! $reservation) {
             return ApiResponse::notFound(ApiMessages::RESERVATION_NOT_FOUND);
         }
 
-        if (!$this->reservationService->canAccess($request->user(), $reservation)) {
+        if (! $this->reservationService->canAccess($request->user(), $reservation)) {
             return ApiResponse::forbidden();
         }
 
         return ApiResponse::success($reservation, ApiMessages::RESERVATION_DETAIL_SUCCESS);
     }
 
+    /**
+     * Buat reservasi baru
+     *
+     * Divalidasi oleh CSPService: waktu valid, room ada & tidak maintenance, kapasitas cukup, dan
+     * tidak overlap dengan reservasi berstatus pending/approved lain di ruangan yang sama.
+     *
+     * @bodyParam room_id string required ID ruangan. Example: RM-LT01
+     * @bodyParam user_id string ID karyawan pemesan (hanya bisa diisi admin untuk memesan atas nama orang lain). Example: USR-001
+     * @bodyParam start_time string required Waktu mulai, harus di masa depan (ISO 8601 UTC). Example: 2026-07-20T09:00:00Z
+     * @bodyParam end_time string required Waktu selesai, harus setelah start_time. Example: 2026-07-20T10:00:00Z
+     * @bodyParam purpose string Agenda rapat. Example: Rapat koordinasi divisi IT
+     * @bodyParam visitor_count int required Jumlah peserta, tidak boleh melebihi kapasitas ruangan. Example: 8
+     * @bodyParam with_snack boolean Sertakan snack. Example: true
+     * @bodyParam with_lunch boolean Sertakan makan siang. Example: false
+     *
+     * @response 201 scenario="Reservasi berhasil dibuat" {
+     *   "success": true,
+     *   "message": "Reservasi berhasil dibuat dan menunggu persetujuan",
+     *   "data": {}
+     * }
+     * @response 422 scenario="Slot waktu bentrok dengan reservasi lain (CSP non-overlapping)" {
+     *   "success": false,
+     *   "error_code": "RESERVATION_CONSTRAINT_FAILED",
+     *   "message": "Slot waktu tidak tersedia, karena bentrok dengan reservasi lain."
+     * }
+     * @response 422 scenario="Jumlah peserta melebihi kapasitas ruangan" {
+     *   "success": false,
+     *   "error_code": "RESERVATION_CONSTRAINT_FAILED",
+     *   "message": "Jumlah pengunjung melebihi kapasitas ruangan."
+     * }
+     */
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -109,14 +180,14 @@ class ReservationController extends Controller
             $requestedUserId = $request->input('user_id');
             $currentUserId = $request->user()?->id;
 
-            if ($requestedUserId !== $currentUserId && !$request->user()?->isAdmin()) {
+            if ($requestedUserId !== $currentUserId && ! $request->user()?->isAdmin()) {
                 return ApiResponse::forbidden();
             }
         }
 
         $result = $this->reservationService->create($request->user(), $validator->validated());
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return ApiResponse::error(
                 $result['error_code'],
                 $result['message'],
@@ -128,11 +199,38 @@ class ReservationController extends Controller
         return ApiResponse::success($result['data'], $result['message'], 201);
     }
 
+    /**
+     * Update reservasi
+     *
+     * Semua field bersifat opsional (partial update), tapi minimal satu harus diisi. Diperiksa ulang
+     * lewat CSPService (waktu, kapasitas, overlap) sebelum disimpan.
+     *
+     * @urlParam id string required ID reservasi. Example: RSV-20260717-01
+     *
+     * @bodyParam room_id string ID ruangan baru. Example: RM-LT02
+     * @bodyParam start_time string Waktu mulai baru, harus di masa depan. Example: 2026-07-20T09:00:00Z
+     * @bodyParam end_time string Waktu selesai baru, harus setelah start_time. Example: 2026-07-20T10:30:00Z
+     * @bodyParam purpose string Agenda rapat. Example: Rapat koordinasi divisi IT
+     * @bodyParam visitor_count int Jumlah peserta baru. Example: 10
+     * @bodyParam with_snack boolean Sertakan snack. Example: true
+     * @bodyParam with_lunch boolean Sertakan makan siang. Example: false
+     *
+     * @response 200 scenario="Berhasil diperbarui" {
+     *   "success": true,
+     *   "message": "Reservasi berhasil diperbarui",
+     *   "data": {}
+     * }
+     * @response 422 scenario="Tidak ada field yang dikirim" {
+     *   "success": false,
+     *   "error_code": "NO_UPDATE_PAYLOAD",
+     *   "message": "Tidak ada data yang dikirim untuk diperbarui"
+     * }
+     */
     public function update(Request $request, string $id): JsonResponse
     {
         $reservation = Reservation::query()->where('id', $id)->first();
 
-        if (!$reservation) {
+        if (! $reservation) {
             return ApiResponse::notFound(ApiMessages::RESERVATION_NOT_FOUND);
         }
 
@@ -159,11 +257,11 @@ class ReservationController extends Controller
             );
         }
 
-        if (!isset($validated['end_time']) && isset($validated['start_time'])) {
+        if (! isset($validated['end_time']) && isset($validated['start_time'])) {
             $validated['end_time'] = $reservation->end_time;
         }
 
-        if (isset($validated['end_time']) && !isset($validated['start_time'])) {
+        if (isset($validated['end_time']) && ! isset($validated['start_time'])) {
             $validated['start_time'] = $reservation->start_time;
         }
 
@@ -176,7 +274,7 @@ class ReservationController extends Controller
 
         $result = $this->reservationService->update($request->user(), $reservation, $validated);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return ApiResponse::error(
                 $result['error_code'],
                 $result['message'],
@@ -188,17 +286,35 @@ class ReservationController extends Controller
         return ApiResponse::success($result['data'], $result['message']);
     }
 
+    /**
+     * Batalkan reservasi
+     *
+     * Hanya reservasi milik sendiri (atau oleh admin) yang belum berlangsung yang bisa dibatalkan.
+     *
+     * @urlParam id string required ID reservasi. Example: RSV-20260717-01
+     *
+     * @response 200 scenario="Berhasil dibatalkan" {
+     *   "success": true,
+     *   "message": "Reservasi berhasil dibatalkan",
+     *   "data": {}
+     * }
+     * @response 422 scenario="Reservasi sudah dimulai" {
+     *   "success": false,
+     *   "error_code": "RESERVATION_ALREADY_STARTED",
+     *   "message": "Reservasi yang sudah dimulai tidak dapat diubah"
+     * }
+     */
     public function cancel(Request $request, string $id): JsonResponse
     {
         $reservation = Reservation::query()->where('id', $id)->first();
 
-        if (!$reservation) {
+        if (! $reservation) {
             return ApiResponse::notFound(ApiMessages::RESERVATION_NOT_FOUND);
         }
 
         $result = $this->reservationService->cancel($request->user(), $reservation);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return ApiResponse::error(
                 $result['error_code'],
                 $result['message'],
@@ -210,17 +326,36 @@ class ReservationController extends Controller
         return ApiResponse::success($result['data'], $result['message']);
     }
 
+    /**
+     * Selesaikan reservasi
+     *
+     * Menandai reservasi sebagai completed. Hanya berlaku untuk reservasi approved yang waktunya
+     * sudah berakhir.
+     *
+     * @urlParam id string required ID reservasi. Example: RSV-20260717-01
+     *
+     * @response 200 scenario="Berhasil diselesaikan" {
+     *   "success": true,
+     *   "message": "Reservasi berhasil selesai",
+     *   "data": {}
+     * }
+     * @response 422 scenario="Reservasi belum berakhir" {
+     *   "success": false,
+     *   "error_code": "RESERVATION_NOT_FINISHED",
+     *   "message": "Reservasi belum berakhir"
+     * }
+     */
     public function complete(Request $request, string $id): JsonResponse
     {
         $reservation = Reservation::query()->where('id', $id)->first();
 
-        if (!$reservation) {
+        if (! $reservation) {
             return ApiResponse::notFound(ApiMessages::RESERVATION_NOT_FOUND);
         }
 
         $result = $this->reservationService->complete($request->user(), $reservation);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return ApiResponse::error(
                 $result['error_code'],
                 $result['message'],
@@ -232,17 +367,33 @@ class ReservationController extends Controller
         return ApiResponse::success($result['data'], $result['message']);
     }
 
+    /**
+     * Setujui reservasi (admin)
+     *
+     * @urlParam id string required ID reservasi. Example: RSV-20260717-01
+     *
+     * @response 200 scenario="Berhasil disetujui" {
+     *   "success": true,
+     *   "message": "Reservasi berhasil disetujui",
+     *   "data": {}
+     * }
+     * @response 422 scenario="Melanggar constraint saat disetujui (misal jadi overlap)" {
+     *   "success": false,
+     *   "error_code": "RESERVATION_CONSTRAINT_FAILED",
+     *   "message": "Reservasi tidak dapat disetujui karena melanggar aturan"
+     * }
+     */
     public function approve(Request $request, string $id): JsonResponse
     {
         $reservation = Reservation::query()->where('id', $id)->first();
 
-        if (!$reservation) {
+        if (! $reservation) {
             return ApiResponse::notFound(ApiMessages::RESERVATION_NOT_FOUND);
         }
 
         $result = $this->reservationService->approve($request->user(), $reservation);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return ApiResponse::error(
                 $result['error_code'],
                 $result['message'],
@@ -254,17 +405,28 @@ class ReservationController extends Controller
         return ApiResponse::success($result['data'], $result['message']);
     }
 
+    /**
+     * Tolak reservasi (admin)
+     *
+     * @urlParam id string required ID reservasi. Example: RSV-20260717-01
+     *
+     * @response 200 scenario="Berhasil ditolak" {
+     *   "success": true,
+     *   "message": "Reservasi berhasil ditolak",
+     *   "data": {}
+     * }
+     */
     public function reject(Request $request, string $id): JsonResponse
     {
         $reservation = Reservation::query()->where('id', $id)->first();
 
-        if (!$reservation) {
+        if (! $reservation) {
             return ApiResponse::notFound(ApiMessages::RESERVATION_NOT_FOUND);
         }
 
         $result = $this->reservationService->reject($request->user(), $reservation);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return ApiResponse::error(
                 $result['error_code'],
                 $result['message'],
@@ -276,10 +438,39 @@ class ReservationController extends Controller
         return ApiResponse::success($result['data'], $result['message']);
     }
 
+    /**
+     * Kalender reservasi bulanan
+     *
+     * Mengembalikan ringkasan jumlah reservasi per hari (per status) dan daftar reservasi untuk
+     * bulan yang diminta.
+     *
+     * @queryParam year int required Tahun. Example: 2026
+     * @queryParam month int required Bulan (1-12). Example: 7
+     *
+     * @response 200 scenario="Sukses" {
+     *   "success": true,
+     *   "message": "Data kalender reservasi berhasil diambil",
+     *   "data": {
+     *     "year": 2026,
+     *     "month": 7,
+     *     "summary": {
+     *       "2026-07-17": {
+     *         "total": 2,
+     *         "pending": 1,
+     *         "approved": 1,
+     *         "completed": 0,
+     *         "rejected": 0,
+     *         "cancelled": 0
+     *       }
+     *     },
+     *     "reservations": []
+     *   }
+     * }
+     */
     public function calendar(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'year'  => 'required|integer|min:2000|max:2100',
+            'year' => 'required|integer|min:2000|max:2100',
             'month' => 'required|integer|min:1|max:12',
         ]);
 
@@ -287,11 +478,11 @@ class ReservationController extends Controller
             return ApiResponse::validationError($validator->errors()->toArray());
         }
 
-        $year  = (int) $request->input('year');
+        $year = (int) $request->input('year');
         $month = (int) $request->input('month');
 
         $from = Carbon::createFromDate($year, $month, 1)->startOfDay()->utc();
-        $to   = $from->copy()->endOfMonth()->endOfDay();
+        $to = $from->copy()->endOfMonth()->endOfDay();
 
         $reservations = $this->reservationService->queryFor($request->user())
             ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id'])
@@ -303,13 +494,13 @@ class ReservationController extends Controller
         $summary = [];
         foreach ($reservations as $reservation) {
             $day = $reservation->start_time->toDateString();
-            if (!isset($summary[$day])) {
+            if (! isset($summary[$day])) {
                 $summary[$day] = [
                     'total' => 0,
-                    ReservationStatus::Pending->value   => 0,
-                    ReservationStatus::Approved->value  => 0,
+                    ReservationStatus::Pending->value => 0,
+                    ReservationStatus::Approved->value => 0,
                     ReservationStatus::Completed->value => 0,
-                    ReservationStatus::Rejected->value  => 0,
+                    ReservationStatus::Rejected->value => 0,
                     ReservationStatus::Cancelled->value => 0,
                 ];
             }
@@ -320,9 +511,9 @@ class ReservationController extends Controller
         }
 
         return ApiResponse::success([
-            'year'         => $year,
-            'month'        => $month,
-            'summary'      => $summary,
+            'year' => $year,
+            'month' => $month,
+            'summary' => $summary,
             'reservations' => $reservations,
         ], ApiMessages::RESERVATION_CALENDAR_SUCCESS);
     }

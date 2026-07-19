@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\EnsuresAdminAccess;
 use App\Http\Responses\ApiResponse;
 use App\Models\Facility;
 use App\Support\ApiMessages;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Validator;
 
 class FacilityController extends Controller
 {
+    use EnsuresAdminAccess;
+
     public function index(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -153,12 +156,4 @@ class FacilityController extends Controller
         return ApiResponse::success(null, ApiMessages::FACILITY_DELETED_SUCCESS);
     }
 
-    private function ensureAdmin(Request $request): ?JsonResponse
-    {
-        if (!$request->user()?->isAdmin()) {
-            return ApiResponse::forbidden();
-        }
-
-        return null;
-    }
 }
