@@ -71,18 +71,6 @@ Route::prefix('v1')->middleware('jwt')->group(function () {
     Route::get('/complaints/{id}', [ComplaintController::class, 'show']);
     Route::patch('/complaints/{id}/status', [ComplaintController::class, 'updateStatus']);
 
-    // Report endpoints (Outputs 3, 5, 6, 7, 8, 9, 10)
-    Route::prefix('reports')->group(function () {
-        Route::get('/complaints',        [ReportController::class, 'complaints']);
-        Route::get('/usage',             [ReportController::class, 'usage']);
-        Route::get('/user-activity',     [ReportController::class, 'userActivity']);
-        Route::get('/schedule-history',  [ReportController::class, 'scheduleHistory']);
-        Route::get('/periodic',          [ReportController::class, 'periodic']);
-        Route::get('/division-activity', [ReportController::class, 'divisionActivity']);
-        Route::get('/maintenance',       [ReportController::class, 'maintenance']);
-        Route::get('/division-usage',    [ReportController::class, 'divisionUsage']);
-    });
-
     // Notification history endpoints
     Route::prefix('notifications')->group(function () {
         Route::get('/',                            [NotificationController::class, 'index']);
@@ -91,4 +79,16 @@ Route::prefix('v1')->middleware('jwt')->group(function () {
         Route::post('/{id}/read',                  [NotificationController::class, 'markRead']);
         Route::delete('/{id}',                     [NotificationController::class, 'destroy']);
     });
+});
+
+// Report endpoints (Outputs 3, 5, 6, 7, 8, 9, 10) — admin only
+Route::prefix('v1/reports')->middleware('jwt:admin')->group(function () {
+    Route::get('/complaints',        [ReportController::class, 'complaints']);
+    Route::get('/usage',             [ReportController::class, 'usage']);
+    Route::get('/user-activity',     [ReportController::class, 'userActivity']);
+    Route::get('/schedule-history',  [ReportController::class, 'scheduleHistory']);
+    Route::get('/periodic',          [ReportController::class, 'periodic']);
+    Route::get('/division-activity', [ReportController::class, 'divisionActivity']);
+    Route::get('/maintenance',       [ReportController::class, 'maintenance']);
+    Route::get('/division-usage',    [ReportController::class, 'divisionUsage']);
 });

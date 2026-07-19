@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\EnsuresAdminAccess;
 use App\Http\Responses\ApiResponse;
 use App\Models\Facility;
 use App\Models\Room;
@@ -20,6 +21,8 @@ use Throwable;
 
 class RoomController extends Controller
 {
+    use EnsuresAdminAccess;
+
     private CSPService $cspService;
     private ImageService $imageService;
 
@@ -321,19 +324,22 @@ class RoomController extends Controller
         $end          = Carbon::parse($request->input('end_time'))->utc();
         $visitorCount = (int) $request->input('visitor_count', 1);
 
-        $rooms = Room::query()
+        // Exclude rooms with an overlapping pending/approved reservation in a single
+        // query, using the same half-open interval formula as CSPService
+        $available = Room::query()
             ->with('facilities')
             ->whereNull('deleted_at')
             ->where('is_maintenance', false)
             ->where('capacity', '>=', $visitorCount)
+            ->whereDoesntHave('reservations', function ($q) use ($start, $end) {
+                $q->whereNull('deleted_at')
+                  ->whereIn('status', [ReservationStatus::Pending->value, ReservationStatus::Approved->value])
+                  ->where('start_time', '<', $end)
+                  ->where('end_time', '>', $start);
+            })
             ->orderBy('floor')
             ->orderBy('name')
             ->get();
-
-        // Filter out rooms that have an overlapping approved/pending reservation
-        $available = $rooms->filter(function (Room $room) use ($start, $end) {
-            return $this->cspService->isRoomAvailable($room->id, $start, $end);
-        })->values();
 
         return ApiResponse::success([
             'start_time'    => $start->toIso8601String(),
@@ -473,12 +479,4 @@ class RoomController extends Controller
         return ApiResponse::success(null, ApiMessages::ROOM_IMAGE_DELETED_SUCCESS, 200);
     }
 
-    private function ensureAdmin(Request $request): ?JsonResponse
-    {
-        if (!$request->user()?->isAdmin()) {
-            return ApiResponse::forbidden();
-        }
-
-        return null;
-    }
 }

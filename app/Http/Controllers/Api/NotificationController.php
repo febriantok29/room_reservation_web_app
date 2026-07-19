@@ -41,6 +41,8 @@ class NotificationController extends Controller
                 'per_page'     => $paginated->perPage(),
                 'current_page' => $paginated->currentPage(),
                 'last_page'    => $paginated->lastPage(),
+                'from'         => $paginated->firstItem(),
+                'to'           => $paginated->lastItem(),
                 'unread_count' => $request->user()->unreadNotifications()->count(),
             ]
         );
