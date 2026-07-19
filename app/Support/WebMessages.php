@@ -16,6 +16,10 @@ final class WebMessages
     public const FACILITY_UPDATED_SUCCESS = 'Data fasilitas berhasil diperbarui.';
     public const FACILITY_DELETED_SUCCESS = 'Data fasilitas berhasil dihapus.';
     public const FACILITY_DUPLICATE_NAME = 'Nama fasilitas sudah digunakan.';
+
+    public const USER_UPDATED_SUCCESS = 'Data karyawan berhasil diperbarui.';
+    public const USER_DELETED_SUCCESS = 'Data karyawan berhasil dihapus.';
+    public const USER_CANNOT_MODIFY_SELF = 'Anda tidak dapat menonaktifkan atau menghapus akun sendiri.';
     public const FACILITY_INVALID_NAME = 'Nama fasilitas tidak valid.';
 
     public const RESERVATION_END_AFTER_START = 'Jam selesai harus setelah jam mulai.';
