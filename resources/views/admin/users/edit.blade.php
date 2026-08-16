@@ -57,7 +57,7 @@
                 Karyawan wajib mengganti password saat login berikutnya. Gunakan bila karyawan lupa password.
             </p>
             <form action="{{ route('admin.users.reset-password', $user) }}" method="POST"
-                onsubmit="return confirm('Reset password {{ $user->full_name }} ke password awal?')"
+                data-confirm-delete="Reset password {{ $user->full_name }} ke password awal?"
                 data-submit-guard data-loading-text="Memproses...">
                 @csrf
                 <button type="submit" class="btn btn-outline-warning">
@@ -70,4 +70,5 @@
 
 @push('js')
     @include('admin.partials.form_submit_guard_script')
+    @include('admin.partials.confirm_delete')
 @endpush
