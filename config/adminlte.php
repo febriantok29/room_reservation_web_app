@@ -418,6 +418,11 @@ return [
             'icon' => 'fas fa-fw fa-paper-plane',
         ],
         [
+            'text' => 'Debug Feature',
+            'route' => 'admin.tools.reservation-debug',
+            'icon' => 'fas fa-fw fa-flask',
+        ],
+        [
             'text' => 'Keluar',
             'route' => 'admin.logout',
             'icon' => 'fas fa-fw fa-sign-out-alt',
