@@ -78,6 +78,11 @@
                         </div>
 
                         <div class="row mb-2">
+                            <div class="col-5 text-muted small font-weight-bold">Divisi</div>
+                            <div class="col-7 small">{{ $reservation->user?->division?->name ?? '-' }}</div>
+                        </div>
+
+                        <div class="row mb-2">
                             <div class="col-5 text-muted small font-weight-bold">Ruangan</div>
                             <div class="col-7 small">
                                 {{ $reservation->room?->name ?? '-' }}
@@ -106,11 +111,14 @@
                             <div class="col-7 small">{{ $reservation->visitor_count }} orang</div>
                         </div>
 
-                        @if ($reservation->required_facilities)
-                            <div class="row mb-2">
-                                <div class="col-5 text-muted small font-weight-bold">Fasilitas Diminta</div>
-                                <div class="col-7 small">{{ $reservation->required_facilities }}</div>
+                        @if($reservation->with_snack || $reservation->with_lunch)
+                        <div class="row mb-2">
+                            <div class="col-5 text-muted small font-weight-bold">Konsumsi</div>
+                            <div class="col-7 small">
+                                @if($reservation->with_snack)<span class="badge badge-warning">Snack</span>@endif
+                                @if($reservation->with_lunch)<span class="badge badge-info">Makan Siang</span>@endif
                             </div>
+                        </div>
                         @endif
 
                         <div class="row mb-2">
@@ -277,7 +285,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 @stop
 
-@section('js')
+@push('js')
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     @include('admin.partials.form_submit_guard_script')
 
@@ -350,6 +358,6 @@
             }
         });
     </script>
-@stop
+@endpush
 
 @include('admin.partials.timezone_detector')

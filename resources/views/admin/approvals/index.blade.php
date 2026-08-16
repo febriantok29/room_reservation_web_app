@@ -74,13 +74,20 @@
                         </div>
 
                         {{-- User + Visitors --}}
-                        <div class="d-flex align-items-center text-sm">
-                            <i class="fas fa-user text-muted mr-2" style="width:16px;flex-shrink:0;"></i>
-                            <span>{{ $reservation->user?->full_name ?? '-' }}</span>
-                            <span class="mx-2 text-muted">·</span>
-                            <i class="fas fa-users text-muted mr-1"></i>
-                            <span>{{ $reservation->visitor_count }} orang</span>
-                        </div>
+<div class="d-flex align-items-center text-sm">
+    <i class="fas fa-user text-muted mr-2" style="width:16px;flex-shrink:0;"></i>
+    <span>{{ $reservation->user?->full_name ?? '-' }}</span>
+    <span class="text-muted">({{ $reservation->user?->division?->name ?? '-' }})</span>
+    @if($reservation->with_snack || $reservation->with_lunch)
+        <span class="ml-2">
+            @if($reservation->with_snack)<span class="badge badge-warning"><i class="fas fa-cookie-bite"></i> Snack</span> @endif
+            @if($reservation->with_lunch)<span class="badge badge-info"><i class="fas fa-utensils"></i> Makan Siang</span> @endif
+        </span>
+    @endif
+    <span class="mx-2 text-muted">·</span>
+    <i class="fas fa-users text-muted mr-1"></i>
+    <span>{{ $reservation->visitor_count }} orang</span>
+</div>
 
                         {{-- Purpose --}}
                         @if ($reservation->purpose)
@@ -97,6 +104,9 @@
                         <button type="button" class="btn btn-info btn-xs" data-toggle="modal"
                             data-target="#reservationDetailModal" data-id="{{ $reservation->id }}"
                             data-user="{{ $reservation->user?->full_name ?? '-' }}"
+                            data-division="{{ $reservation->user?->division?->name ?? '-' }}"
+                            data-with-snack="{{ $reservation->with_snack ? 1 : 0 }}"
+                            data-with-lunch="{{ $reservation->with_lunch ? 1 : 0 }}"
                             data-room="{{ $reservation->room?->name ?? '-' }}"
                             data-start="{{ $reservation->start_time_label }}"
                             data-end="{{ $reservation->end_time_label }}"
@@ -174,9 +184,9 @@
                                     lain)</span>
                             </label>
                             <select name="room_id" id="approve-room-select" class="form-control">
+                                <option value="">— Pertahankan ruangan asli —</option>
                                 @foreach ($rooms as $room)
-                                    <option value="{{ $room->id }}" data-capacity="{{ $room->capacity }}"
-                                        {{ $room->is_maintenance ? 'disabled' : '' }}>
+                                    <option value="{{ $room->id }}" data-capacity="{{ $room->capacity }}">
                                         {{ $room->name }} — Lantai {{ $room->floor }} · Kap. {{ $room->capacity }}
                                         orang
                                         {{ $room->is_maintenance ? '(Maintenance)' : '' }}
@@ -185,7 +195,6 @@
                             </select>
                             <small class="text-muted">
                                 Pilih ruangan lain jika perlu dipindah. CSP akan divalidasi ulang.
-                                Ruangan bertanda <em>Maintenance</em> tidak dapat dipilih.
                             </small>
                         </div>
                     </div>
@@ -223,6 +232,14 @@
                                 <td id="modal-detail-user"></td>
                             </tr>
                             <tr>
+                                <th class="bg-light">Divisi</th>
+                                <td id="modal-detail-division"></td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Konsumsi</th>
+                                <td id="modal-detail-consumption"></td>
+                            </tr>
+                            <tr>
                                 <th class="bg-light">Ruangan</th>
                                 <td id="modal-detail-room"></td>
                             </tr>
@@ -253,12 +270,22 @@
     </div>
 @stop
 
-@section('js')
+@push('js')
     <script>
         $('#reservationDetailModal').on('show.bs.modal', function(event) {
             var btn = $(event.relatedTarget);
             $('#modal-detail-id').text(btn.data('id'));
             $('#modal-detail-user').text(btn.data('user'));
+            $('#modal-detail-division').text(btn.data('division'));
+            var snack = btn.attr('data-with-snack') === '1';
+            var lunch = btn.attr('data-with-lunch') === '1';
+            var consumptionHtml = '-';
+            if (snack || lunch) {
+                consumptionHtml = '';
+                if (snack) consumptionHtml += '<span class="badge badge-warning"><i class="fas fa-cookie-bite"></i> Snack</span> ';
+                if (lunch) consumptionHtml += '<span class="badge badge-info"><i class="fas fa-utensils"></i> Makan Siang</span>';
+            }
+            $('#modal-detail-consumption').html(consumptionHtml);
             $('#modal-detail-room').text(btn.data('room'));
             $('#modal-detail-start').text(btn.data('start'));
             $('#modal-detail-end').text(btn.data('end'));
@@ -273,6 +300,6 @@
             $('#approve-room-select').val(btn.data('room-id'));
         });
     </script>
-@endsection
+@endpush
 
 @include('admin.partials.timezone_detector')

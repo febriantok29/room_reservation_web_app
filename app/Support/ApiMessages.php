@@ -36,6 +36,7 @@ final class ApiMessages
     public const FACILITY_LIST_SUCCESS = 'Data fasilitas berhasil diambil';
     public const FACILITY_DETAIL_SUCCESS = 'Detail fasilitas berhasil diambil';
     public const FACILITY_CREATED_SUCCESS = 'Fasilitas berhasil ditambahkan';
+    public const FACILITY_DUPLICATE_NAME = 'Nama fasilitas sudah digunakan';
     public const FACILITY_UPDATED_SUCCESS = 'Fasilitas berhasil diperbarui';
     public const FACILITY_DELETED_SUCCESS = 'Fasilitas berhasil dihapus';
 
@@ -57,6 +58,8 @@ final class ApiMessages
     public const RESERVATION_CONSTRAINT_ROOM_NOT_FOUND = 'Ruangan tidak ditemukan atau sudah dihapus.';
     public const RESERVATION_CONSTRAINT_ROOM_MAINTENANCE = 'Ruangan sedang dalam maintenance.';
     public const RESERVATION_CONSTRAINT_CAPACITY_EXCEEDED = 'Jumlah pengunjung melebihi kapasitas ruangan.';
+    public const RESERVATION_CONSTRAINT_WEEKEND = 'Pemesanan hanya tersedia Senin-Jumat.';
+    public const RESERVATION_CONSTRAINT_OUTSIDE_HOURS = 'Pemesanan hanya tersedia pukul 08:00-17:00.';
     public const RESERVATION_CONSTRAINT_SLOT_UNAVAILABLE = 'Slot waktu tidak tersedia, karena bentrok dengan reservasi lain.';
     public const RESERVATION_UPDATE_PENDING_ONLY = 'Hanya reservasi dengan status pending yang dapat diubah';
     public const RESERVATION_ALREADY_STARTED = 'Reservasi yang sudah dimulai tidak dapat diubah';

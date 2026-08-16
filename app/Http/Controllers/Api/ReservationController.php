@@ -112,7 +112,7 @@ class ReservationController extends Controller
     public function show(Request $request, string $id): JsonResponse
     {
         $reservation = Reservation::query()
-            ->with(['room', 'user'])
+            ->with(['room', 'user', 'user.division:id,name,code'])
             ->where('id', $id)
             ->first();
 
@@ -169,10 +169,16 @@ class ReservationController extends Controller
             'visitor_count' => 'required|integer|min:1|max:1000',
             'with_snack' => 'nullable|boolean',
             'with_lunch' => 'nullable|boolean',
+        ], [
+            'room_id.exists' => ApiMessages::ROOM_NOT_FOUND,
+            'end_time.after' => ApiMessages::RESERVATION_END_TIME_AFTER_START,
+            'start_time.after' => ApiMessages::RESERVATION_CONSTRAINT_PAST_TIME,
         ]);
 
         if ($validator->fails()) {
-            return ApiResponse::validationError($validator->errors()->toArray());
+            $errors = $validator->errors();
+
+            return ApiResponse::validationError($errors->toArray(), $errors->first());
         }
 
         // Only admins may specify a different user_id
@@ -485,7 +491,7 @@ class ReservationController extends Controller
         $to = $from->copy()->endOfMonth()->endOfDay();
 
         $reservations = $this->reservationService->queryFor($request->user())
-            ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id'])
+            ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
             ->where('start_time', '>=', $from)
             ->where('start_time', '<=', $to)
             ->orderBy('start_time')
