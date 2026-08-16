@@ -6,6 +6,7 @@ use App\Http\Controllers\Web\AdminDashboardController;
 use App\Http\Controllers\Web\AdminDivisionController;
 use App\Http\Controllers\Web\AdminFacilityController;
 use App\Http\Controllers\Web\AdminFcmTestController;
+use App\Http\Controllers\Web\AdminNotificationController;
 use App\Http\Controllers\Web\AdminReportController;
 use App\Http\Controllers\Web\AdminUserController;
 use Illuminate\Support\Facades\Route;
@@ -108,6 +109,12 @@ Route::prefix('admin')->group(function () {
         // Tools
         Route::get('/tools/fcm-test', [AdminFcmTestController::class, 'showForm'])->name('admin.tools.fcm-test');
         Route::post('/tools/fcm-test', [AdminFcmTestController::class, 'send'])->name('admin.tools.fcm-test.send');
+
+        // Notifications
+        Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('admin.notifications');
+        Route::get('/notifications/unread', [AdminNotificationController::class, 'unread'])->name('admin.notifications.unread');
+        Route::post('/notifications/{id}/read', [AdminNotificationController::class, 'markRead'])->name('admin.notifications.read');
+        Route::post('/notifications/read-all', [AdminNotificationController::class, 'markAllRead'])->name('admin.notifications.read-all');
 
         Route::match(['get', 'post'], '/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
     });
