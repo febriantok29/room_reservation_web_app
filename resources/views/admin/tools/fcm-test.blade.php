@@ -1,10 +1,10 @@
 @extends('adminlte::page')
 
-@section('title', 'Test Notifikasi FCM')
+@section('title', 'Uji Notifikasi')
 
 @section('content_header')
     <div>
-        <h1 class="m-0">Test Notifikasi FCM</h1>
+        <h1 class="m-0">Uji Notifikasi</h1>
         <div class="page-subtitle">Kirim push notification manual untuk menguji jalur FCM tanpa membuat reservasi.</div>
     </div>
 @stop
