@@ -9,6 +9,7 @@ use App\Notifications\ReservationCancelled;
 use App\Notifications\ReservationCompleted;
 use App\Notifications\ReservationCreated;
 use App\Notifications\ReservationRejected;
+use App\Notifications\ReservationSubmitted;
 use App\Support\ApiErrorCodes;
 use App\Support\ApiMessages;
 use App\Support\ReservationStatus;
@@ -16,6 +17,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class ReservationService
 {
@@ -28,9 +30,9 @@ class ReservationService
 
     public function queryFor(User $actor): Builder
     {
-        $query = Reservation::query()->with(['room', 'user']);
+        $query = Reservation::query()->with(['room', 'user', 'user.division:id,name,code']);
 
-        if (!$actor->canApprove()) {
+        if (! $actor->canApprove()) {
             $query->forUser($actor->id);
         }
 
@@ -72,14 +74,14 @@ class ReservationService
                 $visitorCount
             );
 
-            if (!$constraint['valid']) {
+            if (! $constraint['valid']) {
                 // Log constraint errors for debugging
                 Log::warning('Reservation constraint validation failed', [
                     'room_id' => $roomId,
                     'start_time' => $startTime,
                     'end_time' => $endTime,
                     'visitor_count' => $visitorCount,
-                    'constraint_errors' => $constraint['errors'] ?? []
+                    'constraint_errors' => $constraint['errors'] ?? [],
                 ]);
 
                 // Format errors as flat array for better frontend display
@@ -91,7 +93,7 @@ class ReservationService
                 }
 
                 // Use first constraint error as main message, or fallback to generic message
-                $mainMessage = !empty($errorMessages)
+                $mainMessage = ! empty($errorMessages)
                     ? $errorMessages[0]
                     : ApiMessages::RESERVATION_CONSTRAINT_CREATE_FAILED;
 
@@ -101,7 +103,7 @@ class ReservationService
                     'error_code' => ApiErrorCodes::RESERVATION_CONSTRAINT_FAILED,
                     'message' => $mainMessage,
                     'errors' => [
-                        'reservation' => $errorMessages ?: ['Reservasi tidak valid']
+                        'reservation' => $errorMessages ?: ['Reservasi tidak valid'],
                     ],
                 ];
             }
@@ -120,10 +122,16 @@ class ReservationService
                 'updated_by' => $actor->id,
             ]);
 
-            $reservation->load(['room', 'user']);
+            $reservation->load(['room', 'user', 'user.division:id,name,code']);
 
             if ($reservation->user) {
                 $reservation->user->notify(new ReservationCreated($reservation));
+            }
+
+            // Notify admins that a new pending reservation awaits approval.
+            $admins = User::where('is_admin', true)->get();
+            if ($admins->isNotEmpty()) {
+                Notification::send($admins, new ReservationSubmitted($reservation));
             }
 
             return [
@@ -136,11 +144,11 @@ class ReservationService
 
     public function update(User $actor, Reservation $reservation, array $payload): array
     {
-        if (!$this->canAccess($actor, $reservation)) {
+        if (! $this->canAccess($actor, $reservation)) {
             return $this->forbidden();
         }
 
-        if (!$reservation->isPending()) {
+        if (! $reservation->isPending()) {
             return [
                 'success' => false,
                 'status_code' => 422,
@@ -190,7 +198,7 @@ class ReservationService
                 $reservation->id
             );
 
-            if (!$constraint['valid']) {
+            if (! $constraint['valid']) {
                 return [
                     'success' => false,
                     'status_code' => 422,
@@ -207,11 +215,13 @@ class ReservationService
                 'end_time' => $endTime,
                 'purpose' => $payload['purpose'] ?? $reservation->purpose,
                 'visitor_count' => $visitorCount,
+                'with_snack' => $payload['with_snack'] ?? $reservation->with_snack,
+                'with_lunch' => $payload['with_lunch'] ?? $reservation->with_lunch,
                 'updated_by' => $actor->id,
             ]);
 
             $reservation->save();
-            $reservation->load(['room', 'user']);
+            $reservation->load(['room', 'user', 'user.division:id,name,code']);
 
             return [
                 'success' => true,
@@ -223,7 +233,7 @@ class ReservationService
 
     public function cancel(User $actor, Reservation $reservation): array
     {
-        if (!$this->canAccess($actor, $reservation)) {
+        if (! $this->canAccess($actor, $reservation)) {
             return $this->forbidden();
         }
 
@@ -250,7 +260,7 @@ class ReservationService
         $reservation->status = ReservationStatus::Cancelled->value;
         $reservation->updated_by = $actor->id;
         $reservation->save();
-        $reservation->load(['room', 'user']);
+        $reservation->load(['room', 'user', 'user.division:id,name,code']);
 
         if ($reservation->user) {
             $reservation->user->notify(new ReservationCancelled($reservation));
@@ -269,7 +279,7 @@ class ReservationService
      */
     public function complete(User $actor, Reservation $reservation): array
     {
-        if (!$this->canAccess($actor, $reservation) && !$actor->canApprove()) {
+        if (! $this->canAccess($actor, $reservation) && ! $actor->canApprove()) {
             // only owner or admin may complete
             return $this->forbidden();
         }
@@ -297,7 +307,7 @@ class ReservationService
         $reservation->status = ReservationStatus::Completed->value;
         $reservation->updated_by = $actor->id;
         $reservation->save();
-        $reservation->load(['room', 'user']);
+        $reservation->load(['room', 'user', 'user.division:id,name,code']);
 
         if ($reservation->user) {
             $reservation->user->notify(new ReservationCompleted($reservation));
@@ -336,11 +346,11 @@ class ReservationService
 
     public function approve(User $actor, Reservation $reservation, ?string $targetRoomId = null): array
     {
-        if (!$actor->canApprove()) {
+        if (! $actor->canApprove()) {
             return $this->forbidden();
         }
 
-        if (!$reservation->isPending()) {
+        if (! $reservation->isPending()) {
             return [
                 'success' => false,
                 'status_code' => 422,
@@ -362,7 +372,7 @@ class ReservationService
             // Re-read reservation inside transaction to get the latest status
             $reservation->refresh();
 
-            if (!$reservation->isPending()) {
+            if (! $reservation->isPending()) {
                 return [
                     'success' => false,
                     'status_code' => 422,
@@ -384,7 +394,7 @@ class ReservationService
                 $excludeId
             );
 
-            if (!$constraint['valid']) {
+            if (! $constraint['valid']) {
                 return [
                     'success' => false,
                     'status_code' => 422,
@@ -394,11 +404,11 @@ class ReservationService
                 ];
             }
 
-            $reservation->room_id   = $roomId;
-            $reservation->status    = ReservationStatus::Approved->value;
+            $reservation->room_id = $roomId;
+            $reservation->status = ReservationStatus::Approved->value;
             $reservation->updated_by = $actor->id;
             $reservation->save();
-            $reservation->load(['room', 'user']);
+            $reservation->load(['room', 'user', 'user.division:id,name,code']);
 
             if ($reservation->user) {
                 $reservation->user->notify(new ReservationApproved($reservation));
@@ -414,11 +424,11 @@ class ReservationService
 
     public function reject(User $actor, Reservation $reservation): array
     {
-        if (!$actor->canApprove()) {
+        if (! $actor->canApprove()) {
             return $this->forbidden();
         }
 
-        if (!$reservation->isPending()) {
+        if (! $reservation->isPending()) {
             return [
                 'success' => false,
                 'status_code' => 422,
@@ -431,7 +441,7 @@ class ReservationService
         $reservation->status = ReservationStatus::Rejected->value;
         $reservation->updated_by = $actor->id;
         $reservation->save();
-        $reservation->load(['room', 'user']);
+        $reservation->load(['room', 'user', 'user.division:id,name,code']);
 
         if ($reservation->user) {
             $reservation->user->notify(new ReservationRejected($reservation));

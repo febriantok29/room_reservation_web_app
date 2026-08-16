@@ -148,6 +148,25 @@ class CSPService
             $errors[] = ApiMessages::RESERVATION_CONSTRAINT_PAST_TIME;
         }
 
+        // Constraint 2a & 2b evaluate weekday/operating-hours in local (WIB) wall-clock time.
+        // Stored/returned values stay UTC — ->copy() leaves $startTime/$endTime untouched.
+        $tz = config('app.timezone_user', 'Asia/Jakarta');
+        $startLocal = $startTime->copy()->timezone($tz);
+        $endLocal   = $endTime->copy()->timezone($tz);
+
+        // Constraint 2a: Only weekdays (Monday-Friday)
+        if ($startLocal->isWeekend()) {
+            $errors[] = ApiMessages::RESERVATION_CONSTRAINT_WEEKEND;
+        }
+
+        // Constraint 2b: Within operating hours 08:00-17:00 (compare minute-of-day)
+        // ponytail: assumes same-day reservation (no midnight crossing); add $startLocal->isSameDay($endLocal) if needed.
+        $startMin = $startLocal->hour * 60 + $startLocal->minute;
+        $endMin   = $endLocal->hour * 60 + $endLocal->minute;
+        if ($startMin < OperatingHours::START_HOUR * 60 || $endMin > OperatingHours::END_HOUR * 60) {
+            $errors[] = ApiMessages::RESERVATION_CONSTRAINT_OUTSIDE_HOURS;
+        }
+
         // Constraint 3: Check if room exists and is not deleted
         $room = DB::table('m_rooms')
             ->where('id', $roomId)
@@ -171,7 +190,13 @@ class CSPService
 
         // Constraint 6: No time conflicts (CSP main constraint)
         if (!$this->isRoomAvailable($roomId, $startTime, $endTime, $excludeReservationId)) {
-            $errors[] = ApiMessages::RESERVATION_CONSTRAINT_SLOT_UNAVAILABLE;
+            $conflicts = $this->getConflictingReservations($roomId, $startTime, $endTime, $excludeReservationId);
+            $ids = array_values(array_filter(array_map(fn ($c) => $c->id ?? null, $conflicts)));
+            $message = ApiMessages::RESERVATION_CONSTRAINT_SLOT_UNAVAILABLE;
+            if (!empty($ids)) {
+                $message .= ' (Reservasi bentrok: ' . implode(', ', $ids) . ')';
+            }
+            $errors[] = $message;
         }
 
         return [
