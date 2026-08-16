@@ -1,0 +1,63 @@
+/* FullCalendar custom styles for the admin reservation calendar */
+
+#calendar {
+    font-size: 0.9rem;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.fc .fc-button {
+    padding: 0.3rem 0.65rem;
+    font-size: 0.875rem;
+}
+
+.fc-event {
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.fc-event:hover {
+    opacity: 0.85;
+}
+
+.fc-timegrid-event {
+    border-left-width: 3px;
+}
+
+/* Status badges in modal */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-pending {
+    background: #ffc107;
+    color: #000;
+}
+
+.status-approved {
+    background: #28a745;
+    color: #fff;
+}
+
+.status-rejected {
+    background: #dc3545;
+    color: #fff;
+}
+
+.status-completed {
+    background: #007bff;
+    color: #fff;
+}
+
+.status-cancelled {
+    background: #6c757d;
+    color: #fff;
+}
