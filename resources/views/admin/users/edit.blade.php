@@ -78,10 +78,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="date_of_birth">Tanggal Lahir</label>
+                    <label for="date_of_birth">Tanggal Lahir <span class="text-danger">*</span></label>
                     <input type="date" id="date_of_birth" name="date_of_birth"
                         class="form-control @error('date_of_birth') is-invalid @enderror"
-                        value="{{ old('date_of_birth', $user->date_of_birth?->format('Y-m-d')) }}">
+                        value="{{ old('date_of_birth', $user->date_of_birth?->format('Y-m-d')) }}" required>
                     @error('date_of_birth')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -119,14 +119,15 @@
         </div>
         <div class="card-body">
             <p class="text-muted small mb-2">
-                Password akan dikembalikan ke default <strong>User@123</strong>. Gunakan bila karyawan lupa password.
+                Password akan direset ke password awal (No. Induk + tanggal lahir) dan ditampilkan satu kali.
+                Karyawan wajib mengganti password saat login berikutnya. Gunakan bila karyawan lupa password.
             </p>
             <form action="{{ route('admin.users.reset-password', $user) }}" method="POST"
-                onsubmit="return confirm('Reset password {{ $user->full_name }} ke default?')"
+                onsubmit="return confirm('Reset password {{ $user->full_name }} ke password awal?')"
                 data-submit-guard data-loading-text="Memproses...">
                 @csrf
                 <button type="submit" class="btn btn-outline-warning">
-                    <i class="fas fa-key mr-1"></i> Reset ke Password Default
+                    <i class="fas fa-key mr-1"></i> Reset Password
                 </button>
             </form>
         </div>
