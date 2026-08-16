@@ -15,7 +15,7 @@
     <div class="row">
 
         {{-- Main Form --}}
-        <div class="col-lg-8">
+        <div class="col-lg-12">
             <x-form.card action="{{ route('admin.complaints.store') }}" submit-guard loading-text="Menyimpan..."
                 :multipart="true">
 
@@ -80,69 +80,6 @@
 
                 <x-form.actions back-url="{{ route('admin.complaints') }}" submit-text="Simpan Komplain" />
             </x-form.card>
-        </div>
-
-        {{-- Sidebar: info --}}
-        <div class="col-lg-4">
-            <div class="card card-admin sticky-top" style="top:70px;">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-info-circle mr-2 text-primary"></i>Panduan Pengisian</h3>
-                </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item px-3 py-2">
-                            <div class="d-flex align-items-start">
-                                <span class="badge badge-primary mr-2 mt-1" style="min-width:22px;">1</span>
-                                <div>
-                                    <div class="font-weight-bold small">Referensi Reservasi</div>
-                                    <div class="text-muted" style="font-size:.8rem;">
-                                        Komplain harus dikaitkan dengan reservasi yang sudah disetujui atau selesai
-                                        sebagai bukti bahwa pelapor memang menggunakan ruangan tersebut.
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item px-3 py-2">
-                            <div class="d-flex align-items-start">
-                                <span class="badge badge-primary mr-2 mt-1" style="min-width:22px;">2</span>
-                                <div>
-                                    <div class="font-weight-bold small">Fasilitas Terkait</div>
-                                    <div class="text-muted" style="font-size:.8rem;">
-                                        Jika masalah spesifik pada fasilitas tertentu (mis. proyektor, AC),
-                                        pilih fasilitas tersebut. Kosongkan jika komplain tentang ruangan secara umum.
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item px-3 py-2">
-                            <div class="d-flex align-items-start">
-                                <span class="badge badge-primary mr-2 mt-1" style="min-width:22px;">3</span>
-                                <div>
-                                    <div class="font-weight-bold small">Deskripsi yang Jelas</div>
-                                    <div class="text-muted" style="font-size:.8rem;">
-                                        Sertakan detail seperti: apa yang terjadi, sejak kapan terjadi,
-                                        apakah sudah dilaporkan sebelumnya.
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item px-3 py-2">
-                            <div class="d-flex align-items-start">
-                                <span class="badge badge-warning mr-2 mt-1" style="min-width:22px;"><i class="fas fa-info"
-                                        style="font-size:.65rem;"></i></span>
-                                <div>
-                                    <div class="font-weight-bold small">Status Awal</div>
-                                    <div class="text-muted" style="font-size:.8rem;">
-                                        Komplain baru akan berstatus
-                                        <span class="badge badge-danger badge-sm">TERBUKA</span>
-                                        dan perlu ditangani oleh admin terkait.
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
         </div>
 
     </div>
