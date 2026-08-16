@@ -16,15 +16,12 @@
         <x-form.section title="Informasi Fasilitas">
             <x-form.row>
                 <x-form.field name="name" label="Nama Fasilitas" type="text" :value="old('name', $facility->name)" required />
-
-                <x-form.field name="slug" label="Slug (Auto-generated)" type="text" :value="$facility->slug"
-                    hint="Slug dihasilkan otomatis dari nama fasilitas." disabled />
             </x-form.row>
 
-            @if ($facility->rooms->isNotEmpty())
+            @if ($facility->rooms_count > 0)
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle"></i>
-                    Fasilitas ini digunakan di <strong>{{ $facility->rooms->count() }} ruangan</strong>. Perubahan nama
+                    Fasilitas ini digunakan di <strong>{{ $facility->rooms_count }} ruangan</strong>. Perubahan nama
                     akan mempengaruhi tampilan di semua ruangan tersebut.
                 </div>
             @endif
@@ -34,8 +31,8 @@
     </x-form.card>
 @stop
 
-@section('js')
+@push('js')
     @include('admin.partials.form_submit_guard_script')
-@stop
+@endpush
 
 @include('admin.partials.timezone_detector')
