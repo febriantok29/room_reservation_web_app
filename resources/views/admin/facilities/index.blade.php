@@ -31,7 +31,7 @@
                     <div class="col-lg-9 col-md-8">
                         <div class="form-group mb-0">
                             <input type="text" name="q" class="form-control form-control-sm"
-                                placeholder="Cari nama atau slug fasilitas..." value="{{ request('q') }}">
+                                placeholder="Cari nama fasilitas..." value="{{ request('q') }}">
                         </div>
                     </div>
                     <div class="col-lg-3 col-md-4">
@@ -51,7 +51,8 @@
                 <thead>
                     <tr>
                         <th>Nama</th>
-                        <th>Slug</th>
+                        <th>Jml. Ruangan</th>
+                        <th>Dibuat</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -59,12 +60,20 @@
                     @forelse($facilities as $facility)
                         <tr>
                             <td>{{ $facility->name }}</td>
-                            <td>{{ $facility->slug }}</td>
+                            <td>
+                                @if($facility->rooms_count > 0)
+                                    <span class="badge badge-info">{{ $facility->rooms_count }}</span>
+                                @else
+                                    <span class="text-muted">0</span>
+                                @endif
+                            </td>
+                            <td class="text-muted small">{{ $facility->created_at?->format('d M Y') }}</td>
                             <td>
                                 <div class="table-action-group">
                                     <button type="button" class="btn btn-info btn-xs" data-toggle="modal"
                                         data-target="#facilityDetailModal" data-facility-name="{{ $facility->name }}"
-                                        data-facility-slug="{{ $facility->slug }}">
+                                        data-facility-count="{{ $facility->rooms_count }}"
+                                        data-facility-created="{{ $facility->created_at?->format('d M Y') }}">
                                         <i class="fas fa-eye"></i> Detail
                                     </button>
                                     <a href="{{ route('admin.facilities.edit', $facility->id) }}"
@@ -72,7 +81,7 @@
                                         <i class="fas fa-edit"></i> Ubah
                                     </a>
                                     <form action="{{ route('admin.facilities.destroy', $facility->id) }}" method="POST"
-                                        class="d-inline" onsubmit="return confirm('Yakin ingin menghapus fasilitas ini?')">
+                                        class="d-inline" onsubmit="return confirmDelete({{ $facility->rooms_count }})">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger btn-xs">
@@ -84,7 +93,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="empty-state-cell">
+                            <td colspan="4" class="empty-state-cell">
                                 <div class="empty-icon"><i class="fas fa-plug"></i></div>
                                 <div class="empty-title">Belum ada data fasilitas</div>
                                 <div class="empty-desc">Tambahkan fasilitas agar dapat dipilih saat pengelolaan ruangan.
@@ -122,8 +131,12 @@
                         <div class="form-control-plaintext" id="facilityName">-</div>
                     </div>
                     <div class="form-group">
-                        <label>Slug</label>
-                        <div class="form-control-plaintext" id="facilitySlug">-</div>
+                        <label>Jumlah Ruangan</label>
+                        <div class="form-control-plaintext" id="facilityCount">-</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Dibuat</label>
+                        <div class="form-control-plaintext" id="facilityCreated">-</div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -134,18 +147,21 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const facilityDetailModal = document.getElementById('facilityDetailModal');
-            if (facilityDetailModal) {
-                facilityDetailModal.addEventListener('show.bs.modal', function(event) {
-                    const button = event.relatedTarget;
-                    document.getElementById('facilityName').textContent = button.getAttribute(
-                        'data-facility-name');
-                    document.getElementById('facilitySlug').textContent = button.getAttribute(
-                        'data-facility-slug');
-                });
-            }
+        $(function() {
+            $('#facilityDetailModal').on('show.bs.modal', function(event) {
+                const button = $(event.relatedTarget);
+                $('#facilityName').text(button.data('facility-name'));
+                $('#facilityCount').text(button.data('facility-count') + ' ruangan');
+                $('#facilityCreated').text(button.data('facility-created') || '-');
+            });
         });
+
+        function confirmDelete(roomCount) {
+            if (roomCount > 0) {
+                return confirm('Fasilitas ini digunakan di ' + roomCount + ' ruangan. Yakin ingin menghapus? Semua ruangan akan kehilangan fasilitas ini.');
+            }
+            return confirm('Yakin ingin menghapus fasilitas ini?');
+        }
     </script>
 @stop
 

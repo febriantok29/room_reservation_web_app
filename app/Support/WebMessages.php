@@ -17,6 +17,12 @@ final class WebMessages
     public const FACILITY_DELETED_SUCCESS = 'Data fasilitas berhasil dihapus.';
     public const FACILITY_DUPLICATE_NAME = 'Nama fasilitas sudah digunakan.';
 
+    public const FACILITY_BULK_ADDED = ':count fasilitas berhasil ditambahkan.';
+
+    public const FACILITY_BULK_SKIPPED = ' :skipped dilewati karena sudah ada: :names';
+
+    public const FACILITY_BULK_NONE_ADDED = 'Tidak ada fasilitas baru yang ditambahkan.';
+
     public const USER_UPDATED_SUCCESS = 'Data karyawan berhasil diperbarui.';
     public const USER_DELETED_SUCCESS = 'Data karyawan berhasil dihapus.';
     public const USER_CANNOT_MODIFY_SELF = 'Anda tidak dapat menonaktifkan atau menghapus akun sendiri.';

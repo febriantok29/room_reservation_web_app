@@ -2,14 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Facility extends Model
 {
-    use HasUuids;
-
     /**
      * The table associated with the model.
      *
@@ -65,7 +62,7 @@ class Facility extends Model
      */
     public static function parseInput(?string $rawInput): array
     {
-        if (!$rawInput) {
+        if (! $rawInput) {
             return [];
         }
 
@@ -84,6 +81,7 @@ class Facility extends Model
                 if (Str::isUuid($name)) {
                     return $name;
                 }
+
                 // Otherwise, normalize spaces and separators
                 return str_replace(['_', '-'], ' ', $name);
             })
@@ -100,7 +98,7 @@ class Facility extends Model
     public static function normalizeSlugs(array $inputs): array
     {
         return collect(self::normalizeNames($inputs))
-            ->map(fn (string $name) => Str::slug($name, '_'))
+            ->map(fn (string $name) => Str::isUuid($name) ? $name : Str::slug($name, '_'))
             ->filter(fn (string $slug) => $slug !== '')
             ->unique()
             ->values()
@@ -120,25 +118,21 @@ class Facility extends Model
                 $existing = self::query()->find($input);
                 if ($existing) {
                     $ids[] = $existing->id;
-                    continue;
                 }
+
+                continue;
             }
 
-            // 2. Otherwise treat as name/slug
+            // 2. Otherwise treat as name/slug — look up only, do not auto-create
             $slug = Str::slug($input, '_');
             if ($slug === '') {
                 continue;
             }
 
-            $facility = self::query()->firstOrCreate(
-                ['slug' => $slug],
-                [
-                    'id' => (string) Str::uuid7(),
-                    'name' => Str::of($input)->title()->toString(),
-                ]
-            );
-
-            $ids[] = $facility->id;
+            $existing = self::query()->where('slug', $slug)->first();
+            if ($existing) {
+                $ids[] = $existing->id;
+            }
         }
 
         return array_values(array_unique($ids));
