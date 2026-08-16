@@ -2,22 +2,7 @@
 
 @section('title', 'Laporan Aktivitas Karyawan')
 
-@section('content_header')
-    <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap:.75rem;">
-        <div>
-            <h1 class="m-0">Laporan Aktivitas Karyawan</h1>
-            <div class="page-subtitle">Rekap aktivitas reservasi per pengguna dalam periode tertentu.</div>
-        </div>
-        <div class="d-flex" style="gap:.5rem;">
-            <a href="{{ request()->fullUrlWithQuery(['format' => 'excel']) }}" class="btn btn-success btn-sm">
-                <i class="fas fa-file-excel"></i> Export Excel
-            </a>
-            <a href="{{ request()->fullUrlWithQuery(['format' => 'pdf']) }}" class="btn btn-danger btn-sm">
-                <i class="fas fa-file-pdf"></i> Export PDF
-            </a>
-        </div>
-    </div>
-@stop
+<x-admin.report-header title="Laporan Aktivitas Karyawan" subtitle="Rekap aktivitas reservasi per pengguna dalam periode tertentu." />
 
 @section('content')
     @include('admin.partials.flash_message')
@@ -61,41 +46,13 @@
     </div>
 
     {{-- Filter --}}
-    <div class="card card-admin mb-3">
-        <div class="card-body py-3">
-            <form method="GET" action="{{ route('admin.reports.user-activity') }}">
-                <div class="row align-items-end">
-                    <div class="col-lg-2 col-md-4 mb-2 mb-lg-0">
-                        <label class="small mb-1">Dari Tanggal</label>
-                        <input type="date" name="date_from" class="form-control form-control-sm"
-                            value="{{ $dateFrom ?? '' }}">
-                    </div>
-                    <div class="col-lg-2 col-md-4 mb-2 mb-lg-0">
-                        <label class="small mb-1">Sampai Tanggal</label>
-                        <input type="date" name="date_to" class="form-control form-control-sm"
-                            value="{{ $dateTo ?? '' }}">
-                    </div>
-                    <div class="col-lg-4 col-md-4 mb-2 mb-lg-0">
-                        <label class="small mb-1 d-block">Pengguna</label>
-                        @include('admin.reports.partials.user_filter_pills', [
-                            'users' => $users,
-                            'selected' => $userFilters ?? [],
-                        ])
-                    </div>
-                    <div class="col-lg-4 col-md-12">
-                        <div class="d-flex" style="gap:.5rem;">
-                            <button type="submit" class="btn btn-primary btn-sm flex-fill">
-                                <i class="fas fa-search"></i> Filter
-                            </button>
-                            <a href="{{ route('admin.reports.user-activity') }}" class="btn btn-secondary btn-sm">
-                                <i class="fas fa-undo"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
+    <x-admin.report-date-filter action="{{ route('admin.reports.user-activity') }}" :date-from="$dateFrom ?? ''" :date-to="$dateTo ?? ''">
+        <label class="small mb-1 d-block">Pengguna</label>
+        @include('admin.reports.partials.user_filter_pills', [
+            'users' => $users,
+            'selected' => $userFilters ?? [],
+        ])
+    </x-admin.report-date-filter>
 
     {{-- Per-User Summary --}}
     @if ($byUser->isNotEmpty())
