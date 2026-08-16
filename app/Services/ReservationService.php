@@ -55,6 +55,10 @@ class ReservationService
         $startTime = Carbon::parse($payload['start_time'])->utc();
         $endTime = Carbon::parse($payload['end_time'])->utc();
         $visitorCount = (int) $payload['visitor_count'];
+        $isAdminCreated = $actor->canApprove();
+        $initialStatus = $isAdminCreated
+            ? ReservationStatus::Approved->value
+            : ReservationStatus::Pending->value;
 
         return DB::transaction(function () use (
             $actor,
@@ -63,7 +67,9 @@ class ReservationService
             $startTime,
             $endTime,
             $visitorCount,
-            $payload
+            $payload,
+            $isAdminCreated,
+            $initialStatus
         ) {
             DB::table('m_rooms')->where('id', $roomId)->lockForUpdate()->first();
 
@@ -117,7 +123,7 @@ class ReservationService
                 'visitor_count' => $visitorCount,
                 'with_snack' => $payload['with_snack'] ?? false,
                 'with_lunch' => $payload['with_lunch'] ?? false,
-                'status' => ReservationStatus::Pending->value,
+                'status' => $initialStatus,
                 'created_by' => $actor->id,
                 'updated_by' => $actor->id,
             ]);
@@ -125,13 +131,21 @@ class ReservationService
             $reservation->load(['room', 'user', 'user.division:id,name,code']);
 
             if ($reservation->user) {
-                $reservation->user->notify(new ReservationCreated($reservation));
+                // Admin-created reservations are approved immediately, so notify the
+                // requester with the approved notification instead of "pending".
+                $notification = $isAdminCreated
+                    ? new ReservationApproved($reservation)
+                    : new ReservationCreated($reservation);
+
+                $reservation->user->notify($notification);
             }
 
-            // Notify admins that a new pending reservation awaits approval.
-            $admins = User::where('is_admin', true)->get();
-            if ($admins->isNotEmpty()) {
-                Notification::send($admins, new ReservationSubmitted($reservation));
+            if (! $isAdminCreated) {
+                // Notify admins that a new pending reservation awaits approval.
+                $admins = User::where('is_admin', true)->get();
+                if ($admins->isNotEmpty()) {
+                    Notification::send($admins, new ReservationSubmitted($reservation));
+                }
             }
 
             return [

@@ -619,10 +619,6 @@ const rid = esc(props.reservation_id);
 
                 if (status === 'pending') {
                     html += `
-                        <button type="button" class="btn btn-outline-dark btn-sm"
-                            onclick="doCalendarAction('cancel','${reservationId}','Batalkan Reservasi','Reservasi ini akan dibatalkan dan tidak bisa dikembalikan.','Batalkan','#6c757d')">
-                            <i class="fas fa-ban mr-1"></i>Batalkan
-                        </button>
                         <button type="button" class="btn btn-danger btn-sm"
                             onclick="doCalendarAction('reject','${reservationId}','Tolak Reservasi','Reservasi ini akan ditolak. Pemohon akan diberitahu.','Tolak','#dc3545')">
                             <i class="fas fa-times mr-1"></i>Tolak
@@ -634,10 +630,6 @@ const rid = esc(props.reservation_id);
                     `;
                 } else if (status === 'approved') {
                     html += `
-                        <button type="button" class="btn btn-outline-dark btn-sm"
-                            onclick="doCalendarAction('cancel','${reservationId}','Batalkan Reservasi','Reservasi yang sudah disetujui ini akan dibatalkan.','Batalkan','#6c757d')">
-                            <i class="fas fa-ban mr-1"></i>Batalkan
-                        </button>
                         <button type="button" class="btn btn-primary btn-sm"
                             onclick="doCalendarAction('complete','${reservationId}','Selesaikan Reservasi','Tandai reservasi ini sebagai selesai.','Selesaikan','#007bff')">
                             <i class="fas fa-check-double mr-1"></i>Selesaikan
