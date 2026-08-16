@@ -349,21 +349,27 @@
                     const statusClass = 'status-' + props.status;
                     const statusLabel = getStatusLabel(props.status);
 
+const rid = esc(props.reservation_id);
+                    const rName = esc(props.room_name || '-');
+                    const uName = esc(props.user_name || '-');
+                    const uDivision = esc(props.user_division || '-');
+                    const purpose = props.purpose ? esc(props.purpose) : '';
+
                     const html = `
                         <div class="mb-3">
                             <span class="status-badge ${statusClass}">${statusLabel}</span>
                         </div>
                         <div class="mb-2">
                             <strong><i class="fas fa-hashtag mr-1"></i>ID Reservasi:</strong><br>
-                            <span class="text-monospace">${props.reservation_id}</span>
+                            <span class="text-monospace">${rid}</span>
                         </div>
                         <div class="mb-2">
                             <strong><i class="fas fa-door-open mr-1"></i>Ruangan:</strong><br>
-                            ${props.room_name || '-'}
+                            ${rName}
                         </div>
                         <div class="mb-2">
                             <strong><i class="fas fa-user mr-1"></i>Pemohon:</strong><br>
-                            ${props.user_name || '-'}
+                            ${uName}${uDivision && uDivision !== '-' ? ` <span class="text-muted">(${uDivision})</span>` : ''}
                         </div>
                         <div class="mb-2">
                             <strong><i class="fas fa-clock mr-1"></i>Waktu:</strong><br>
@@ -373,7 +379,8 @@
                             <strong><i class="fas fa-users mr-1"></i>Jumlah Pengunjung:</strong><br>
                             ${props.visitor_count} orang
                         </div>
-                        ${props.purpose ? `<div class="mb-2"><strong><i class="fas fa-clipboard-list mr-1"></i>Keperluan:</strong><br>${props.purpose}</div>` : ''}
+                        ${(props.with_snack || props.with_lunch) ? `<div class="mb-2"><strong><i class="fas fa-utensils mr-1"></i>Konsumsi:</strong><br>${props.with_snack ? '<span class="badge badge-warning">Snack</span> ' : ''}${props.with_lunch ? '<span class="badge badge-info">Makan Siang</span>' : ''}</div>` : ''}
+                        ${purpose ? `<div class="mb-2"><strong><i class="fas fa-clipboard-list mr-1"></i>Keperluan:</strong><br>${purpose}</div>` : ''}
                     `;
 
                     eventModalBody.html(html);
@@ -709,10 +716,10 @@
                 });
             }
 
-            function formatTimeForUrl(date) {
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                return hours + ':' + minutes;
+            function esc(val) {
+                const el = document.createElement('span');
+                el.textContent = val;
+                return el.innerHTML;
             }
 
             function formatTimeForInput(date) {

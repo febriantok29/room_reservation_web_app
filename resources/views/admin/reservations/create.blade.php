@@ -185,7 +185,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 @stop
 
-@section('js')
+@push('js')
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     @include('admin.partials.form_submit_guard_script')
 
@@ -300,6 +300,6 @@
             }
         });
     </script>
-@stop
+@endpush
 
 @include('admin.partials.timezone_detector')

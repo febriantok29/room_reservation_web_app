@@ -5,7 +5,7 @@
       - $allFacilities : Collection Facility (dari parent view)
 --}}
 <div class="form-group mb-0">
-    <label class="d-block mb-1">Filter Fasilitas Ruangan</label>
+    <label class="d-block mb-1"><i class="fas fa-filter mr-1"></i>Filter Fasilitas Ruangan</label>
 
     <div class="d-flex flex-wrap" data-toggle="buttons" id="facility-filter-group">
         @forelse ($allFacilities as $facility)
