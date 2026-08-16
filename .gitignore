@@ -32,3 +32,4 @@ CLAUDE.md
 database.sqlite
 
 exports/
+graphify-out/

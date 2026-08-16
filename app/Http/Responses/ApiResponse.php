@@ -95,11 +95,11 @@ class ApiResponse
      * @param array $errors Laravel validation errors
      * @return JsonResponse
      */
-    public static function validationError(array $errors): JsonResponse
+    public static function validationError(array $errors, ?string $message = null): JsonResponse
     {
         return self::error(
             ApiErrorCodes::VALIDATION_ERROR,
-            ApiMessages::SUCCESS_VALIDATION,
+            $message ?? ApiMessages::SUCCESS_VALIDATION,
             422,
             $errors
         );
