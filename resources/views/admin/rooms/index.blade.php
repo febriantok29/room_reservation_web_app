@@ -236,7 +236,7 @@
     </div>
 @stop
 
-@section('js')
+@push('js')
     <script>
         $(document).ready(function() {
             var placeholder = '{{ asset('images/not_available.jpg') }}';
@@ -268,6 +268,6 @@
             });
         });
     </script>
-@stop
+@endpush
 
 @include('admin.partials.timezone_detector')

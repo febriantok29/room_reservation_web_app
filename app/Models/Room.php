@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPublicStorageUrl;
 use App\Services\RoomIdGenerator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 
 class Room extends Model
 {
     use SoftDeletes;
+    use HasPublicStorageUrl;
 
     /**
      * The table associated with the model.
@@ -83,7 +84,7 @@ class Room extends Model
      */
     public function getImageUrlAttribute(): ?string
     {
-        return $this->image_path ? Storage::disk('public')->url($this->image_path) : null;
+        return $this->publicStorageUrl($this->image_path);
     }
 
     /**
