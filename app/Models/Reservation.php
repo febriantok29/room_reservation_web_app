@@ -311,6 +311,22 @@ class Reservation extends Model
     }
 
     /**
+     * Short local start time for reports/tables (d/m/Y H:i).
+     */
+    public function getStartTimeShortAttribute(): string
+    {
+        return $this->start_time_local?->format('d/m/Y H:i') ?? '-';
+    }
+
+    /**
+     * Short local end time for reports/tables (d/m/Y H:i).
+     */
+    public function getEndTimeShortAttribute(): string
+    {
+        return $this->end_time_local?->format('d/m/Y H:i') ?? '-';
+    }
+
+    /**
      * Format datetime to Indonesian readable text.
      */
     private function formatReadableDateTime(?CarbonInterface $dateTime): string

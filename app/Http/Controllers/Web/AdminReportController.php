@@ -17,6 +17,7 @@ use App\Exports\UsageReportExport;
 use App\Exports\UserActivityReportExport;
 use App\Exports\ScheduleHistoryReportExport;
 use App\Exports\PeriodicReportExport;
+use App\Helpers\TimezoneHelper;
 use App\Support\ReservationStatus;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -53,10 +54,10 @@ class AdminReportController extends Controller
             ->orderByDesc('created_at');
 
         if ($dateFrom) {
-            $query->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
+            $query->where('created_at', '>=', TimezoneHelper::parseDateFromUtc($dateFrom));
         }
         if ($dateTo) {
-            $query->where('created_at', '<=', Carbon::parse($dateTo)->endOfDay());
+            $query->where('created_at', '<=', TimezoneHelper::parseDateToUtc($dateTo));
         }
         if ($statusFilters !== []) {
             $query->whereIn('status', $statusFilters);
@@ -131,10 +132,10 @@ class AdminReportController extends Controller
             ->whereIn('status', [ReservationStatus::Approved->value, ReservationStatus::Completed->value]);
 
         if ($dateFrom) {
-            $query->where('start_time', '>=', Carbon::parse($dateFrom)->startOfDay());
+            $query->where('start_time', '>=', TimezoneHelper::parseDateFromUtc($dateFrom));
         }
         if ($dateTo) {
-            $query->where('start_time', '<=', Carbon::parse($dateTo)->endOfDay());
+            $query->where('start_time', '<=', TimezoneHelper::parseDateToUtc($dateTo));
         }
 
         if ($roomFilters !== []) {
@@ -204,10 +205,10 @@ class AdminReportController extends Controller
             ->orderBy('start_time');
 
         if ($dateFrom) {
-            $query->where('start_time', '>=', Carbon::parse($dateFrom)->startOfDay());
+            $query->where('start_time', '>=', TimezoneHelper::parseDateFromUtc($dateFrom));
         }
         if ($dateTo) {
-            $query->where('start_time', '<=', Carbon::parse($dateTo)->endOfDay());
+            $query->where('start_time', '<=', TimezoneHelper::parseDateToUtc($dateTo));
         }
 
         if ($userFilters !== []) {
@@ -281,10 +282,10 @@ class AdminReportController extends Controller
             ->orderBy('start_time');
 
         if ($dateFrom) {
-            $query->where('start_time', '>=', Carbon::parse($dateFrom)->startOfDay());
+            $query->where('start_time', '>=', TimezoneHelper::parseDateFromUtc($dateFrom));
         }
         if ($dateTo) {
-            $query->where('start_time', '<=', Carbon::parse($dateTo)->endOfDay());
+            $query->where('start_time', '<=', TimezoneHelper::parseDateToUtc($dateTo));
         }
 
         if ($statusFilters !== []) {
@@ -358,19 +359,19 @@ class AdminReportController extends Controller
         $format = $request->input('format', '');
 
         if ($period === 'daily') {
-            $from    = Carbon::createFromDate($year, $month, 1)->startOfDay();
-            $to      = $from->copy()->endOfMonth()->endOfDay();
+            $from    = TimezoneHelper::monthStartUtc($year, $month);
+            $to      = TimezoneHelper::monthEndUtc($year, $month);
             $groupBy = fn($r) => $r->start_time->toDateString();
             $labelKey = 'date';
         } elseif ($period === 'weekly') {
-            $from    = Carbon::createFromDate($year, 1, 1)->startOfDay();
-            $to      = Carbon::createFromDate($year, 12, 31)->endOfDay();
+            $from    = TimezoneHelper::yearStartUtc($year);
+            $to      = TimezoneHelper::yearEndUtc($year);
             $groupBy = fn($r) => 'Week ' . $r->start_time->isoWeek;
             $labelKey = 'week';
         } else {
-            $from    = Carbon::createFromDate($year, 1, 1)->startOfDay();
-            $to      = Carbon::createFromDate($year, 12, 31)->endOfDay();
-            $groupBy = fn($r) => $r->start_time->format('Y-m');
+            $from    = TimezoneHelper::yearStartUtc($year);
+            $to      = TimezoneHelper::yearEndUtc($year);
+            $groupBy = fn($r) => $r->start_time_local->format('Y-m');
             $labelKey = 'month';
         }
 
@@ -437,10 +438,10 @@ class AdminReportController extends Controller
             ->orderBy('start_time');
 
         if ($dateFrom) {
-            $query->where('start_time', '>=', Carbon::parse($dateFrom)->startOfDay());
+            $query->where('start_time', '>=', TimezoneHelper::parseDateFromUtc($dateFrom));
         }
         if ($dateTo) {
-            $query->where('start_time', '<=', Carbon::parse($dateTo)->endOfDay());
+            $query->where('start_time', '<=', TimezoneHelper::parseDateToUtc($dateTo));
         }
 
         $reservations = $query->get();
@@ -513,10 +514,10 @@ class AdminReportController extends Controller
         $complaintQuery = RoomComplaint::query();
 
         if ($dateFrom) {
-            $complaintQuery->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
+            $complaintQuery->where('created_at', '>=', TimezoneHelper::parseDateFromUtc($dateFrom));
         }
         if ($dateTo) {
-            $complaintQuery->where('created_at', '<=', Carbon::parse($dateTo)->endOfDay());
+            $complaintQuery->where('created_at', '<=', TimezoneHelper::parseDateToUtc($dateTo));
         }
 
         $complaints = $complaintQuery
@@ -589,10 +590,10 @@ class AdminReportController extends Controller
             ->orderBy('start_time');
 
         if ($dateFrom) {
-            $query->where('start_time', '>=', Carbon::parse($dateFrom)->startOfDay());
+            $query->where('start_time', '>=', TimezoneHelper::parseDateFromUtc($dateFrom));
         }
         if ($dateTo) {
-            $query->where('start_time', '<=', Carbon::parse($dateTo)->endOfDay());
+            $query->where('start_time', '<=', TimezoneHelper::parseDateToUtc($dateTo));
         }
 
         $reservations = $query->get();

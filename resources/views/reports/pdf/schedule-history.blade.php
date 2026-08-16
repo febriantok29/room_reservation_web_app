@@ -104,8 +104,8 @@
                     <td>{{ $r->user?->employee_id ?? '-' }}</td>
                     <td>{{ $r->room?->name ?? '-' }}</td>
                     <td>{{ $r->room?->floor ?? '-' }}</td>
-                    <td>{{ $r->start_time?->format('d/m/Y H:i') }}</td>
-                    <td>{{ $r->end_time?->format('d/m/Y H:i') }}</td>
+                    <td>{{ $r->start_time_short }}</td>
+                    <td>{{ $r->end_time_short }}</td>
                     <td>{{ $r->visitor_count }}</td>
                     <td>{{ strtoupper($r->status) }}</td>
                     <td>{{ \Illuminate\Support\Str::limit($r->purpose ?? '-', 40) }}</td>

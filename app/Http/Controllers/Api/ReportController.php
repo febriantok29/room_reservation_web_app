@@ -20,6 +20,7 @@ use App\Models\RoomComplaint;
 use App\Models\User;
 use App\Support\ApiMessages;
 use App\Support\ReservationStatus;
+use App\Helpers\TimezoneHelper;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -63,10 +64,10 @@ class ReportController extends Controller
             ->orderByDesc('created_at');
 
         if ($request->filled('date_from')) {
-            $query->where('created_at', '>=', Carbon::parse($request->input('date_from'))->startOfDay());
+            $query->where('created_at', '>=', TimezoneHelper::parseDateFromUtc($request->input('date_from')));
         }
         if ($request->filled('date_to')) {
-            $query->where('created_at', '<=', Carbon::parse($request->input('date_to'))->endOfDay());
+            $query->where('created_at', '<=', TimezoneHelper::parseDateToUtc($request->input('date_to')));
         }
         if ($statusFilters !== []) {
             $query->whereIn('status', $statusFilters);
@@ -136,10 +137,10 @@ class ReportController extends Controller
             ->whereIn('status', [ReservationStatus::Approved->value, ReservationStatus::Completed->value]);
 
         if ($request->filled('date_from')) {
-            $query->where('start_time', '>=', Carbon::parse($request->input('date_from'))->startOfDay());
+            $query->where('start_time', '>=', TimezoneHelper::parseDateFromUtc($request->input('date_from')));
         }
         if ($request->filled('date_to')) {
-            $query->where('start_time', '<=', Carbon::parse($request->input('date_to'))->endOfDay());
+            $query->where('start_time', '<=', TimezoneHelper::parseDateToUtc($request->input('date_to')));
         }
 
         if ($roomFilters !== []) {
@@ -218,11 +219,11 @@ class ReportController extends Controller
         }
 
         $from = $request->filled('date_from')
-            ? Carbon::parse($request->input('date_from'))->startOfDay()
-            : Carbon::now()->startOfMonth();
+            ? TimezoneHelper::parseDateFromUtc($request->input('date_from'))
+            : TimezoneHelper::nowLocal()->startOfMonth()->utc();
         $to = $request->filled('date_to')
-            ? Carbon::parse($request->input('date_to'))->endOfDay()
-            : Carbon::now()->endOfDay();
+            ? TimezoneHelper::parseDateToUtc($request->input('date_to'))
+            : TimezoneHelper::nowLocal()->endOfDay()->utc();
 
         $actor = $request->user();
 
@@ -319,11 +320,11 @@ class ReportController extends Controller
         }
 
         $from = $request->filled('date_from')
-            ? Carbon::parse($request->input('date_from'))->startOfDay()
-            : Carbon::now()->startOfMonth();
+            ? TimezoneHelper::parseDateFromUtc($request->input('date_from'))
+            : TimezoneHelper::nowLocal()->startOfMonth()->utc();
         $to = $request->filled('date_to')
-            ? Carbon::parse($request->input('date_to'))->endOfDay()
-            : Carbon::now()->endOfDay();
+            ? TimezoneHelper::parseDateToUtc($request->input('date_to'))
+            : TimezoneHelper::nowLocal()->endOfDay()->utc();
 
         $actor = $request->user();
 
@@ -401,20 +402,20 @@ class ReportController extends Controller
         $month = (int) $request->input('month', now()->month);
 
         if ($period === 'daily') {
-            $from = Carbon::createFromDate($year, $month, 1)->startOfDay();
-            $to = $from->copy()->endOfMonth()->endOfDay();
-            $groupBy = fn ($r) => $r->start_time->toDateString();
+            $from = TimezoneHelper::monthStartUtc($year, $month);
+            $to = TimezoneHelper::monthEndUtc($year, $month);
+            $groupBy = fn ($r) => $r->start_time_local->toDateString();
             $labelKey = 'date';
         } elseif ($period === 'weekly') {
-            $from = Carbon::createFromDate($year, 1, 1)->startOfDay();
-            $to = Carbon::createFromDate($year, 12, 31)->endOfDay();
-            $groupBy = fn ($r) => 'Week '.$r->start_time->isoWeek;
+            $from = TimezoneHelper::yearStartUtc($year);
+            $to = TimezoneHelper::yearEndUtc($year);
+            $groupBy = fn ($r) => 'Week '.$r->start_time_local->isoWeek;
             $labelKey = 'week';
         } else {
             // monthly — show all months of the year
-            $from = Carbon::createFromDate($year, 1, 1)->startOfDay();
-            $to = Carbon::createFromDate($year, 12, 31)->endOfDay();
-            $groupBy = fn ($r) => $r->start_time->format('Y-m');
+            $from = TimezoneHelper::yearStartUtc($year);
+            $to = TimezoneHelper::yearEndUtc($year);
+            $groupBy = fn ($r) => $r->start_time_local->format('Y-m');
             $labelKey = 'month';
         }
 
@@ -493,10 +494,10 @@ class ReportController extends Controller
             ->orderBy('start_time');
 
         if ($request->filled('date_from')) {
-            $query->where('start_time', '>=', Carbon::parse($request->input('date_from'))->startOfDay());
+            $query->where('start_time', '>=', TimezoneHelper::parseDateFromUtc($request->input('date_from')));
         }
         if ($request->filled('date_to')) {
-            $query->where('start_time', '<=', Carbon::parse($request->input('date_to'))->endOfDay());
+            $query->where('start_time', '<=', TimezoneHelper::parseDateToUtc($request->input('date_to')));
         }
 
         $reservations = $query->get();
@@ -588,10 +589,10 @@ class ReportController extends Controller
             ->whereNull('deleted_at');
 
         if ($request->filled('date_from')) {
-            $complaintQuery->where('created_at', '>=', Carbon::parse($request->input('date_from'))->startOfDay());
+            $complaintQuery->where('created_at', '>=', TimezoneHelper::parseDateFromUtc($request->input('date_from')));
         }
         if ($request->filled('date_to')) {
-            $complaintQuery->where('created_at', '<=', Carbon::parse($request->input('date_to'))->endOfDay());
+            $complaintQuery->where('created_at', '<=', TimezoneHelper::parseDateToUtc($request->input('date_to')));
         }
 
         $complaints = $complaintQuery
@@ -673,10 +674,10 @@ class ReportController extends Controller
             ->orderBy('start_time');
 
         if ($request->filled('date_from')) {
-            $query->where('start_time', '>=', Carbon::parse($request->input('date_from'))->startOfDay());
+            $query->where('start_time', '>=', TimezoneHelper::parseDateFromUtc($request->input('date_from')));
         }
         if ($request->filled('date_to')) {
-            $query->where('start_time', '<=', Carbon::parse($request->input('date_to'))->endOfDay());
+            $query->where('start_time', '<=', TimezoneHelper::parseDateToUtc($request->input('date_to')));
         }
 
         $reservations = $query->get();

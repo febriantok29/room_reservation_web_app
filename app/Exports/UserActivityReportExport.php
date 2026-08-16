@@ -36,8 +36,8 @@ class UserActivityReportExport implements FromArray, WithHeadings, WithTitle, Wi
             $r->user?->employee_id ?? '-',
             $r->user?->full_name ?? '-',
             $r->room?->name ?? '-',
-            $r->start_time?->format('d/m/Y H:i'),
-            $r->end_time?->format('d/m/Y H:i'),
+            $r->start_time_short,
+            $r->end_time_short,
             match ($r->status) {
                 ReservationStatus::Pending->value   => 'Menunggu',
                 ReservationStatus::Approved->value  => 'Disetujui',
