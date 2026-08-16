@@ -39,7 +39,7 @@
         </div>
 
         <div class="card-body border-bottom py-2 text-sm text-muted">
-            Menampilkan {{ $divisions->count() }} divisi.
+            Menampilkan {{ $divisions->count() }} dari {{ $divisions->total() }} divisi.
         </div>
 
         <div class="card-body table-responsive p-0">
@@ -90,6 +90,9 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+        <div class="card-footer clearfix">
+            {{ $divisions->links() }}
         </div>
     </div>
 @stop

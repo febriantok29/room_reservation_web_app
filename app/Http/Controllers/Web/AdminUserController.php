@@ -45,7 +45,7 @@ class AdminUserController extends Controller
 
         return view('admin.users.index', [
             'users'          => $query->paginate(10)->withQueryString(),
-            'divisions'      => Division::query()->whereNull('deleted_at')->orderBy('name')->get(),
+            'divisions'      => Division::query()->orderBy('name')->get(),
             'searchQuery'    => $request->input('q', ''),
             'divisionFilter' => $request->input('division_id', ''),
         ]);
@@ -56,7 +56,7 @@ class AdminUserController extends Controller
         $this->ensureAdminAccess($request);
 
         return view('admin.users.create', [
-            'divisions' => Division::query()->whereNull('deleted_at')->orderBy('name')->get(),
+            'divisions' => Division::query()->orderBy('name')->get(),
         ]);
     }
 
@@ -77,7 +77,7 @@ class AdminUserController extends Controller
 
         $isAdmin  = $request->boolean('is_admin');
         $division = $validated['division_id'] ?? null
-            ? Division::query()->whereNull('deleted_at')->find($validated['division_id'])
+            ? Division::query()->find($validated['division_id'])
             : null;
 
         if (!$isAdmin && !$division) {
@@ -113,7 +113,7 @@ class AdminUserController extends Controller
 
         return view('admin.users.edit', [
             'user'      => $user,
-            'divisions' => Division::query()->whereNull('deleted_at')->orderBy('name')->get(),
+            'divisions' => Division::query()->orderBy('name')->get(),
         ]);
     }
 

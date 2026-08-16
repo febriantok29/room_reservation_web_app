@@ -22,7 +22,8 @@
             </h3>
         </div>
         <div class="card-body">
-            <form action="{{ route('admin.divisions.update', $division) }}" method="POST">
+            <form action="{{ route('admin.divisions.update', $division) }}" method="POST" data-submit-guard
+                data-loading-text="Memproses...">
                 @csrf @method('PUT')
 
                 <div class="form-group">
@@ -68,10 +69,11 @@
     </div>
 @stop
 
-@section('js')
+@push('js')
+    @include('admin.partials.form_submit_guard_script')
     <script>
         document.getElementById('code').addEventListener('input', function() {
             this.value = this.value.toUpperCase();
         });
     </script>
-@stop
+@endpush
