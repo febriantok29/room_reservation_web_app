@@ -48,6 +48,7 @@ class User extends Authenticatable
         'date_of_birth',
         'is_admin',
         'is_active',
+        'must_change_password',
     ];
 
     /**
@@ -69,6 +70,7 @@ class User extends Authenticatable
         'date_of_birth' => 'date',
         'is_admin' => 'boolean',
         'is_active' => 'boolean',
+        'must_change_password' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -147,6 +149,7 @@ class User extends Authenticatable
             'division' => $this->division?->only(['id', 'name', 'code']),
             'is_admin' => $this->is_admin,
             'is_active' => $this->is_active,
+            'must_change_password' => (bool) $this->must_change_password,
         ];
     }
 
