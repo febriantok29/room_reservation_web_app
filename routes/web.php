@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\AdminFacilityController;
 use App\Http\Controllers\Web\AdminFcmTestController;
 use App\Http\Controllers\Web\AdminNotificationController;
 use App\Http\Controllers\Web\AdminReportController;
+use App\Http\Controllers\Web\AdminReservationDebugController;
 use App\Http\Controllers\Web\AdminUserController;
 use Illuminate\Support\Facades\Route;
 
@@ -109,6 +110,11 @@ Route::prefix('admin')->group(function () {
         // Tools
         Route::get('/tools/fcm-test', [AdminFcmTestController::class, 'showForm'])->name('admin.tools.fcm-test');
         Route::post('/tools/fcm-test', [AdminFcmTestController::class, 'send'])->name('admin.tools.fcm-test.send');
+
+        // Debug Feature
+        Route::get('/tools/reservation-debug', [AdminReservationDebugController::class, 'index'])->name('admin.tools.reservation-debug');
+        Route::post('/tools/reservation-debug/run', [AdminReservationDebugController::class, 'runTransition'])->name('admin.tools.reservation-debug.run');
+        Route::post('/tools/reservation-debug/{reservation}/backdate', [AdminReservationDebugController::class, 'backdate'])->name('admin.tools.reservation-debug.backdate');
 
         // Notifications
         Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('admin.notifications');
