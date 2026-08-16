@@ -22,18 +22,18 @@ class AdminDivisionController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $query = Division::query()->withCount('users')->whereNull('deleted_at')->orderBy('id');
+        $query = Division::query()->withCount('users')->orderBy('id');
 
         if ($request->filled('q')) {
             $kw = trim((string) $request->input('q'));
             $query->where(function ($q) use ($kw) {
                 $q->where('name', 'like', "%{$kw}%")
-                  ->orWhere('code', 'like', "%{$kw}%");
+                    ->orWhere('code', 'like', "%{$kw}%");
             });
         }
 
         return view('admin.divisions.index', [
-            'divisions'   => $query->get(),
+            'divisions' => $query->paginate(10)->withQueryString(),
             'searchQuery' => $request->input('q', ''),
         ]);
     }
@@ -50,30 +50,30 @@ class AdminDivisionController extends Controller
         $this->ensureAdminAccess($request);
 
         $validated = $request->validate([
-            'name'        => 'required|string|max:100',
-            'code'        => 'required|string|max:10',
+            'name' => 'required|string|max:100',
+            'code' => 'required|string|max:10',
             'description' => 'nullable|string|max:500',
         ]);
 
         $name = Str::of((string) $validated['name'])->squish()->toString();
         $code = strtoupper(trim((string) $validated['code']));
 
-        if (Division::query()->whereNull('deleted_at')->where('code', $code)->exists()) {
-            return back()->withErrors(['code' => 'Kode divisi sudah digunakan.'])->withInput();
+        if (Division::query()->where('code', $code)->exists()) {
+            return back()->withErrors(['code' => WebMessages::DIVISION_DUPLICATE_CODE])->withInput();
         }
-        if (Division::query()->whereNull('deleted_at')->where('name', $name)->exists()) {
-            return back()->withErrors(['name' => 'Nama divisi sudah digunakan.'])->withInput();
+        if (Division::query()->where('name', $name)->exists()) {
+            return back()->withErrors(['name' => WebMessages::DIVISION_DUPLICATE_NAME])->withInput();
         }
 
         Division::query()->create([
-            'id'          => DivisionIdGenerator::generate(),
-            'name'        => $name,
-            'code'        => $code,
+            'id' => DivisionIdGenerator::generate(),
+            'name' => $name,
+            'code' => $code,
             'description' => $validated['description'] ?? null,
-            'created_by'  => $request->user()?->id,
+            'created_by' => $request->user()?->id,
         ]);
 
-        return redirect()->route('admin.divisions')->with('success', 'Divisi berhasil ditambahkan.');
+        return redirect()->route('admin.divisions')->with('success', WebMessages::DIVISION_CREATED_SUCCESS);
     }
 
     public function edit(Request $request, Division $division): View
@@ -88,28 +88,28 @@ class AdminDivisionController extends Controller
         $this->ensureAdminAccess($request);
 
         $validated = $request->validate([
-            'name'        => 'required|string|max:100',
-            'code'        => 'required|string|max:10',
+            'name' => 'required|string|max:100',
+            'code' => 'required|string|max:10',
             'description' => 'nullable|string|max:500',
         ]);
 
         $name = Str::of((string) $validated['name'])->squish()->toString();
         $code = strtoupper(trim((string) $validated['code']));
 
-        if (Division::query()->whereNull('deleted_at')->where('code', $code)->where('id', '!=', $division->id)->exists()) {
-            return back()->withErrors(['code' => 'Kode divisi sudah digunakan.'])->withInput();
+        if (Division::query()->where('code', $code)->where('id', '!=', $division->id)->exists()) {
+            return back()->withErrors(['code' => WebMessages::DIVISION_DUPLICATE_CODE])->withInput();
         }
-        if (Division::query()->whereNull('deleted_at')->where('name', $name)->where('id', '!=', $division->id)->exists()) {
-            return back()->withErrors(['name' => 'Nama divisi sudah digunakan.'])->withInput();
+        if (Division::query()->where('name', $name)->where('id', '!=', $division->id)->exists()) {
+            return back()->withErrors(['name' => WebMessages::DIVISION_DUPLICATE_NAME])->withInput();
         }
 
-        $division->name        = $name;
-        $division->code        = $code;
+        $division->name = $name;
+        $division->code = $code;
         $division->description = $validated['description'] ?? null;
-        $division->updated_by  = $request->user()?->id;
+        $division->updated_by = $request->user()?->id;
         $division->save();
 
-        return redirect()->route('admin.divisions')->with('success', 'Divisi berhasil diperbarui.');
+        return redirect()->route('admin.divisions')->with('success', WebMessages::DIVISION_UPDATED_SUCCESS);
     }
 
     public function destroy(Request $request, Division $division): RedirectResponse
@@ -120,6 +120,6 @@ class AdminDivisionController extends Controller
         $division->save();
         $division->delete();
 
-        return redirect()->route('admin.divisions')->with('success', 'Divisi berhasil dihapus.');
+        return redirect()->route('admin.divisions')->with('success', WebMessages::DIVISION_DELETED_SUCCESS);
     }
 }
