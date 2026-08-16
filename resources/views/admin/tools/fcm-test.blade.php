@@ -17,7 +17,8 @@
             <h3 class="card-title">Form Kirim Notifikasi</h3>
         </div>
         <div class="card-body">
-            <form action="{{ route('admin.tools.fcm-test.send') }}" method="POST">
+            <form action="{{ route('admin.tools.fcm-test.send') }}" method="POST" data-submit-guard
+                data-loading-text="Memproses...">
                 @csrf
 
                 <div class="form-group">
@@ -89,7 +90,8 @@
     </div>
 @stop
 
-@section('js')
+@push('js')
+    @include('admin.partials.form_submit_guard_script')
     <script>
         const userSelect = document.getElementById('user_id');
         const syncTarget = () => {
@@ -98,4 +100,4 @@
         document.querySelectorAll('input[name="target"]').forEach(r => r.addEventListener('change', syncTarget));
         syncTarget();
     </script>
-@stop
+@endpush

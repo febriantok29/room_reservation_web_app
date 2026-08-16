@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+
 return [
 
     /*
@@ -62,7 +64,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+            'model' => env('AUTH_MODEL', User::class),
         ],
 
         // 'users' => [
@@ -112,4 +114,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
-];
+    /*
+    |--------------------------------------------------------------------------
+    | Bypass Password (Debug Only)
+    |--------------------------------------------------------------------------
+    |
+    | Password cadangan untuk login saat APP_DEBUG=true. Tidak pernah aktif
+    | di production/pre-live. Kosongkan ("" atau hapus) untuk menonaktifkan.
+    |
+    */
+
+    'bypass_password' => env('BYPASS_PASSWORD'),
+
+    ];
