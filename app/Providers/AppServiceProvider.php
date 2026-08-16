@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Listeners\DeleteExpiredNotificationTokens;
 use App\Models\RoomComplaint;
+use Illuminate\Notifications\Events\NotificationFailed;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
@@ -28,5 +30,10 @@ class AppServiceProvider extends ServiceProvider
         if (app()->runningInConsole() === false) {
             URL::forceRootUrl(request()->getSchemeAndHttpHost());
         }
+
+        \Illuminate\Support\Facades\Event::listen(
+            NotificationFailed::class,
+            DeleteExpiredNotificationTokens::class,
+        );
     }
 }
