@@ -69,6 +69,8 @@ final class WebMessages
         'visitor_count' => 'jumlah pengunjung',
     ];
 
+    public const COMPLAINT_CREATED_SUCCESS = 'Komplain berhasil ditambahkan.';
+
     private function __construct()
     {
     }
