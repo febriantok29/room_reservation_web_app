@@ -38,25 +38,23 @@
                             value="{{ $dateTo ?? '' }}">
                     </div>
                     <div class="col-lg-2 col-md-4 mb-2 mb-lg-0">
-                        <label class="small mb-1">Status</label>
-                        <select name="status" class="form-control form-control-sm">
-                            <option value="">Semua Status</option>
-                            <option value="open" @selected(($statusFilter ?? '') === 'open')>Terbuka</option>
-                            <option value="in_progress" @selected(($statusFilter ?? '') === 'in_progress')>Dikerjakan</option>
-                            <option value="resolved" @selected(($statusFilter ?? '') === 'resolved')>Selesai</option>
-                            <option value="rejected" @selected(($statusFilter ?? '') === 'rejected')>Ditolak</option>
-                        </select>
+                        <label class="small mb-1 d-block">Status</label>
+                        @include('admin.reports.partials.status_filter_pills', [
+                            'options' => [
+                                'open' => 'Terbuka',
+                                'in_progress' => 'Dikerjakan',
+                                'resolved' => 'Selesai',
+                                'rejected' => 'Ditolak',
+                            ],
+                            'selected' => $statusFilters ?? [],
+                        ])
                     </div>
                     <div class="col-lg-3 col-md-6 mb-2 mb-lg-0">
-                        <label class="small mb-1">Ruangan</label>
-                        <select name="room_id" class="form-control form-control-sm">
-                            <option value="">Semua Ruangan</option>
-                            @foreach ($rooms as $room)
-                                <option value="{{ $room->id }}" @selected(($roomFilter ?? '') === $room->id)>
-                                    {{ $room->name }} (Lt. {{ $room->floor }})
-                                </option>
-                            @endforeach
-                        </select>
+                        <label class="small mb-1 d-block">Ruangan</label>
+                        @include('admin.reports.partials.room_filter_pills', [
+                            'rooms' => $rooms,
+                            'selected' => $roomFilters ?? [],
+                        ])
                     </div>
                     <div class="col-lg-3 col-md-6">
                         <div class="d-flex" style="gap:.5rem;">
