@@ -423,6 +423,11 @@ return [
             'icon' => 'fas fa-fw fa-flask',
         ],
         [
+            'text' => 'Log Kesalahan Sistem',
+            'route' => 'admin.tools.error-logs',
+            'icon' => 'fas fa-fw fa-bug',
+        ],
+        [
             'text' => 'Keluar',
             'route' => 'admin.logout',
             'icon' => 'fas fa-fw fa-sign-out-alt',
