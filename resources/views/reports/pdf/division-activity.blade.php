@@ -147,8 +147,8 @@
                     <td>{{ $r->user?->employee_id ?? '-' }}</td>
                     <td>{{ $r->user?->division?->name ?? 'Admin / Tanpa Divisi' }}</td>
                     <td>{{ $r->room?->name ?? '-' }}</td>
-                    <td>{{ $r->start_time?->format('d/m/Y H:i') }}</td>
-                    <td>{{ $r->end_time?->format('d/m/Y H:i') }}</td>
+                    <td>{{ $r->start_time_short }}</td>
+                    <td>{{ $r->end_time_short }}</td>
                     <td>{{ strtoupper($r->status) }}</td>
                     <td>{{ $r->visitor_count }}</td>
                 </tr>

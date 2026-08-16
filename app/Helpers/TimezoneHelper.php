@@ -57,4 +57,63 @@ class TimezoneHelper
         // Fallback to config
         return config('app.timezone_user', 'Asia/Jakarta');
     }
+
+    /**
+     * Parse a date-only value (Y-m-d) as the start of day in the local timezone,
+     * converted to UTC — for date range filters.
+     */
+    public static function parseDateFromUtc(string $date): Carbon
+    {
+        return Carbon::createFromFormat('Y-m-d', $date, self::getLocalTimezone())->startOfDay()->utc();
+    }
+
+    /**
+     * Parse a date-only value (Y-m-d) as the end of day in the local timezone,
+     * converted to UTC — for date range filters.
+     */
+    public static function parseDateToUtc(string $date): Carbon
+    {
+        return Carbon::createFromFormat('Y-m-d', $date, self::getLocalTimezone())->endOfDay()->utc();
+    }
+
+    /**
+     * Now in the local timezone.
+     */
+    public static function nowLocal(): Carbon
+    {
+        return Carbon::now(self::getLocalTimezone());
+    }
+
+    /**
+     * Start of the given month (local timezone), converted to UTC.
+     */
+    public static function monthStartUtc(int $year, int $month): Carbon
+    {
+        return Carbon::createFromDate($year, $month, 1, self::getLocalTimezone())->startOfDay()->utc();
+    }
+
+    /**
+     * End of the given month (local timezone), converted to UTC.
+     */
+    public static function monthEndUtc(int $year, int $month): Carbon
+    {
+        return Carbon::createFromDate($year, $month, 1, self::getLocalTimezone())
+            ->endOfMonth()->endOfDay()->utc();
+    }
+
+    /**
+     * Start of the given year (local timezone), converted to UTC.
+     */
+    public static function yearStartUtc(int $year): Carbon
+    {
+        return Carbon::createFromDate($year, 1, 1, self::getLocalTimezone())->startOfDay()->utc();
+    }
+
+    /**
+     * End of the given year (local timezone), converted to UTC.
+     */
+    public static function yearEndUtc(int $year): Carbon
+    {
+        return Carbon::createFromDate($year, 12, 31, self::getLocalTimezone())->endOfDay()->utc();
+    }
 }

@@ -100,8 +100,8 @@
                     <td>{{ $r->room?->name ?? '-' }}</td>
                     <td>{{ $r->room?->floor ?? '-' }}</td>
                     <td>{{ $r->user?->full_name ?? '-' }}</td>
-                    <td>{{ $r->start_time?->format('d/m/Y H:i') }}</td>
-                    <td>{{ $r->end_time?->format('d/m/Y H:i') }}</td>
+                    <td>{{ $r->start_time_short }}</td>
+                    <td>{{ $r->end_time_short }}</td>
                     <td>{{ intdiv($mins, 60) }}j {{ $mins % 60 }}m</td>
                     <td>{{ $r->visitor_count }}</td>
                     <td>{{ strtoupper($r->status) }}</td>

@@ -36,8 +36,8 @@ class UsageReportExport implements FromArray, WithHeadings, WithTitle, WithStyle
             $r->room?->name ?? '-',
             $r->room?->floor ?? '-',
             $r->user?->full_name ?? '-',
-            $r->start_time?->format('d/m/Y H:i'),
-            $r->end_time?->format('d/m/Y H:i'),
+            $r->start_time_short,
+            $r->end_time_short,
             $r->start_time && $r->end_time ? $r->start_time->diffInMinutes($r->end_time) : 0,
             $r->visitor_count,
             match ($r->status) {

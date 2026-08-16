@@ -58,8 +58,8 @@ class DivisionActivityReportExport implements FromArray, WithHeadings, WithTitle
                 $r->user?->employee_id ?? '-',
                 $r->user?->division?->name ?? 'Admin / Tanpa Divisi',
                 $r->room?->name ?? '-',
-                $r->start_time?->format('d/m/Y H:i'),
-                $r->end_time?->format('d/m/Y H:i'),
+                $r->start_time_short,
+                $r->end_time_short,
                 $r->status,
                 $r->visitor_count,
             ];

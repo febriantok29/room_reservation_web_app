@@ -83,9 +83,9 @@
                             <div class="font-weight-semibold">{{ $complaint->reservation_id }}</div>
                             @if ($complaint->reservation)
                                 <div class="text-muted small">
-                                    {{ $complaint->reservation->start_time?->format('d M Y, H:i') }}
+                                    {{ $complaint->reservation->start_time_local?->format('d M Y, H:i') }}
                                     &ndash;
-                                    {{ $complaint->reservation->end_time?->format('H:i') }}
+                                    {{ $complaint->reservation->end_time_local?->format('H:i') }}
                                 </div>
                             @endif
                         </div>

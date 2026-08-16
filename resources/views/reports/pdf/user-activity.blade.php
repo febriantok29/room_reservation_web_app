@@ -98,8 +98,8 @@
                     <td>{{ $r->user?->employee_id ?? '-' }}</td>
                     <td>{{ $r->user?->full_name ?? '-' }}</td>
                     <td>{{ $r->room?->name ?? '-' }}</td>
-                    <td>{{ $r->start_time?->format('d/m/Y H:i') }}</td>
-                    <td>{{ $r->end_time?->format('d/m/Y H:i') }}</td>
+                    <td>{{ $r->start_time_short }}</td>
+                    <td>{{ $r->end_time_short }}</td>
                     <td>{{ strtoupper($r->status) }}</td>
                     <td>{{ $r->with_snack ? 'Ya' : '-' }}</td>
                     <td>{{ $r->with_lunch ? 'Ya' : '-' }}</td>
