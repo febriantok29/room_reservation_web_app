@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\NormalizesFilterValues;
 use App\Models\Reservation;
 use App\Models\Room;
 use App\Models\RoomComplaint;
@@ -26,6 +27,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class AdminReportController extends Controller
 {
+    use NormalizesFilterValues;
+
     private function ensureAdminAccess(Request $request): void
     {
         abort_unless($request->user()?->canApprove(), 403);
@@ -39,15 +42,14 @@ class AdminReportController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $dateFrom    = $request->input('date_from');
-        $dateTo      = $request->input('date_to');
-        $statusFilter = $request->input('status', '');
-        $roomFilter  = $request->input('room_id', '');
-        $format      = $request->input('format', '');
+        $dateFrom      = $request->input('date_from');
+        $dateTo        = $request->input('date_to');
+        $statusFilters = $this->normalizeFilterValues($request->input('status'));
+        $roomFilters   = $this->normalizeFilterValues($request->input('room_id'));
+        $format        = $request->input('format', '');
 
         $query = RoomComplaint::query()
             ->with(['room', 'reporter', 'facility', 'resolver'])
-            ->whereNull('deleted_at')
             ->orderByDesc('created_at');
 
         if ($dateFrom) {
@@ -56,11 +58,11 @@ class AdminReportController extends Controller
         if ($dateTo) {
             $query->where('created_at', '<=', Carbon::parse($dateTo)->endOfDay());
         }
-        if ($statusFilter) {
-            $query->where('status', $statusFilter);
+        if ($statusFilters !== []) {
+            $query->whereIn('status', $statusFilters);
         }
-        if ($roomFilter) {
-            $query->where('room_id', $roomFilter);
+        if ($roomFilters !== []) {
+            $query->whereIn('room_id', $roomFilters);
         }
 
         $complaints = $query->get();
@@ -105,10 +107,10 @@ class AdminReportController extends Controller
             );
         }
 
-        $rooms = Room::query()->whereNull('deleted_at')->orderBy('name')->get();
+        $rooms = Room::query()->orderBy('name')->get();
 
         return view('admin.reports.complaints', compact('complaints', 'byFacility', 'summary', 'rooms',
-            'dateFrom', 'dateTo', 'statusFilter', 'roomFilter'));
+            'dateFrom', 'dateTo', 'statusFilters', 'roomFilters'));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -119,14 +121,13 @@ class AdminReportController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $dateFrom = $request->input('date_from');
-        $dateTo   = $request->input('date_to');
-        $roomFilter = $request->input('room_id', '');
-        $format   = $request->input('format', '');
+        $dateFrom    = $request->input('date_from');
+        $dateTo      = $request->input('date_to');
+        $roomFilters = $this->normalizeFilterValues($request->input('room_id'));
+        $format      = $request->input('format', '');
 
         $query = Reservation::query()
             ->with(['room:id,name,floor,capacity', 'user:id,first_name,last_name,employee_id'])
-            ->whereNull('deleted_at')
             ->whereIn('status', [ReservationStatus::Approved->value, ReservationStatus::Completed->value]);
 
         if ($dateFrom) {
@@ -136,8 +137,8 @@ class AdminReportController extends Controller
             $query->where('start_time', '<=', Carbon::parse($dateTo)->endOfDay());
         }
 
-        if ($roomFilter) {
-            $query->where('room_id', $roomFilter);
+        if ($roomFilters !== []) {
+            $query->whereIn('room_id', $roomFilters);
         }
 
         $reservations = $query->orderBy('start_time')->get();
@@ -179,10 +180,10 @@ class AdminReportController extends Controller
             );
         }
 
-        $rooms = Room::query()->whereNull('deleted_at')->orderBy('floor')->orderBy('name')->get();
+        $rooms = Room::query()->orderBy('floor')->orderBy('name')->get();
 
         return view('admin.reports.usage', compact('reservations', 'byRoom', 'summary', 'rooms',
-            'dateFrom', 'dateTo', 'roomFilter'));
+            'dateFrom', 'dateTo', 'roomFilters'));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -193,14 +194,13 @@ class AdminReportController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $dateFrom   = $request->input('date_from');
-        $dateTo     = $request->input('date_to');
-        $userFilter = $request->input('user_id', '');
-        $format     = $request->input('format', '');
+        $dateFrom    = $request->input('date_from');
+        $dateTo      = $request->input('date_to');
+        $userFilters = $this->normalizeFilterValues($request->input('user_id'));
+        $format      = $request->input('format', '');
 
         $query = Reservation::query()
             ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
-            ->whereNull('deleted_at')
             ->orderBy('start_time');
 
         if ($dateFrom) {
@@ -210,8 +210,8 @@ class AdminReportController extends Controller
             $query->where('start_time', '<=', Carbon::parse($dateTo)->endOfDay());
         }
 
-        if ($userFilter) {
-            $query->where('user_id', $userFilter);
+        if ($userFilters !== []) {
+            $query->whereIn('user_id', $userFilters);
         }
 
         $reservations = $query->get();
@@ -256,10 +256,10 @@ class AdminReportController extends Controller
             );
         }
 
-        $users = User::query()->whereNull('deleted_at')->orderBy('first_name')->get();
+        $users = User::query()->orderBy('first_name')->get();
 
         return view('admin.reports.user-activity', compact('reservations', 'byUser', 'summary', 'users',
-            'dateFrom', 'dateTo', 'userFilter'));
+            'dateFrom', 'dateTo', 'userFilters'));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -270,15 +270,14 @@ class AdminReportController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $dateFrom     = $request->input('date_from');
-        $dateTo       = $request->input('date_to');
-        $statusFilter = $request->input('status', '');
-        $roomFilter   = $request->input('room_id', '');
-        $format       = $request->input('format', '');
+        $dateFrom      = $request->input('date_from');
+        $dateTo        = $request->input('date_to');
+        $statusFilters = $this->normalizeFilterValues($request->input('status'));
+        $roomFilters   = $this->normalizeFilterValues($request->input('room_id'));
+        $format        = $request->input('format', '');
 
         $query = Reservation::query()
             ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
-            ->whereNull('deleted_at')
             ->orderBy('start_time');
 
         if ($dateFrom) {
@@ -288,11 +287,11 @@ class AdminReportController extends Controller
             $query->where('start_time', '<=', Carbon::parse($dateTo)->endOfDay());
         }
 
-        if ($statusFilter) {
-            $query->where('status', $statusFilter);
+        if ($statusFilters !== []) {
+            $query->whereIn('status', $statusFilters);
         }
-        if ($roomFilter) {
-            $query->where('room_id', $roomFilter);
+        if ($roomFilters !== []) {
+            $query->whereIn('room_id', $roomFilters);
         }
 
         $reservations = $query->get();
@@ -339,10 +338,10 @@ class AdminReportController extends Controller
             );
         }
 
-        $rooms = Room::query()->whereNull('deleted_at')->orderBy('floor')->orderBy('name')->get();
+        $rooms = Room::query()->orderBy('floor')->orderBy('name')->get();
 
         return view('admin.reports.schedule-history', compact('reservations', 'byRoom', 'summary', 'rooms',
-            'dateFrom', 'dateTo', 'statusFilter', 'roomFilter'));
+            'dateFrom', 'dateTo', 'statusFilters', 'roomFilters'));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -376,7 +375,6 @@ class AdminReportController extends Controller
         }
 
         $reservations = Reservation::query()
-            ->whereNull('deleted_at')
             ->where('start_time', '>=', $from)
             ->where('start_time', '<=', $to)
             ->orderBy('start_time')
@@ -436,7 +434,6 @@ class AdminReportController extends Controller
 
         $query = Reservation::query()
             ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
-            ->whereNull('deleted_at')
             ->orderBy('start_time');
 
         if ($dateFrom) {
@@ -498,24 +495,22 @@ class AdminReportController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $dateFrom   = $request->input('date_from');
-        $dateTo     = $request->input('date_to');
-        $roomFilter = $request->input('room_id', '');
-        $format     = $request->input('format', '');
+        $dateFrom    = $request->input('date_from');
+        $dateTo      = $request->input('date_to');
+        $roomFilters = $this->normalizeFilterValues($request->input('room_id'));
+        $format      = $request->input('format', '');
 
         $roomQuery = Room::query()
-            ->whereNull('deleted_at')
             ->orderBy('floor')
             ->orderBy('name');
 
-        if ($roomFilter) {
-            $roomQuery->where('id', $roomFilter);
+        if ($roomFilters !== []) {
+            $roomQuery->whereIn('id', $roomFilters);
         }
 
         $allRooms = $roomQuery->get();
 
-        $complaintQuery = RoomComplaint::query()
-            ->whereNull('deleted_at');
+        $complaintQuery = RoomComplaint::query();
 
         if ($dateFrom) {
             $complaintQuery->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
@@ -525,7 +520,7 @@ class AdminReportController extends Controller
         }
 
         $complaints = $complaintQuery
-            ->when($roomFilter, fn($q) => $q->where('room_id', $roomFilter))
+            ->when($roomFilters !== [], fn($q) => $q->whereIn('room_id', $roomFilters))
             ->get()
             ->groupBy('room_id');
 
@@ -570,10 +565,10 @@ class AdminReportController extends Controller
             );
         }
 
-        $allRoomsList = Room::query()->whereNull('deleted_at')->orderBy('floor')->orderBy('name')->get();
+        $allRoomsList = Room::query()->orderBy('floor')->orderBy('name')->get();
 
         return view('admin.reports.maintenance', compact('rooms', 'summary', 'allRoomsList',
-            'dateFrom', 'dateTo', 'roomFilter'));
+            'dateFrom', 'dateTo', 'roomFilters'));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -590,7 +585,6 @@ class AdminReportController extends Controller
 
         $query = Reservation::query()
             ->with(['room:id,name,floor', 'user:id,first_name,last_name,employee_id,division_id', 'user.division:id,name,code'])
-            ->whereNull('deleted_at')
             ->whereIn('status', [ReservationStatus::Approved->value, ReservationStatus::Completed->value])
             ->orderBy('start_time');
 

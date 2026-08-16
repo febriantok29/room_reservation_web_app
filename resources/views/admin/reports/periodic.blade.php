@@ -148,7 +148,7 @@
     </div>
 @stop
 
-@section('js')
+@push('js')
     <script>
         function toggleMonthField() {
             var period = document.getElementById('periodSelect').value;
@@ -156,4 +156,4 @@
         }
         toggleMonthField();
     </script>
-@stop
+@endpush

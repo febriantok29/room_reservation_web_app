@@ -38,15 +38,11 @@
                             value="{{ $dateTo ?? '' }}">
                     </div>
                     <div class="col-lg-4 col-md-4 mb-2 mb-lg-0">
-                        <label class="small mb-1">Ruangan</label>
-                        <select name="room_id" class="form-control form-control-sm">
-                            <option value="">Semua Ruangan</option>
-                            @foreach ($allRoomsList as $room)
-                                <option value="{{ $room->id }}" @selected(($roomFilter ?? '') === $room->id)>
-                                    {{ $room->name }} (Lt. {{ $room->floor }})
-                                </option>
-                            @endforeach
-                        </select>
+                        <label class="small mb-1 d-block">Ruangan</label>
+                        @include('admin.reports.partials.room_filter_pills', [
+                            'rooms' => $allRoomsList,
+                            'selected' => $roomFilters ?? [],
+                        ])
                     </div>
                     <div class="col-lg-4 col-md-12">
                         <div class="d-flex" style="gap:.5rem;">

@@ -6,110 +6,6 @@
     <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap:.75rem;">
         <div>
             <h1 class="m-0">Rekapitulasi Penggunaan Ruangan</h1>
-            <div class="page-subtitle">Rekapitulasi durasi, frekuensi, dan pengunjung untuk setiap ruangan.</div>
-        </div>
-        <div class="d-flex" style="gap:.5rem;">
-            <a href="{{ request()->fullUrlWithQuery(['format' => 'excel']) }}" class="btn btn-success btn-sm">
-                <i class="fas fa-file-excel"></i> Export Excel
-            </a>
-            <a href="{{ request()->fullUrlWithQuery(['format' => 'pdf']) }}" class="btn btn-danger btn-sm">
-                <i class="fas fa-file-pdf"></i> Export PDF
-            </a>
-        </div>
-    </div>
-@stop
-
-@section('content')
-    @include('admin.partials.flash_message')
-
-    {{-- Filter --}}
-    <div class="card card-admin mb-3">
-        <div class="card-body py-3">
-            <form method="GET" action="{{ route('admin.reports.usage') }}">
-                <div class="row align-items-end">
-                    <div class="col-lg-2 col-md-4 mb-2 mb-lg-0">
-                        <label class="small mb-1">Dari Tanggal</label>
-                        <input type="date" name="date_from" class="form-control form-control-sm"
-                            value="{{ $dateFrom ?? '' }}">
-                    </div>
-                    <div class="col-lg-2 col-md-4 mb-2 mb-lg-0">
-                        <label class="small mb-1">Sampai Tanggal</label>
-                        <input type="date" name="date_to" class="form-control form-control-sm"
-                            value="{{ $dateTo ?? '' }}">
-                    </div>
-                    <div class="col-lg-4 col-md-4 mb-2 mb-lg-0">
-                        <label class="small mb-1">Ruangan</label>
-                        <select name="room_id" class="form-control form-control-sm">
-                            <option value="">Semua Ruangan</option>
-                            @foreach ($rooms as $room)
-                                <option value="{{ $room->id }}" @selected(($roomFilter ?? '') === $room->id)>
-                                    {{ $room->name }} (Lt. {{ $room->floor }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-lg-4 col-md-12">
-                        <div class="d-flex" style="gap:.5rem;">
-                            <button type="submit" class="btn btn-primary btn-sm flex-fill">
-                                <i class="fas fa-search"></i> Filter
-                            </button>
-                            <a href="{{ route('admin.reports.usage') }}" class="btn btn-secondary btn-sm">
-                                <i class="fas fa-undo"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    {{-- Single Table: Per-Room Summary --}}
-    <div class="card card-admin">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-sm table-hover mb-0">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Nama Ruangan</th>
-                            <th class="text-center">Lantai</th>
-                            <th class="text-center">Kapasitas</th>
-                            <th class="text-center">Jml. Pemakaian</th>
-                            <th class="text-center">Total Jam</th>
-                            <th class="text-center">Rata-rata Jam</th>
-                            <th class="text-center">Total Pengunjung</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($byRoom as $row)
-                            <tr>
-                                <td class="font-weight-bold">{{ $row['room_name'] }}</td>
-                                <td class="text-center">{{ $row['floor'] ? 'Lt. ' . $row['floor'] : '-' }}</td>
-                                <td class="text-center">{{ $row['capacity'] }} orang</td>
-                                <td class="text-center">{{ $row['reserved_count'] }}×</td>
-                                <td class="text-center font-weight-bold text-warning">{{ $row['total_hours'] }} jam</td>
-                                <td class="text-center">{{ $row['avg_hours'] }} jam</td>
-                                <td class="text-center">{{ $row['total_visitors'] }}</td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="text-center text-muted py-4">
-                                    <i class="fas fa-inbox fa-2x d-block mb-2"></i>
-                                    Tidak ada data pemakaian ruangan pada periode ini.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-@stop
-
-
-@section('content_header')
-    <div class="d-flex justify-content-between align-items-start flex-wrap" style="gap:.75rem;">
-        <div>
-            <h1 class="m-0">Rekapitulasi Penggunaan Ruangan</h1>
             <div class="page-subtitle">Rekap pemakaian dan durasi penggunaan setiap ruangan.</div>
         </div>
         <div class="d-flex" style="gap:.5rem;">
@@ -189,15 +85,11 @@
                             value="{{ $dateTo ?? '' }}">
                     </div>
                     <div class="col-lg-4 col-md-4 mb-2 mb-lg-0">
-                        <label class="small mb-1">Ruangan</label>
-                        <select name="room_id" class="form-control form-control-sm">
-                            <option value="">Semua Ruangan</option>
-                            @foreach ($rooms as $room)
-                                <option value="{{ $room->id }}" @selected(($roomFilter ?? '') === $room->id)>
-                                    {{ $room->name }} (Lt. {{ $room->floor }})
-                                </option>
-                            @endforeach
-                        </select>
+                        <label class="small mb-1 d-block">Ruangan</label>
+                        @include('admin.reports.partials.room_filter_pills', [
+                            'rooms' => $rooms,
+                            'selected' => $roomFilters ?? [],
+                        ])
                     </div>
                     <div class="col-lg-4 col-md-12">
                         <div class="d-flex" style="gap:.5rem;">
