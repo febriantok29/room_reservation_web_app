@@ -7,6 +7,7 @@ use App\Models\Division;
 use App\Models\User;
 use App\Services\EmployeeIdGenerator;
 use App\Support\WebMessages;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -16,11 +17,14 @@ use Illuminate\View\View;
 
 class AdminUserController extends Controller
 {
-    private const DEFAULT_PASSWORD = 'User@123';
-
     private function ensureAdminAccess(Request $request): void
     {
         abort_unless($request->user()?->canApprove(), 403);
+    }
+
+    private function temporaryPassword(string $employeeId, string $dateOfBirth): string
+    {
+        return $employeeId . '-' . Carbon::parse($dateOfBirth)->format('dmY');
     }
 
     public function index(Request $request): View
@@ -70,9 +74,10 @@ class AdminUserController extends Controller
             'email'         => 'required|email|max:100|unique:s_users,email',
             'division_id'   => 'nullable|string|exists:m_divisions,id',
             'is_admin'      => 'nullable|boolean',
-            'date_of_birth' => 'nullable|date|before:today',
+            'date_of_birth' => 'required|date|before:today',
         ], [
             'email.unique' => 'Email sudah digunakan.',
+            'date_of_birth.required' => 'Tanggal lahir wajib diisi (digunakan untuk password awal).',
         ]);
 
         $isAdmin  = $request->boolean('is_admin');
@@ -88,22 +93,25 @@ class AdminUserController extends Controller
             ? EmployeeIdGenerator::generate($division->code)
             : EmployeeIdGenerator::generateAdmin();
 
-        User::query()->create([
+        $user = User::query()->create([
             'employee_id'   => $employeeId,
             'division_id'   => $division?->id,
             'email'         => strtolower(trim($validated['email'])),
-            'password'      => Hash::make(self::DEFAULT_PASSWORD),
+            'password'      => Hash::make($this->temporaryPassword($employeeId, $validated['date_of_birth'])),
             'first_name'    => Str::of($validated['first_name'])->squish()->toString(),
             'last_name'     => Str::of($validated['last_name'])->squish()->toString(),
-            'date_of_birth' => $validated['date_of_birth'] ?? null,
+            'date_of_birth' => $validated['date_of_birth'],
             'is_admin'      => $isAdmin,
             'is_active'     => true,
+            'must_change_password' => true,
             'created_by'    => $request->user()?->id,
         ]);
 
+        $tempPassword = $this->temporaryPassword($employeeId, $validated['date_of_birth']);
+
         return redirect()->route('admin.users')->with(
             'success',
-            "Karyawan berhasil ditambahkan. No. Induk: {$employeeId} — password awal: " . self::DEFAULT_PASSWORD
+            "Karyawan berhasil ditambahkan. No. Induk: {$employeeId} — password awal: {$tempPassword} (wajib diganti saat login pertama)."
         );
     }
 
@@ -128,9 +136,10 @@ class AdminUserController extends Controller
             'division_id'   => 'nullable|string|exists:m_divisions,id',
             'is_admin'      => 'nullable|boolean',
             'is_active'     => 'nullable|boolean',
-            'date_of_birth' => 'nullable|date|before:today',
+            'date_of_birth' => 'required|date|before:today',
         ], [
             'email.unique' => 'Email sudah digunakan.',
+            'date_of_birth.required' => 'Tanggal lahir wajib diisi.',
         ]);
 
         $isSelf = $user->id === $request->user()?->id;
@@ -143,7 +152,7 @@ class AdminUserController extends Controller
         $user->last_name     = Str::of($validated['last_name'])->squish()->toString();
         $user->email         = strtolower(trim($validated['email']));
         $user->division_id   = $validated['division_id'] ?? null;
-        $user->date_of_birth = $validated['date_of_birth'] ?? null;
+        $user->date_of_birth = $validated['date_of_birth'];
         $user->is_admin      = $request->boolean('is_admin');
         $user->is_active     = $request->boolean('is_active');
         $user->updated_by    = $request->user()?->id;
@@ -156,11 +165,13 @@ class AdminUserController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $user->password   = Hash::make(self::DEFAULT_PASSWORD);
-        $user->updated_by = $request->user()?->id;
+        $tempPassword = $this->temporaryPassword($user->employee_id, $user->date_of_birth->format('Y-m-d'));
+        $user->password             = Hash::make($tempPassword);
+        $user->must_change_password = true;
+        $user->updated_by           = $request->user()?->id;
         $user->save();
 
-        return back()->with('success', 'Password ' . $user->full_name . ' direset ke: ' . self::DEFAULT_PASSWORD);
+        return back()->with('success', 'Password ' . $user->full_name . ' direset ke password awal: ' . $tempPassword . ' (wajib diganti saat login berikutnya).');
     }
 
     public function destroy(Request $request, User $user): RedirectResponse

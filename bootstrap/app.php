@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureAdminMiddleware;
+use App\Http\Middleware\EnsurePasswordChangedMiddleware;
 use App\Http\Middleware\JwtMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'jwt' => JwtMiddleware::class,
             'admin' => EnsureAdminMiddleware::class,
+            'password.changed' => EnsurePasswordChangedMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
