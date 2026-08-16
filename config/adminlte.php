@@ -300,6 +300,22 @@ return [
 
     'menu' => [
         [
+            'type' => 'navbar-notification',
+            'id' => 'adminlteNavbarNotification',
+            'icon' => 'fas fa-bell',
+            'icon_color' => 'info',
+            'label_color' => 'danger',
+            'url' => '/admin/notifications',
+            'href' => '/admin/notifications',
+            'topnav_right' => true,
+            'dropdown_mode' => true,
+            'dropdown_flabel' => 'Lihat Semua Notifikasi',
+            'update_cfg' => [
+                'route' => 'admin.notifications.unread',
+                'period' => 30,
+            ],
+        ],
+        [
             'type' => 'fullscreen-widget',
             'topnav_right' => true,
         ],
