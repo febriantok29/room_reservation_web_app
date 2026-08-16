@@ -60,8 +60,8 @@
 @section('css')
 @stop
 
-@section('js')
+@push('js')
     @include('admin.partials.form_submit_guard_script')
-@stop
+@endpush
 
 @include('admin.partials.timezone_detector')
