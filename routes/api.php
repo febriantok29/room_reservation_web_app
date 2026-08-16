@@ -24,6 +24,7 @@ Route::prefix('v1')->group(function () {
 Route::prefix('v1')->middleware('jwt')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::post('/auth/change-password', [AuthController::class, 'changePassword']);
     Route::post('/auth/fcm-token', [AuthController::class, 'updateFcmToken']);
 
     // Room endpoints
