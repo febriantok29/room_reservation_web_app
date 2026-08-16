@@ -14,8 +14,8 @@
 
     <div class="row">
 
-        {{-- Main Form (8 columns) --}}
-        <div class="col-lg-8">
+        {{-- Main Form --}}
+        <div class="col-lg-12">
             <x-form.card action="{{ route('admin.reservations.store') }}" submit-guard loading-text="Menyimpan...">
                 <x-form.section title="Pemohon & Kebutuhan Ruangan" />
 
@@ -88,6 +88,12 @@
                 <x-form.field name="purpose" label="Tujuan" type="textarea" value="{{ old('purpose') }}" rows="3"
                     hint="Opsional: Jelaskan keperluan reservasi ruangan ini." col-class="col-md-12" />
 
+                <div class="alert alert-info py-2 small">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Reservasi yang dibuat dari web admin langsung berstatus
+                    <span class="badge badge-success badge-sm">DISETUJUI</span>.
+                </div>
+
                 <x-form.actions back-url="{{ route('admin.reservations') }}" submit-text="Simpan" />
             </x-form.card>
 
@@ -112,71 +118,6 @@
             @endif
         </div>
 
-        {{-- Sidebar (4 columns) --}}
-        <div class="col-lg-4">
-            <div class="card card-admin sticky-top" style="top:70px;">
-                <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-info-circle mr-2 text-primary"></i> Panduan Reservasi</h3>
-                </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item px-3 py-2">
-                            <div class="d-flex align-items-start">
-                                <span class="badge badge-primary mr-2 mt-1" style="min-width:22px;">1</span>
-                                <div>
-                                    <div class="font-weight-bold small">Pemohon</div>
-                                    <div class="text-muted" style="font-size:.8rem;">Kosongkan jika reservasi untuk akun
-                                        admin. Pilih pegawai jika membuat atas nama orang lain.</div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item px-3 py-2">
-                            <div class="d-flex align-items-start">
-                                <span class="badge badge-primary mr-2 mt-1" style="min-width:22px;">2</span>
-                                <div>
-                                    <div class="font-weight-bold small">Fasilitas yang Dibutuhkan</div>
-                                    <div class="text-muted" style="font-size:.8rem;">Filter ruangan berdasarkan fasilitas
-                                        yang tersedia. Hanya ruangan yang memiliki semua fasilitas yang dipilih akan muncul.
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item px-3 py-2">
-                            <div class="d-flex align-items-start">
-                                <span class="badge badge-primary mr-2 mt-1" style="min-width:22px;">3</span>
-                                <div>
-                                    <div class="font-weight-bold small">Jadwal Reservasi</div>
-                                    <div class="text-muted" style="font-size:.8rem;">Pastikan jam mulai lebih awal dari
-                                        jam selesai. Sistem akan memverifikasi ketersediaan ruangan secara otomatis.</div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item px-3 py-2">
-                            <div class="d-flex align-items-start">
-                                <span class="badge badge-primary mr-2 mt-1" style="min-width:22px;">4</span>
-                                <div>
-                                    <div class="font-weight-bold small">Kapasitas</div>
-                                    <div class="text-muted" style="font-size:.8rem;">Jumlah pengunjung tidak boleh
-                                        melebihi kapasitas ruangan yang dipilih.</div>
-                                </div>
-                            </div>
-                        </li>
-                        <li class="list-group-item px-3 py-2">
-                            <div class="d-flex align-items-start">
-                                <span class="badge badge-warning mr-2 mt-1" style="min-width:22px;"><i
-                                        class="fas fa-clock" style="font-size:.65rem;"></i></span>
-                                <div>
-                                    <div class="font-weight-bold small">Status Awal</div>
-                                    <div class="text-muted" style="font-size:.8rem;">Reservasi baru akan berstatus <span
-                                            class="badge badge-warning badge-sm">MENUNGGU</span> dan perlu disetujui oleh
-                                        admin.</div>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
 
     </div>
 @stop
