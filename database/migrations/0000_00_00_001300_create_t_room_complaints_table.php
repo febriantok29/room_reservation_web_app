@@ -62,10 +62,12 @@ return new class extends Migration
             $table->index(['status', 'created_at', 'deleted_at'], 'idx_complaint_status_time');
         });
 
-        DB::statement('ALTER TABLE t_room_complaints MODIFY created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP');
-        DB::statement('ALTER TABLE t_room_complaints MODIFY updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP');
-        DB::statement('ALTER TABLE t_room_complaints MODIFY deleted_at TIMESTAMP NULL');
-        DB::statement('ALTER TABLE t_room_complaints MODIFY resolved_at TIMESTAMP NULL');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE t_room_complaints MODIFY created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP');
+            DB::statement('ALTER TABLE t_room_complaints MODIFY updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP');
+            DB::statement('ALTER TABLE t_room_complaints MODIFY deleted_at TIMESTAMP NULL');
+            DB::statement('ALTER TABLE t_room_complaints MODIFY resolved_at TIMESTAMP NULL');
+        }
     }
 
     /**

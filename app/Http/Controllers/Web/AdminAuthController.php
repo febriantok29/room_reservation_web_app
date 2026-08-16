@@ -67,7 +67,41 @@ class AdminAuthController extends Controller
                 ->withErrors(['login' => WebMessages::AUTH_NO_ADMIN_ACCESS]);
         }
 
+        if (Auth::user()?->must_change_password) {
+            return redirect()->route('admin.password.change');
+        }
+
         return redirect()->intended(route('admin.dashboard'));
+    }
+
+    public function showChangePassword(): View
+    {
+        return view('admin.auth.change-password');
+    }
+
+    public function changePassword(Request $request): RedirectResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6',
+            'new_password_confirmation' => 'required|same:new_password',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $user = Auth::user();
+
+        if (! Hash::check($request->input('current_password'), $user->password)) {
+            return back()->withErrors(['current_password' => 'Password saat ini salah']);
+        }
+
+        $user->password             = Hash::make($request->input('new_password'));
+        $user->must_change_password = false;
+        $user->save();
+
+        return redirect()->route('admin.dashboard')->with('success', 'Password berhasil diganti.');
     }
 
     public function logout(Request $request): RedirectResponse

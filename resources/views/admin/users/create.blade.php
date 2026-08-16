@@ -76,10 +76,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="date_of_birth">Tanggal Lahir</label>
+                    <label for="date_of_birth">Tanggal Lahir <span class="text-danger">*</span></label>
                     <input type="date" id="date_of_birth" name="date_of_birth"
                         class="form-control @error('date_of_birth') is-invalid @enderror"
-                        value="{{ old('date_of_birth') }}">
+                        value="{{ old('date_of_birth') }}" required>
+                    <small class="form-text text-muted">
+                        Digunakan untuk membuat password awal karyawan.
+                    </small>
                     @error('date_of_birth')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -95,7 +98,8 @@
 
                 <div class="alert alert-info py-2 small">
                     <i class="fas fa-info-circle mr-1"></i>
-                    Password awal karyawan baru: <strong>User@123</strong> — sampaikan ke karyawan dan sarankan tidak dibagikan.
+                    Password awal dibuat otomatis dari No. Induk + tanggal lahir dan hanya ditampilkan sekali setelah
+                    disimpan. Karyawan wajib mengganti password saat login pertama.
                 </div>
 
                 <div class="d-flex" style="gap:.5rem;">

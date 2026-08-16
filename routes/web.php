@@ -30,8 +30,12 @@ Route::prefix('admin')->group(function () {
         Route::post('/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
     });
 
-    Route::middleware(['auth', 'admin'])->group(function () {
+    Route::middleware(['auth', 'admin', 'password.changed'])->group(function () {
         Route::get('/', [AdminDashboardController::class, 'dashboard'])->name('admin.dashboard');
+
+        // Force password change
+        Route::get('/password/change', [AdminAuthController::class, 'showChangePassword'])->name('admin.password.change');
+        Route::post('/password/change', [AdminAuthController::class, 'changePassword'])->name('admin.password.change.submit');
 
         // Rooms CRUD
         Route::get('/rooms', [AdminDashboardController::class, 'rooms'])->name('admin.rooms');

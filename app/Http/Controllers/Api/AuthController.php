@@ -295,4 +295,51 @@ class AuthController extends Controller
 
         return ApiResponse::success(null, ApiMessages::AUTH_FCM_TOKEN_UPDATED, 200);
     }
+
+    /**
+     * Ganti password
+     *
+     * Mengganti password sendiri. Wajib dilakukan saat akun memiliki flag must_change_password.
+     *
+     * @bodyParam current_password string required Password saat ini. Example: IT-001-12052000
+     * @bodyParam new_password string required Password baru. Example: passwordBaru123
+     *
+     * @response 200 scenario="Sukses" {
+     *   "success": true,
+     *   "message": "Password berhasil diganti",
+     *   "data": null
+     * }
+     * @response 422 scenario="Password saat ini salah" {
+     *   "success": false,
+     *   "error_code": "INVALID_CURRENT_PASSWORD",
+     *   "message": "Password saat ini salah"
+     * }
+     */
+    public function changePassword(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return ApiResponse::validationError($validator->errors()->toArray());
+        }
+
+        $user = $request->user();
+
+        if (! Hash::check($request->input('current_password'), $user->password)) {
+            return ApiResponse::error(
+                ApiErrorCodes::INVALID_CURRENT_PASSWORD,
+                ApiMessages::AUTH_INVALID_CURRENT_PASSWORD,
+                422
+            );
+        }
+
+        $user->password             = Hash::make($request->input('new_password'));
+        $user->must_change_password = false;
+        $user->save();
+
+        return ApiResponse::success(null, ApiMessages::AUTH_PASSWORD_CHANGED, 200);
+    }
 }

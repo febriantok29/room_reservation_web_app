@@ -54,11 +54,13 @@ return new class extends Migration
         });
 
         // Set timezone to UTC for this table
-        DB::statement('ALTER TABLE t_reservations MODIFY start_time TIMESTAMP NOT NULL');
-        DB::statement('ALTER TABLE t_reservations MODIFY end_time TIMESTAMP NOT NULL');
-        DB::statement('ALTER TABLE t_reservations MODIFY created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP');
-        DB::statement('ALTER TABLE t_reservations MODIFY updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP');
-        DB::statement('ALTER TABLE t_reservations MODIFY deleted_at TIMESTAMP NULL');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE t_reservations MODIFY start_time TIMESTAMP NOT NULL');
+            DB::statement('ALTER TABLE t_reservations MODIFY end_time TIMESTAMP NOT NULL');
+            DB::statement('ALTER TABLE t_reservations MODIFY created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP');
+            DB::statement('ALTER TABLE t_reservations MODIFY updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP');
+            DB::statement('ALTER TABLE t_reservations MODIFY deleted_at TIMESTAMP NULL');
+        }
     }
 
     /**

@@ -45,9 +45,11 @@ return new class extends Migration
         });
 
         // Set timezone to UTC for this table
-        DB::statement('ALTER TABLE m_rooms MODIFY created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP');
-        DB::statement('ALTER TABLE m_rooms MODIFY updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP');
-        DB::statement('ALTER TABLE m_rooms MODIFY deleted_at TIMESTAMP NULL');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE m_rooms MODIFY created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP');
+            DB::statement('ALTER TABLE m_rooms MODIFY updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP');
+            DB::statement('ALTER TABLE m_rooms MODIFY deleted_at TIMESTAMP NULL');
+        }
     }
 
     /**

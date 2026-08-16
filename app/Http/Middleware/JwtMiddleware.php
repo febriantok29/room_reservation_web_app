@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use App\Models\User;
 use App\Http\Responses\ApiResponse;
 use App\Services\JwtService;
+use App\Support\ApiErrorCodes;
+use App\Support\ApiMessages;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -72,6 +74,15 @@ class JwtMiddleware
             if ($requiresAdmin && !$user->isAdmin()) {
                 return ApiResponse::forbidden();
             }
+        }
+
+        // Force password change: block everything except the change-password endpoint
+        if ($user->must_change_password && ! $request->is('api/v1/auth/change-password')) {
+            return ApiResponse::error(
+                ApiErrorCodes::PASSWORD_CHANGE_REQUIRED,
+                ApiMessages::AUTH_PASSWORD_CHANGE_REQUIRED,
+                403
+            );
         }
 
         // Inject user into request

@@ -28,9 +28,11 @@ return new class extends Migration
             $table->index('code');
         });
 
-        DB::statement('ALTER TABLE m_divisions MODIFY created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP');
-        DB::statement('ALTER TABLE m_divisions MODIFY updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP');
-        DB::statement('ALTER TABLE m_divisions MODIFY deleted_at TIMESTAMP NULL');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('ALTER TABLE m_divisions MODIFY created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP');
+            DB::statement('ALTER TABLE m_divisions MODIFY updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP');
+            DB::statement('ALTER TABLE m_divisions MODIFY deleted_at TIMESTAMP NULL');
+        }
     }
 
     public function down(): void
