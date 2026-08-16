@@ -71,7 +71,7 @@
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <form action="{{ route('admin.divisions.destroy', $division) }}" method="POST"
-                                        onsubmit="return confirm('Hapus divisi {{ $division->name }}? Pastikan tidak ada pengguna aktif di divisi ini.')">
+                                        data-confirm-delete="Hapus divisi {{ $division->name }}? Pastikan tidak ada pengguna aktif di divisi ini.">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
                                             <i class="fas fa-trash"></i>
@@ -96,3 +96,7 @@
         </div>
     </div>
 @stop
+
+@push('js')
+    @include('admin.partials.confirm_delete')
+@endpush

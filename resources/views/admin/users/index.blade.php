@@ -95,7 +95,7 @@
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
-                                        onsubmit="return confirm('Hapus karyawan {{ $user->full_name }}? Riwayat reservasi tetap tersimpan.')">
+                                        data-confirm-delete="Hapus karyawan {{ $user->full_name }}? Riwayat reservasi tetap tersimpan.">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn btn-danger btn-sm" title="Hapus">
                                             <i class="fas fa-trash"></i>
@@ -123,3 +123,7 @@
         @endif
     </div>
 @stop
+
+@push('js')
+    @include('admin.partials.confirm_delete')
+@endpush
