@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\Concerns\EnsuresAdminAccess;
+use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\Facility;
 use App\Support\ApiMessages;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class FacilityController extends Controller
 {
@@ -51,7 +51,7 @@ class FacilityController extends Controller
     {
         $facility = Facility::query()->where('id', $id)->first();
 
-        if (!$facility) {
+        if (! $facility) {
             return ApiResponse::notFound(ApiMessages::FACILITY_NOT_FOUND);
         }
 
@@ -65,31 +65,49 @@ class FacilityController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100',
+            'names' => 'required|array|min:1',
+            'names.*' => 'required|string|max:100',
         ]);
 
         if ($validator->fails()) {
             return ApiResponse::validationError($validator->errors()->toArray());
         }
 
-        $name = Str::of((string) $request->input('name'))->squish()->title()->toString();
-        $slug = Str::slug($name, '_');
+        $added = 0;
+        $skipped = [];
+        $facilities = [];
 
-        if ($slug === '') {
-            return ApiResponse::validationError([
-                'name' => ['Nama fasilitas tidak valid.'],
-            ]);
-        }
+        foreach ($request->input('names') as $rawName) {
+            $name = Str::of((string) $rawName)->squish()->toString();
+            $slug = Str::slug($name, '_');
 
-        $facility = Facility::query()->firstOrCreate(
-            ['slug' => $slug],
-            [
+            if ($name === '' || $slug === '') {
+                continue;
+            }
+
+            if (Facility::query()->where('slug', $slug)->exists()) {
+                $skipped[] = $name;
+                continue;
+            }
+
+            $facility = Facility::query()->create([
                 'id' => (string) Str::uuid7(),
                 'name' => $name,
-            ]
-        );
+                'slug' => $slug,
+            ]);
+            $facilities[] = $facility;
+            $added++;
+        }
 
-        return ApiResponse::success($facility, ApiMessages::FACILITY_CREATED_SUCCESS, 201);
+        return ApiResponse::success(
+            [
+                'added_count' => $added,
+                'skipped' => $skipped,
+                'facilities' => $facilities,
+            ],
+            $added > 0 ? ApiMessages::FACILITY_CREATED_SUCCESS : ApiMessages::FACILITY_DUPLICATE_NAME,
+            $added > 0 ? 201 : 200
+        );
     }
 
     public function update(Request $request, string $id): JsonResponse
@@ -100,7 +118,7 @@ class FacilityController extends Controller
 
         $facility = Facility::query()->where('id', $id)->first();
 
-        if (!$facility) {
+        if (! $facility) {
             return ApiResponse::notFound(ApiMessages::FACILITY_NOT_FOUND);
         }
 
@@ -112,7 +130,7 @@ class FacilityController extends Controller
             return ApiResponse::validationError($validator->errors()->toArray());
         }
 
-        $name = Str::of((string) $request->input('name'))->squish()->title()->toString();
+        $name = Str::of((string) $request->input('name'))->squish()->toString();
         $slug = Str::slug($name, '_');
 
         if ($slug === '') {
@@ -147,7 +165,7 @@ class FacilityController extends Controller
 
         $facility = Facility::query()->where('id', $id)->first();
 
-        if (!$facility) {
+        if (! $facility) {
             return ApiResponse::notFound(ApiMessages::FACILITY_NOT_FOUND);
         }
 
@@ -155,5 +173,4 @@ class FacilityController extends Controller
 
         return ApiResponse::success(null, ApiMessages::FACILITY_DELETED_SUCCESS);
     }
-
 }

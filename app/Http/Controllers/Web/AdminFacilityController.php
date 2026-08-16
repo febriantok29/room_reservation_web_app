@@ -21,14 +21,11 @@ class AdminFacilityController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $query = Facility::query()->orderBy('name');
+        $query = Facility::query()->withCount('rooms')->orderBy('name');
 
         if ($request->filled('q')) {
             $keyword = trim((string) $request->input('q'));
-            $query->where(function ($q) use ($keyword) {
-                $q->where('name', 'like', "%{$keyword}%")
-                    ->orWhere('slug', 'like', "%{$keyword}%");
-            });
+            $query->where('name', 'like', "%{$keyword}%");
         }
 
         return view('admin.facilities.index', [
@@ -48,29 +45,53 @@ class AdminFacilityController extends Controller
         $this->ensureAdminAccess($request);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:100',
+            'names' => 'required|array|min:1',
+            'names.*' => 'required|string|max:100',
         ]);
 
-        $name = Str::of((string) $validated['name'])->squish()->title()->toString();
-        $slug = Str::slug($name, '_');
+        $added = 0;
+        $skipped = [];
 
-        if ($slug === '') {
-            return back()->withErrors(['name' => WebMessages::FACILITY_INVALID_NAME])->withInput();
+        foreach ($validated['names'] as $rawName) {
+            $name = Str::of((string) $rawName)->squish()->toString();
+            $slug = Str::slug($name, '_');
+
+            if ($name === '' || $slug === '') {
+                continue;
+            }
+
+            if (Facility::query()->where('slug', $slug)->exists()) {
+                $skipped[] = $name;
+                continue;
+            }
+
+            Facility::query()->create([
+                'id' => (string) Str::uuid7(),
+                'name' => $name,
+                'slug' => $slug,
+            ]);
+            $added++;
         }
 
-        $facility = Facility::query()->where('slug', $slug)->first();
-
-        if ($facility) {
-            return back()->withErrors(['name' => WebMessages::FACILITY_DUPLICATE_NAME])->withInput();
+        if ($added === 0 && empty($skipped)) {
+            return back()->withErrors(['names' => WebMessages::FACILITY_INVALID_NAME])->withInput();
         }
 
-        Facility::query()->create([
-            'id' => (string) Str::uuid7(),
-            'name' => $name,
-            'slug' => $slug,
-        ]);
+        $message = $added > 0
+            ? strtr(WebMessages::FACILITY_BULK_ADDED, [':count' => $added])
+            : WebMessages::FACILITY_BULK_NONE_ADDED;
 
-        return redirect()->route('admin.facilities')->with('success', WebMessages::FACILITY_CREATED_SUCCESS);
+        if (!empty($skipped)) {
+            $message .= strtr(WebMessages::FACILITY_BULK_SKIPPED, [
+                ':skipped' => count($skipped),
+                ':names' => implode(', ', array_slice($skipped, 0, 5)),
+            ]);
+            if (count($skipped) > 5) {
+                $message .= ' (+'.(count($skipped) - 5).' lainnya)';
+            }
+        }
+
+        return redirect()->route('admin.facilities')->with('success', $message);
     }
 
     public function edit(Request $request, Facility $facility): View
@@ -78,7 +99,7 @@ class AdminFacilityController extends Controller
         $this->ensureAdminAccess($request);
 
         return view('admin.facilities.edit', [
-            'facility' => $facility,
+            'facility' => $facility->loadCount('rooms'),
         ]);
     }
 
@@ -90,7 +111,7 @@ class AdminFacilityController extends Controller
             'name' => 'required|string|max:100',
         ]);
 
-        $name = Str::of((string) $validated['name'])->squish()->title()->toString();
+        $name = Str::of((string) $validated['name'])->squish()->toString();
         $slug = Str::slug($name, '_');
 
         if ($slug === '') {
