@@ -36,6 +36,7 @@ final class ApiMessages
     public const FACILITY_LIST_SUCCESS = 'Data fasilitas berhasil diambil';
     public const FACILITY_DETAIL_SUCCESS = 'Detail fasilitas berhasil diambil';
     public const FACILITY_CREATED_SUCCESS = 'Fasilitas berhasil ditambahkan';
+    public const FACILITY_DUPLICATE_NAME = 'Nama fasilitas sudah digunakan';
     public const FACILITY_UPDATED_SUCCESS = 'Fasilitas berhasil diperbarui';
     public const FACILITY_DELETED_SUCCESS = 'Fasilitas berhasil dihapus';
 
