@@ -17,7 +17,7 @@
         {{-- Main Form --}}
         <div class="col-lg-8">
             <x-form.card action="{{ route('admin.complaints.store') }}" submit-guard loading-text="Menyimpan..."
-                enctype="multipart/form-data">
+                :multipart="true">
 
                 <x-form.section title="Referensi Reservasi" />
 
@@ -148,7 +148,7 @@
     </div>
 @stop
 
-@section('js')
+@push('js')
     @include('admin.partials.form_submit_guard_script')
     <script>
         // Update custom file input label with selected filename
@@ -157,4 +157,4 @@
             label.textContent = this.files[0]?.name ?? 'Pilih file gambar...';
         });
     </script>
-@stop
+@endpush

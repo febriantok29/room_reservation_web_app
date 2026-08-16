@@ -160,7 +160,9 @@
                         <h3 class="card-title"><i class="fas fa-tasks mr-1"></i>Perbarui Status</h3>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('admin.complaints.update-status', $complaint->id) }}" method="POST">
+                        <form action="{{ route('admin.complaints.update-status', $complaint->id) }}" method="POST"
+                            onsubmit="return confirm('Tutup komplain ini? Status tidak dapat diubah lagi.')"
+                            data-submit-guard data-loading-text="Memproses...">
                             @csrf
                             @method('PATCH')
 
@@ -247,6 +249,7 @@
 @stop
 
 @push('js')
+    @include('admin.partials.form_submit_guard_script')
     <script>
         (function() {
             const statusEl = document.getElementById('status');
