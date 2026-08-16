@@ -4,6 +4,7 @@ use App\Http\Controllers\Web\AdminAuthController;
 use App\Http\Controllers\Web\AdminComplaintController;
 use App\Http\Controllers\Web\AdminDashboardController;
 use App\Http\Controllers\Web\AdminDivisionController;
+use App\Http\Controllers\Web\AdminErrorLogController;
 use App\Http\Controllers\Web\AdminFacilityController;
 use App\Http\Controllers\Web\AdminFcmTestController;
 use App\Http\Controllers\Web\AdminNotificationController;
@@ -115,6 +116,10 @@ Route::prefix('admin')->group(function () {
         Route::get('/tools/reservation-debug', [AdminReservationDebugController::class, 'index'])->name('admin.tools.reservation-debug');
         Route::post('/tools/reservation-debug/run', [AdminReservationDebugController::class, 'runTransition'])->name('admin.tools.reservation-debug.run');
         Route::post('/tools/reservation-debug/{reservation}/backdate', [AdminReservationDebugController::class, 'backdate'])->name('admin.tools.reservation-debug.backdate');
+
+        // Error logs
+        Route::get('/tools/error-logs', [AdminErrorLogController::class, 'index'])->name('admin.tools.error-logs');
+        Route::get('/tools/error-logs/{log}', [AdminErrorLogController::class, 'show'])->name('admin.tools.error-logs.show');
 
         // Notifications
         Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('admin.notifications');
