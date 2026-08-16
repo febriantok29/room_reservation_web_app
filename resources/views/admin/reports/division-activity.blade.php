@@ -153,8 +153,8 @@
                                     @endif
                                 </td>
                                 <td>{{ $r->room?->name ?? '-' }}</td>
-                                <td>{{ $r->start_time?->format('d/m/Y H:i') }}</td>
-                                <td>{{ $r->end_time?->format('d/m/Y H:i') }}</td>
+                                <td>{{ $r->start_time_local?->format('d/m/Y H:i') }}</td>
+                                <td>{{ $r->end_time_local?->format('d/m/Y H:i') }}</td>
                                 <td>
                                     @php
                                         $badgeMap = [

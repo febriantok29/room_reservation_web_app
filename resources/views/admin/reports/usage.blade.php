@@ -130,8 +130,8 @@
                                 <td class="text-monospace small">{{ $r->id }}</td>
                                 <td>{{ $r->room?->name ?? '-' }}</td>
                                 <td>{{ $r->user?->full_name ?? '-' }}</td>
-                                <td class="text-nowrap">{{ $r->start_time->format('d/m/Y H:i') }}</td>
-                                <td class="text-nowrap">{{ $r->end_time->format('d/m/Y H:i') }}</td>
+                                <td class="text-nowrap">{{ $r->start_time_local->format('d/m/Y H:i') }}</td>
+                                <td class="text-nowrap">{{ $r->end_time_local->format('d/m/Y H:i') }}</td>
                                 <td class="text-center">{{ $dur }}</td>
                                 <td class="text-center">{{ $r->visitor_count }}</td>
                                 <td><span class="badge badge-{{ $badge }}">{{ $label }}</span></td>
