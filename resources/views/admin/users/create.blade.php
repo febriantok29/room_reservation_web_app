@@ -21,7 +21,8 @@
             <h3 class="card-title">Form Karyawan Baru</h3>
         </div>
         <div class="card-body">
-            <form action="{{ route('admin.users.store') }}" method="POST">
+            <form action="{{ route('admin.users.store') }}" method="POST" data-submit-guard
+                data-loading-text="Memproses...">
                 @csrf
 
                 <div class="row">
@@ -106,4 +107,8 @@
             </form>
         </div>
     </div>
+@stop
+
+@section('js')
+    @include('admin.partials.form_submit_guard_script')
 @stop

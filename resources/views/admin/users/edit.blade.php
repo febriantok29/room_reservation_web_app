@@ -24,7 +24,8 @@
             </h3>
         </div>
         <div class="card-body">
-            <form action="{{ route('admin.users.update', $user) }}" method="POST">
+            <form action="{{ route('admin.users.update', $user) }}" method="POST" data-submit-guard
+                data-loading-text="Memproses...">
                 @csrf @method('PUT')
 
                 <div class="row">
@@ -121,7 +122,8 @@
                 Password akan dikembalikan ke default <strong>User@123</strong>. Gunakan bila karyawan lupa password.
             </p>
             <form action="{{ route('admin.users.reset-password', $user) }}" method="POST"
-                onsubmit="return confirm('Reset password {{ $user->full_name }} ke default?')">
+                onsubmit="return confirm('Reset password {{ $user->full_name }} ke default?')"
+                data-submit-guard data-loading-text="Memproses...">
                 @csrf
                 <button type="submit" class="btn btn-outline-warning">
                     <i class="fas fa-key mr-1"></i> Reset ke Password Default
@@ -129,4 +131,8 @@
             </form>
         </div>
     </div>
+@stop
+
+@section('js')
+    @include('admin.partials.form_submit_guard_script')
 @stop
