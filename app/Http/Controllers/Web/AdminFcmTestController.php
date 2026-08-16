@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Notifications\TestPush;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Throwable;
 
@@ -35,16 +36,16 @@ class AdminFcmTestController extends Controller
         $this->ensureAdminAccess($request);
 
         $validated = $request->validate([
-            'target'      => 'required|in:user,all',
-            'user_id'     => 'required_if:target,user|nullable|string|exists:s_users,id',
-            'title'       => 'required|string|max:100',
-            'body'        => 'required|string|max:500',
+            'target' => 'required|in:user,all',
+            'user_id' => 'required_if:target,user|nullable|string|exists:s_users,id',
+            'title' => 'required|string|max:100',
+            'body' => 'required|string|max:500',
             'to_database' => 'nullable|boolean',
         ], [
-            'target.required'      => 'Target pengiriman wajib dipilih.',
-            'user_id.required_if'  => 'User tujuan wajib dipilih.',
-            'title.required'       => 'Judul wajib diisi.',
-            'body.required'        => 'Isi pesan wajib diisi.',
+            'target.required' => 'Target pengiriman wajib dipilih.',
+            'user_id.required_if' => 'User tujuan wajib dipilih.',
+            'title.required' => 'Judul wajib diisi.',
+            'body.required' => 'Isi pesan wajib diisi.',
         ]);
 
         $recipients = $validated['target'] === 'all'
@@ -66,8 +67,10 @@ class AdminFcmTestController extends Controller
                 $user->notify($notification);
             }
         } catch (Throwable $e) {
+            Log::error('FCM test failed', ['exception' => $e]);
+
             return back()
-                ->withErrors(['send' => 'Gagal mengirim FCM: ' . $e->getMessage()])
+                ->withErrors(['send' => 'Gagal mengirim FCM. Lihat log untuk detail.'])
                 ->withInput();
         }
 

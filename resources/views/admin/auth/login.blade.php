@@ -9,7 +9,8 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.login.submit') }}" method="post">
+    <form action="{{ route('admin.login.submit') }}" method="post" data-submit-guard
+        data-loading-text="Masuk...">
         @csrf
 
         <div class="input-group mb-3">
@@ -34,3 +35,7 @@
         <button type="submit" class="btn btn-primary btn-block">Masuk</button>
     </form>
 @stop
+
+@push('js')
+    @include('admin.partials.form_submit_guard_script')
+@endpush
