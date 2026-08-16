@@ -24,6 +24,7 @@ use Throwable;
 class AdminDashboardController extends Controller
 {
     private ReservationService $reservationService;
+
     private ImageService $imageService;
 
     public function __construct(ReservationService $reservationService, ImageService $imageService)
@@ -42,24 +43,22 @@ class AdminDashboardController extends Controller
         $this->ensureAdminAccess($request);
 
         $today = Carbon::today();
-        $allRooms = Room::query()->whereNull('deleted_at')->get(['id', 'name', 'floor', 'is_maintenance']);
+        $allRooms = Room::query()->get(['id', 'name', 'floor', 'is_maintenance']);
 
         $summary = [
-            'total_rooms'           => $allRooms->count(),
-            'maintenance_rooms'     => $allRooms->where('is_maintenance', true)->count(),
-            'total_users'           => User::query()->whereNull('deleted_at')->count(),
-            'pending_reservations'  => Reservation::query()->pending()->count(),
+            'total_rooms' => $allRooms->count(),
+            'maintenance_rooms' => $allRooms->where('is_maintenance', true)->count(),
+            'total_users' => User::query()->count(),
+            'pending_reservations' => Reservation::query()->pending()->count(),
             'approved_reservations' => Reservation::query()->approved()->count(),
-            'today_reservations'    => Reservation::query()
+            'today_reservations' => Reservation::query()
                 ->whereDate('start_time', $today)
                 ->whereIn('status', [ReservationStatus::Approved->value, ReservationStatus::Pending->value])
                 ->count(),
-            'open_complaints'       => RoomComplaint::query()
-                ->whereNull('deleted_at')
+            'open_complaints' => RoomComplaint::query()
                 ->where('status', 'open')
                 ->count(),
             'in_progress_complaints' => RoomComplaint::query()
-                ->whereNull('deleted_at')
                 ->where('status', 'in_progress')
                 ->count(),
         ];
@@ -79,18 +78,18 @@ class AdminDashboardController extends Controller
 
         $roomStatuses = $allRooms->map(function ($room) use ($bookedRoomIds) {
             return [
-                'id'           => $room->id,
-                'name'         => $room->name,
-                'floor'        => $room->floor,
-                'maintenance'  => (bool) $room->is_maintenance,
+                'id' => $room->id,
+                'name' => $room->name,
+                'floor' => $room->floor,
+                'maintenance' => (bool) $room->is_maintenance,
                 'booked_today' => $bookedRoomIds->contains($room->id),
             ];
         })->sortBy('floor')->values();
 
         return view('admin.dashboard', [
-            'summary'            => $summary,
+            'summary' => $summary,
             'latestReservations' => $latestReservations,
-            'roomStatuses'       => $roomStatuses,
+            'roomStatuses' => $roomStatuses,
         ]);
     }
 
@@ -102,13 +101,12 @@ class AdminDashboardController extends Controller
         $maintenanceFilter = trim((string) $request->query('maintenance', ''));
 
         $roomsQuery = Room::query()
-            ->with('facilities:id,name,slug')
-            ->whereNull('deleted_at');
+            ->with('facilities:id,name,slug');
 
         if ($searchQuery !== '') {
             $roomsQuery->where(function ($query) use ($searchQuery) {
                 $query->where('name', 'like', "%{$searchQuery}%")
-                        ->orWhereRaw('CAST(floor AS CHAR) LIKE ?', ["%{$searchQuery}%"])
+                    ->orWhereRaw('CAST(floor AS CHAR) LIKE ?', ["%{$searchQuery}%"])
                     ->orWhere('description', 'like', "%{$searchQuery}%")
                     ->orWhereHas('facilities', function ($facilityQuery) use ($searchQuery) {
                         $facilityQuery->where('name', 'like', "%{$searchQuery}%")
@@ -122,7 +120,7 @@ class AdminDashboardController extends Controller
         }
 
         $rooms = $roomsQuery
-                ->orderBy('floor')
+            ->orderBy('floor')
             ->orderBy('name')
             ->paginate(10)
             ->withQueryString();
@@ -163,7 +161,7 @@ class AdminDashboardController extends Controller
             'image' => ImageService::validationRules(),
         ]);
 
-        $room = new Room();
+        $room = new Room;
         $room->fill([
             'name' => $validated['name'],
             'floor' => (int) $validated['floor'],
@@ -297,14 +295,12 @@ class AdminDashboardController extends Controller
 
         // Get all rooms for filter dropdown and form
         $rooms = Room::query()
-            ->whereNull('deleted_at')
             ->orderBy('floor')
             ->orderBy('name')
             ->get(['id', 'name', 'floor', 'capacity']);
 
         // Get all users for dropdown
         $users = User::query()
-            ->whereNull('deleted_at')
             ->where('is_active', true)
             ->orderBy('first_name')
             ->orderBy('last_name')
@@ -322,7 +318,6 @@ class AdminDashboardController extends Controller
 
         $rooms = Room::query()
             ->with('facilities:id,name,slug')
-            ->whereNull('deleted_at')
             ->orderBy('floor')
             ->orderBy('name')
             ->get();
@@ -332,7 +327,6 @@ class AdminDashboardController extends Controller
             ->get(['id', 'name', 'slug']);
 
         $users = User::query()
-            ->whereNull('deleted_at')
             ->where('is_active', true)
             ->orderBy('first_name')
             ->orderBy('last_name')
@@ -376,6 +370,7 @@ class AdminDashboardController extends Controller
             if ($request->expectsJson()) {
                 return response()->json(['message' => WebMessages::RESERVATION_END_AFTER_START, 'errors' => ['end_clock' => [WebMessages::RESERVATION_END_AFTER_START]]], 422);
             }
+
             return back()->withErrors(['end_clock' => WebMessages::RESERVATION_END_AFTER_START])->withInput();
         }
 
@@ -383,6 +378,7 @@ class AdminDashboardController extends Controller
             if ($request->expectsJson()) {
                 return response()->json(['message' => WebMessages::RESERVATION_START_AFTER_NOW, 'errors' => ['start_clock' => [WebMessages::RESERVATION_START_AFTER_NOW]]], 422);
             }
+
             return back()->withErrors(['start_clock' => WebMessages::RESERVATION_START_AFTER_NOW])->withInput();
         }
 
@@ -398,10 +394,11 @@ class AdminDashboardController extends Controller
                 'with_lunch' => (bool) ($validated['with_lunch'] ?? false),
             ]);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 if ($request->expectsJson()) {
                     return response()->json(['message' => $result['message'], 'errors' => $this->formatReservationServiceErrors($result)], 422);
                 }
+
                 return back()->withErrors($this->formatReservationServiceErrors($result))->withInput();
             }
 
@@ -416,6 +413,7 @@ class AdminDashboardController extends Controller
             if ($request->expectsJson()) {
                 return response()->json(['message' => WebMessages::RESERVATION_STORE_FAILED], 500);
             }
+
             return back()->withErrors(['reservation' => WebMessages::RESERVATION_STORE_FAILED])->withInput();
         }
     }
@@ -428,10 +426,10 @@ class AdminDashboardController extends Controller
         $this->reservationService->autoTransition();
         // Reload reservation to get possibly updated status
         $reservation->refresh();
+        $reservation->load(['room', 'user', 'user.division:id,name,code']);
 
         $rooms = Room::query()
             ->with('facilities:id,name,slug')
-            ->whereNull('deleted_at')
             ->orderBy('floor')
             ->orderBy('name')
             ->get();
@@ -441,7 +439,6 @@ class AdminDashboardController extends Controller
             ->get(['id', 'name', 'slug']);
 
         $users = User::query()
-            ->whereNull('deleted_at')
             ->where('is_active', true)
             ->orderBy('first_name')
             ->orderBy('last_name')
@@ -468,6 +465,8 @@ class AdminDashboardController extends Controller
                 'end_clock' => 'required|date_format:H:i',
                 'purpose' => 'nullable|string|max:1000',
                 'visitor_count' => 'required|integer|min:1|max:1000',
+                'with_snack' => 'nullable|in:0,1',
+                'with_lunch' => 'nullable|in:0,1',
             ],
             $this->reservationValidationMessages(),
             $this->reservationValidationAttributes()
@@ -491,9 +490,11 @@ class AdminDashboardController extends Controller
                 'end_time' => $endTime->format('Y-m-d H:i:s'),
                 'purpose' => $validated['purpose'] ?? null,
                 'visitor_count' => (int) $validated['visitor_count'],
+                'with_snack' => (bool) ($validated['with_snack'] ?? false),
+                'with_lunch' => (bool) ($validated['with_lunch'] ?? false),
             ]);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 return back()->withErrors($this->formatReservationServiceErrors($result))->withInput();
             }
 
@@ -503,21 +504,6 @@ class AdminDashboardController extends Controller
         } catch (Throwable $exception) {
             return back()->withErrors(['reservation' => WebMessages::RESERVATION_UPDATE_FAILED])->withInput();
         }
-    }
-
-    public function destroyReservation(Request $request, Reservation $reservation): RedirectResponse
-    {
-        $this->ensureAdminAccess($request);
-
-        $result = $this->reservationService->cancel($request->user(), $reservation);
-
-        if (!$result['success']) {
-            return back()->withErrors(['reservation' => $result['message']]);
-        }
-
-        return redirect()
-            ->route('admin.reservations')
-            ->with('success', WebMessages::RESERVATION_CANCELLED_SUCCESS);
     }
 
     public function completeReservation(Request $request, Reservation $reservation): mixed
@@ -533,7 +519,7 @@ class AdminDashboardController extends Controller
             ], $result['success'] ? 200 : 422);
         }
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return back()->withErrors(['reservation' => $result['message']]);
         }
 
@@ -555,7 +541,7 @@ class AdminDashboardController extends Controller
             ], $result['success'] ? 200 : 422);
         }
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return back()->withErrors(['reservation' => $result['message']]);
         }
 
@@ -600,15 +586,14 @@ class AdminDashboardController extends Controller
             ->withQueryString();
 
         $rooms = Room::query()
-            ->whereNull('deleted_at')
             ->orderBy('floor')
             ->orderBy('name')
             ->get();
 
         return view('admin.approvals.index', [
             'pendingReservations' => $pendingReservations,
-            'searchQuery'         => $searchQuery,
-            'rooms'               => $rooms,
+            'searchQuery' => $searchQuery,
+            'rooms' => $rooms,
         ]);
     }
 
@@ -631,7 +616,7 @@ class AdminDashboardController extends Controller
             ], $result['success'] ? 200 : 422);
         }
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return back()->withErrors(['approval' => $result['message']]);
         }
 
@@ -653,7 +638,7 @@ class AdminDashboardController extends Controller
             ], $result['success'] ? 200 : 422);
         }
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return back()->withErrors(['approval' => $result['message']]);
         }
 
@@ -684,7 +669,7 @@ class AdminDashboardController extends Controller
         $errors['reservation'] = $result['message'];
 
         // If CSP returned a list of constraint violations, surface them individually
-        if (!empty($result['errors']['constraints'])) {
+        if (! empty($result['errors']['constraints'])) {
             foreach ($result['errors']['constraints'] as $index => $constraintError) {
                 $errors["constraint_{$index}"] = $constraintError;
             }
@@ -701,6 +686,8 @@ class AdminDashboardController extends Controller
 
     public function setUserTimezone(Request $request): JsonResponse
     {
+        $this->ensureAdminAccess($request);
+
         $request->validate([
             'timezone' => 'required|string|timezone',
         ]);
@@ -726,17 +713,13 @@ class AdminDashboardController extends Controller
         $query = Reservation::query()
             ->with(['room', 'user']);
 
-        // Filter by date range (wrapped in closure to avoid OR precedence issues)
-        if ($start && $end) {
-            $query->where(function ($q) use ($start, $end) {
-                $q->whereBetween('start_time', [$start, $end])
-                  ->orWhereBetween('end_time', [$start, $end])
-                  ->orWhere(function ($subQ) use ($start, $end) {
-                      $subQ->where('start_time', '<=', $start)
-                           ->where('end_time', '>=', $end);
-                  });
-            });
+        // Filter by date range (default to ±1 month when not provided)
+        if (! $start || ! $end) {
+            $start = now()->subMonth()->startOfMonth()->toDateString();
+            $end = now()->addMonth()->endOfMonth()->toDateString();
         }
+
+        $query->whereBetween('start_time', [$start.' 00:00:00', $end.' 23:59:59']);
 
         // Filter by room
         if ($roomFilter) {
@@ -757,9 +740,9 @@ class AdminDashboardController extends Controller
         $events = $reservations->map(function ($reservation) {
             // Color based on status
             $color = match ($reservation->status) {
-                ReservationStatus::Pending->value   => '#ffc107',
-                ReservationStatus::Approved->value  => '#28a745',
-                ReservationStatus::Rejected->value  => '#dc3545',
+                ReservationStatus::Pending->value => '#ffc107',
+                ReservationStatus::Approved->value => '#28a745',
+                ReservationStatus::Rejected->value => '#dc3545',
                 ReservationStatus::Completed->value => '#007bff',
                 ReservationStatus::Cancelled->value => '#6c757d',
                 default => '#6c757d',
@@ -767,7 +750,7 @@ class AdminDashboardController extends Controller
 
             return [
                 'id' => $reservation->id,
-                'title' => $reservation->room?->name . ' - ' . ($reservation->user?->full_name ?? '-'),
+                'title' => $reservation->room?->name.' - '.($reservation->user?->full_name ?? '-'),
                 'start' => $reservation->start_time->toIso8601String(),
                 'end' => $reservation->end_time->toIso8601String(),
                 'backgroundColor' => $color,
@@ -778,9 +761,12 @@ class AdminDashboardController extends Controller
                     'room_id' => $reservation->room_id,
                     'room_name' => $reservation->room?->name,
                     'user_name' => $reservation->user?->full_name,
+                    'user_division' => $reservation->user?->division?->name,
                     'purpose' => $reservation->purpose,
                     'status' => $reservation->status,
                     'visitor_count' => $reservation->visitor_count,
+                    'with_snack' => (bool) $reservation->with_snack,
+                    'with_lunch' => (bool) $reservation->with_lunch,
                 ],
             ];
         });
@@ -827,7 +813,7 @@ class AdminDashboardController extends Controller
                 'visitor_count' => $reservation->visitor_count,
             ]);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 return response()->json([
                     'success' => false,
                     'message' => $result['message'],
