@@ -42,7 +42,11 @@ class AdminDashboardController extends Controller
     {
         $this->ensureAdminAccess($request);
 
-        $today = Carbon::today();
+        // "Today" in the viewer's local timezone (session), converted to UTC range.
+        $timezone = TimezoneHelper::getLocalTimezone();
+        $todayStart = now($timezone)->startOfDay();
+        $todayEnd = now($timezone)->endOfDay();
+
         $allRooms = Room::query()->get(['id', 'name', 'floor', 'is_maintenance']);
 
         $summary = [
@@ -52,7 +56,7 @@ class AdminDashboardController extends Controller
             'pending_reservations' => Reservation::query()->pending()->count(),
             'approved_reservations' => Reservation::query()->approved()->count(),
             'today_reservations' => Reservation::query()
-                ->whereDate('start_time', $today)
+                ->whereBetween('start_time', [$todayStart, $todayEnd])
                 ->whereIn('status', [ReservationStatus::Approved->value, ReservationStatus::Pending->value])
                 ->count(),
             'open_complaints' => RoomComplaint::query()
@@ -71,7 +75,7 @@ class AdminDashboardController extends Controller
 
         // Room status grid: show maintenance state + whether booked today
         $bookedRoomIds = Reservation::query()
-            ->whereDate('start_time', $today)
+            ->whereBetween('start_time', [$todayStart, $todayEnd])
             ->whereIn('status', [ReservationStatus::Approved->value, ReservationStatus::Pending->value])
             ->pluck('room_id')
             ->unique();
