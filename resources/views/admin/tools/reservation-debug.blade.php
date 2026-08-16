@@ -1,10 +1,10 @@
 @extends('adminlte::page')
 
-@section('title', 'Debug Feature')
+@section('title', 'Uji Transisi Reservasi')
 
 @section('content_header')
     <div>
-        <h1 class="m-0">Debug Feature</h1>
+        <h1 class="m-0">Uji Transisi Reservasi</h1>
         <div class="page-subtitle">Alat bantu testing alur status reservasi (backdate & auto-transition).</div>
     </div>
 @stop

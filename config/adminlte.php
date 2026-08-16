@@ -305,8 +305,7 @@ return [
             'icon' => 'fas fa-bell',
             'icon_color' => 'info',
             'label_color' => 'danger',
-            'url' => '/admin/notifications',
-            'href' => '/admin/notifications',
+            'route' => 'admin.notifications',
             'topnav_right' => true,
             'dropdown_mode' => true,
             'dropdown_flabel' => 'Lihat Semua Notifikasi',
@@ -328,17 +327,7 @@ return [
             'icon' => 'fas fa-fw fa-tachometer-alt',
         ],
         [
-            'header' => 'DATA MASTER',
-        ],
-        [
-            'text' => 'Ruangan',
-            'route' => 'admin.rooms',
-            'icon' => 'fas fa-fw fa-door-open',
-        ],
-        [
-            'text' => 'Fasilitas',
-            'route' => 'admin.facilities',
-            'icon' => 'fas fa-fw fa-plug',
+            'header' => 'MASTER DATA',
         ],
         [
             'text' => 'Divisi',
@@ -346,12 +335,22 @@ return [
             'icon' => 'fas fa-fw fa-building',
         ],
         [
+            'text' => 'Fasilitas',
+            'route' => 'admin.facilities',
+            'icon' => 'fas fa-fw fa-plug',
+        ],
+        [
+            'text' => 'Ruangan',
+            'route' => 'admin.rooms',
+            'icon' => 'fas fa-fw fa-door-open',
+        ],
+        [
             'text' => 'Karyawan',
             'route' => 'admin.users',
             'icon' => 'fas fa-fw fa-users',
         ],
         [
-            'header' => 'RESERVASI & PENGADUAN',
+            'header' => 'OPERASIONAL',
         ],
         [
             'text' => 'Reservasi',
@@ -370,6 +369,11 @@ return [
         ],
         [
             'header' => 'LAPORAN',
+        ],
+        [
+            'text' => 'Daftar Komplain',
+            'route' => 'admin.reports.complaints',
+            'icon' => 'fas fa-fw fa-exclamation-triangle',
         ],
         [
             'text' => 'Komplain Ruangan',
@@ -392,6 +396,11 @@ return [
             'icon' => 'fas fa-fw fa-door-open',
         ],
         [
+            'text' => 'Pemakaian Per-Divisi',
+            'route' => 'admin.reports.division-usage',
+            'icon' => 'fas fa-fw fa-clock',
+        ],
+        [
             'text' => 'Riwayat Pemesanan',
             'route' => 'admin.reports.schedule-history',
             'icon' => 'fas fa-fw fa-history',
@@ -401,26 +410,21 @@ return [
             'route' => 'admin.reports.periodic',
             'icon' => 'fas fa-fw fa-chart-line',
         ],
+        ['header' => 'SISTEM & PENGUJIAN'],
         [
-            'text' => 'Pemakaian Per-Divisi',
-            'route' => 'admin.reports.division-usage',
-            'icon' => 'fas fa-fw fa-clock',
+            'text' => 'Log Kesalahan Sistem',
+            'route' => 'admin.tools.error-logs',
+            'icon' => 'fas fa-fw fa-bug',
         ],
         [
-            'text' => 'Daftar Komplain',
-            'route' => 'admin.reports.complaints',
-            'icon' => 'fas fa-fw fa-exclamation-triangle',
-        ],
-        ['header' => 'TOOLS'],
-        [
-            'text' => 'Test Notifikasi',
-            'route' => 'admin.tools.fcm-test',
-            'icon' => 'fas fa-fw fa-paper-plane',
-        ],
-        [
-            'text' => 'Debug Feature',
+            'text' => 'Uji Transisi Reservasi',
             'route' => 'admin.tools.reservation-debug',
             'icon' => 'fas fa-fw fa-flask',
+        ],
+        [
+            'text' => 'Uji Notifikasi',
+            'route' => 'admin.tools.fcm-test',
+            'icon' => 'fas fa-fw fa-paper-plane',
         ],
         [
             'text' => 'Keluar',
