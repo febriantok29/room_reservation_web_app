@@ -7,7 +7,6 @@ use App\Models\Facility;
 use App\Models\Reservation;
 use App\Models\RoomComplaint;
 use App\Services\ImageService;
-use App\Support\ApiMessages;
 use App\Support\ReservationStatus;
 use App\Support\WebMessages;
 use Carbon\Carbon;
@@ -42,7 +41,6 @@ class AdminComplaintController extends Controller
 
         $query = RoomComplaint::query()
             ->with(['reporter', 'room', 'facility'])
-            ->whereNull('deleted_at')
             ->orderByDesc('created_at');
 
         if ($searchQuery !== '') {
@@ -81,7 +79,6 @@ class AdminComplaintController extends Controller
         $reservations = Reservation::query()
             ->with(['room', 'user'])
             ->where('status', ReservationStatus::Completed->value)
-            ->whereNull('deleted_at')
             ->orderByDesc('start_time')
             ->get();
 
@@ -119,7 +116,6 @@ class AdminComplaintController extends Controller
         $reservation = Reservation::query()
             ->where('id', $validated['reservation_id'])
             ->where('status', ReservationStatus::Completed->value)
-            ->whereNull('deleted_at')
             ->first();
 
         if (!$reservation) {
@@ -155,7 +151,7 @@ class AdminComplaintController extends Controller
 
         return redirect()
             ->route('admin.complaints.show', $complaint->id)
-            ->with('success', ApiMessages::COMPLAINT_CREATED_SUCCESS);
+            ->with('success', WebMessages::COMPLAINT_CREATED_SUCCESS);
     }
 
     /**

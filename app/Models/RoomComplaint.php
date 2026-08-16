@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasPublicStorageUrl;
 use App\Services\ComplaintIdGenerator;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 
 class RoomComplaint extends Model
 {
     use SoftDeletes;
+    use HasPublicStorageUrl;
 
     /**
      * The table associated with the model.
@@ -126,9 +127,7 @@ class RoomComplaint extends Model
      */
     public function getPhotoUrlAttribute(): ?string
     {
-        return $this->photo_path
-            ? Storage::disk('public')->url($this->photo_path)
-            : null;
+        return $this->publicStorageUrl($this->photo_path);
     }
 
     // ─── Query Scopes ─────────────────────────────────────────────────────────
