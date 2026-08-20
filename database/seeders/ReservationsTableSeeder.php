@@ -13,7 +13,6 @@ class ReservationsTableSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get users and rooms for reservations
         $users = DB::table('s_users')->where('is_admin', false)->get();
         $rooms = DB::table('m_rooms')->get();
 
@@ -22,15 +21,23 @@ class ReservationsTableSeeder extends Seeder
             return;
         }
 
-        // Today: April 6, 2026
-        // Date range: Jan 1, 2025 - Apr 30, 2026
-        $now = now(); // April 6, 2026
-        $startDate = Carbon::create(2025, 1, 1);
-        $reservations = [];
+        // All dates are relative to "now" so the calendar is always filled
+        // around the month the seeder is run (bulan ke-3 = bulan berjalan).
+        $now = now();
+        $monthStart = $now->copy()->startOfMonth();
+
+        // Historis: 2 bulan ke belakang
+        $histStart = $monthStart->copy()->subMonths(2);
+        $histEnd = $monthStart->copy()->subDay();
+        $histDays = max(1, $histStart->diffInDays($histEnd));
+
+        // Future: sekarang .. +3 bulan + ~12 hari
+        $futureEnd = $monthStart->copy()->addMonths(3)->addDays(12);
+        $futureDays = max(1, $now->diffInDays($futureEnd));
+
         $userIndex = 0;
         $roomIndex = 0;
 
-        // Helper functions to rotate users and rooms
         $nextUser = function () use (&$userIndex, $users) {
             $user = $users[$userIndex % count($users)];
             $userIndex++;
@@ -41,6 +48,15 @@ class ReservationsTableSeeder extends Seeder
             $room = $rooms[$roomIndex % count($rooms)];
             $roomIndex++;
             return $room->id;
+        };
+
+        // Tanggal acak dalam rentang, sambil menghindari weekend.
+        $randomDate = function (Carbon $start, int $spanDays) {
+            $date = $start->copy()->addDays(rand(0, $spanDays));
+            while ($date->isWeekend()) {
+                $date->addDay();
+            }
+            return $date;
         };
 
         $purposes = [
@@ -76,26 +92,15 @@ class ReservationsTableSeeder extends Seeder
             'Project kickoff meeting',
         ];
 
+        $reservations = [];
+
         // ========================================
-        // [1] COMPLETED — Historical data (100 reservations)
-        // Spread from Jan 1, 2025 to March 31, 2026
+        // [1] COMPLETED — historis (2 bulan ke belakang)
         // ========================================
-        $completedStartDate = Carbon::create(2025, 1, 1);
-        $completedEndDate = Carbon::create(2026, 3, 31);
-        $totalDaysCompleted = $completedStartDate->diffInDays($completedEndDate);
-
-        for ($i = 0; $i < 100; $i++) {
-            $randomDays = rand(0, $totalDaysCompleted);
-            $date = $completedStartDate->copy()->addDays($randomDays);
-
-            // Skip weekends
-            while ($date->isWeekend()) {
-                $date->addDay();
-            }
-
+        for ($i = 0; $i < 90; $i++) {
+            $date = $randomDate($histStart, $histDays);
             $startHour = rand(8, 15);
             $duration = rand(2, 4);
-            $visitorCount = rand(4, 15);
 
             $reservations[] = [
                 'user_id' => $nextUser(),
@@ -103,13 +108,13 @@ class ReservationsTableSeeder extends Seeder
                 'start_time' => $date->copy()->setTime($startHour, 0, 0),
                 'end_time' => $date->copy()->setTime($startHour + $duration, 0, 0),
                 'purpose' => $purposes[$i % count($purposes)],
-                'visitor_count' => $visitorCount,
+                'visitor_count' => rand(4, 15),
                 'status' => 'completed',
             ];
         }
 
         // ========================================
-        // [2] CANCELLED — Mixed throughout the year (20 reservations)
+        // [2] CANCELLED — historis
         // ========================================
         $cancelReasons = [
             'Rapat dibatalkan karena perubahan prioritas bisnis',
@@ -122,15 +127,8 @@ class ReservationsTableSeeder extends Seeder
             'Konflik jadwal dengan rapat direksi',
         ];
 
-        for ($i = 0; $i < 20; $i++) {
-            // Spread across the entire period
-            $randomDays = rand(10, 450); // Jan 2025 to Mar 2026
-            $date = Carbon::create(2025, 1, 1)->addDays($randomDays);
-
-            while ($date->isWeekend()) {
-                $date->addDay();
-            }
-
+        for ($i = 0; $i < 22; $i++) {
+            $date = $randomDate($histStart, $histDays);
             $startHour = rand(9, 15);
 
             $reservations[] = [
@@ -145,7 +143,7 @@ class ReservationsTableSeeder extends Seeder
         }
 
         // ========================================
-        // [3] REJECTED — Mixed throughout the year (15 reservations)
+        // [3] REJECTED — historis
         // ========================================
         $rejectReasons = [
             'Rapat ditolak: ruangan sudah dibooking untuk acara prioritas lebih tinggi',
@@ -157,14 +155,8 @@ class ReservationsTableSeeder extends Seeder
             'Ditolak: ruangan tidak sesuai dengan kebutuhan acara',
         ];
 
-        for ($i = 0; $i < 15; $i++) {
-            $randomDays = rand(15, 440);
-            $date = Carbon::create(2025, 1, 1)->addDays($randomDays);
-
-            while ($date->isWeekend()) {
-                $date->addDay();
-            }
-
+        for ($i = 0; $i < 18; $i++) {
+            $date = $randomDate($histStart, $histDays);
             $startHour = rand(10, 16);
 
             $reservations[] = [
@@ -179,7 +171,7 @@ class ReservationsTableSeeder extends Seeder
         }
 
         // ========================================
-        // [4] APPROVED (PAST) — For cron auto-complete testing (10 reservations)
+        // [4] APPROVED (PAST) — target cron auto-complete
         // ========================================
         for ($i = 0; $i < 10; $i++) {
             $daysAgo = rand(1, 5);
@@ -197,7 +189,7 @@ class ReservationsTableSeeder extends Seeder
         }
 
         // ========================================
-        // [5] PENDING (PAST) — For cron auto-cancel testing (10 reservations)
+        // [5] PENDING (PAST) — target cron auto-cancel
         // ========================================
         for ($i = 0; $i < 10; $i++) {
             $daysAgo = rand(1, 5);
@@ -215,9 +207,8 @@ class ReservationsTableSeeder extends Seeder
         }
 
         // ========================================
-        // [6] TODAY — Ongoing/upcoming meetings (3 reservations at 13:00, 15:00, 17:00)
+        // [6] TODAY — 13:00 (approved), 15:00 (pending), 17:00 (approved)
         // ========================================
-        // 13:00 - approved, currently running
         $reservations[] = [
             'user_id' => $nextUser(),
             'room_id' => $nextRoom(),
@@ -227,8 +218,6 @@ class ReservationsTableSeeder extends Seeder
             'visitor_count' => 8,
             'status' => 'approved',
         ];
-
-        // 15:00 - pending approval
         $reservations[] = [
             'user_id' => $nextUser(),
             'room_id' => $nextRoom(),
@@ -238,8 +227,6 @@ class ReservationsTableSeeder extends Seeder
             'visitor_count' => 6,
             'status' => 'pending',
         ];
-
-        // 17:00 - approved
         $reservations[] = [
             'user_id' => $nextUser(),
             'room_id' => $nextRoom(),
@@ -251,17 +238,17 @@ class ReservationsTableSeeder extends Seeder
         ];
 
         // ========================================
-        // [7] APPROVED (FUTURE) — Upcoming confirmed meetings (12 reservations)
+        // [7] APPROVED (FUTURE) — now .. +3 bulan + 12 hari
         // ========================================
-        for ($i = 0; $i < 12; $i++) {
-            $daysAhead = rand(3, 24);
+        for ($i = 0; $i < 30; $i++) {
+            $date = $randomDate($now, $futureDays);
             $startHour = rand(9, 15);
 
             $reservations[] = [
                 'user_id' => $nextUser(),
                 'room_id' => $nextRoom(),
-                'start_time' => $now->copy()->addDays($daysAhead)->setTime($startHour, 0, 0),
-                'end_time' => $now->copy()->addDays($daysAhead)->setTime($startHour + 3, 0, 0),
+                'start_time' => $date->copy()->setTime($startHour, 0, 0),
+                'end_time' => $date->copy()->setTime($startHour + 3, 0, 0),
                 'purpose' => $purposes[rand(0, count($purposes) - 1)],
                 'visitor_count' => rand(6, 12),
                 'status' => 'approved',
@@ -269,17 +256,17 @@ class ReservationsTableSeeder extends Seeder
         }
 
         // ========================================
-        // [8] PENDING (FUTURE) — Awaiting approval (10 reservations)
+        // [8] PENDING (FUTURE) — now .. +3 bulan + 12 hari
         // ========================================
-        for ($i = 0; $i < 10; $i++) {
-            $daysAhead = rand(2, 20);
+        for ($i = 0; $i < 25; $i++) {
+            $date = $randomDate($now, $futureDays);
             $startHour = rand(10, 16);
 
             $reservations[] = [
                 'user_id' => $nextUser(),
                 'room_id' => $nextRoom(),
-                'start_time' => $now->copy()->addDays($daysAhead)->setTime($startHour, 0, 0),
-                'end_time' => $now->copy()->addDays($daysAhead)->setTime($startHour + 2, 0, 0),
+                'start_time' => $date->copy()->setTime($startHour, 0, 0),
+                'end_time' => $date->copy()->setTime($startHour + 2, 0, 0),
                 'purpose' => 'Rapat koordinasi menunggu persetujuan admin',
                 'visitor_count' => rand(4, 10),
                 'status' => 'pending',
@@ -311,17 +298,16 @@ class ReservationsTableSeeder extends Seeder
             ]);
         }
 
-        $this->command->info('Reservations seeded: ' . count($reservations) . ' total');
-        $this->command->info('  - 100 completed (historical data Jan 2025 - Mar 2026)');
-        $this->command->info('  - 20 cancelled (distributed throughout year)');
-        $this->command->info('  - 15 rejected (distributed throughout year)');
-        $this->command->info('  - 10 approved (past - cron test targets)');
-        $this->command->info('  - 10 pending (past - cron test targets)');
-        $this->command->info('  - 3 TODAY at 13:00, 15:00, 17:00');
-        $this->command->info('  - 12 approved (future)');
-        $this->command->info('  - 10 pending (future)');
+        $this->command->info('Reservations seeded: ' . count($reservations) . ' total (date-relative to seed run)');
+        $this->command->info('  - 90 completed (2 bulan ke belakang)');
+        $this->command->info('  - 22 cancelled (historis)');
+        $this->command->info('  - 18 rejected (historis)');
+        $this->command->info('  - 10 approved (past - cron test)');
+        $this->command->info('  - 10 pending (past - cron test)');
+        $this->command->info('  - 3 TODAY (13:00, 15:00, 17:00)');
+        $this->command->info('  - 30 approved (future, now .. +3bln+12d)');
+        $this->command->info('  - 25 pending (future, now .. +3bln+12d)');
         $this->command->info('');
         $this->command->warn('Run: php artisan schedule:work to test cron job automation.');
     }
 }
-
