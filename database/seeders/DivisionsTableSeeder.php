@@ -20,33 +20,65 @@ class DivisionsTableSeeder extends Seeder
             ],
             [
                 'id'          => 'DIV-02',
-                'name'        => 'Divisi Human Resource',
-                'code'        => 'HRD',
-                'description' => 'Divisi yang mengelola sumber daya manusia, rekrutmen, dan pengembangan karyawan.',
+                'name'        => 'Divisi HCM',
+                'code'        => 'HCM',
+                'description' => 'Human Capital Management: rekrutmen, payroll, dan pengembangan karyawan.',
                 'created_at'  => now(),
                 'created_by'  => null,
             ],
             [
                 'id'          => 'DIV-03',
-                'name'        => 'Divisi Keuangan dan Akuntansi',
-                'code'        => 'FIN',
-                'description' => 'Divisi yang menangani keuangan, akuntansi, perpajakan, dan pelaporan keuangan perusahaan.',
+                'name'        => 'Divisi Keuangan',
+                'code'        => 'KEU',
+                'description' => 'Divisi yang menangani keuangan, akuntansi, dan pelaporan keuangan perusahaan.',
                 'created_at'  => now(),
                 'created_by'  => null,
             ],
             [
                 'id'          => 'DIV-04',
-                'name'        => 'Divisi Marketing dan Sales',
-                'code'        => 'MKT',
-                'description' => 'Divisi yang menangani strategi pemasaran, promosi, dan penjualan produk/layanan.',
+                'name'        => 'Divisi Pengembangan Bisnis',
+                'code'        => 'PDB',
+                'description' => 'Divisi yang menjembatani strategi bisnis, kemitraan, dan pengembangan layanan.',
                 'created_at'  => now(),
                 'created_by'  => null,
             ],
             [
                 'id'          => 'DIV-05',
-                'name'        => 'Divisi Operasional',
+                'name'        => 'Divisi Operasi',
                 'code'        => 'OPS',
                 'description' => 'Divisi yang mengelola kegiatan operasional harian dan logistik perusahaan.',
+                'created_at'  => now(),
+                'created_by'  => null,
+            ],
+            [
+                'id'          => 'DIV-06',
+                'name'        => 'Lembaga Kursus dan Pelatihan',
+                'code'        => 'LKP',
+                'description' => 'Divisi Lembaga Kursus dan Pelatihan (LKP).',
+                'created_at'  => now(),
+                'created_by'  => null,
+            ],
+            [
+                'id'          => 'DIV-07',
+                'name'        => 'Divisi K3',
+                'code'        => 'K3',
+                'description' => 'Keselamatan dan Kesehatan Kerja (K3).',
+                'created_at'  => now(),
+                'created_by'  => null,
+            ],
+            [
+                'id'          => 'DIV-08',
+                'name'        => 'Divisi Umum',
+                'code'        => 'UMU',
+                'description' => 'Divisi Umum: rumah tangga, sarana prasarana, dan administrasi umum.',
+                'created_at'  => now(),
+                'created_by'  => null,
+            ],
+            [
+                'id'          => 'DIV-09',
+                'name'        => 'Sekretaris Direksi',
+                'code'        => 'SD',
+                'description' => 'Divisi Sekretaris Direksi.',
                 'created_at'  => now(),
                 'created_by'  => null,
             ],
@@ -54,6 +86,6 @@ class DivisionsTableSeeder extends Seeder
 
         DB::table('m_divisions')->insert($divisions);
 
-        $this->command->info('Divisions seeded: 5 divisions (IT, HRD, FIN, MKT, OPS)');
+        $this->command->info('Divisions seeded: 9 divisions (IT, HCM, KEU, PDB, OPS, LKP, K3, UMU, SD)');
     }
 }
