@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ComplaintController;
 use App\Http\Controllers\Api\DivisionController;
 use App\Http\Controllers\Api\FacilityController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\PingController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\RoomController;
@@ -15,6 +16,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     Route::post('/auth/login', [AuthController::class, 'login']);
     Route::post('/auth/refresh', [AuthController::class, 'refresh']);
+
+    Route::get('/ping', [PingController::class, 'ping']);
 
     Route::get('/facilities', [FacilityController::class, 'index']);
     Route::get('/facilities/{id}', [FacilityController::class, 'show']);
